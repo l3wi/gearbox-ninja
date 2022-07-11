@@ -14,13 +14,14 @@ import 'index.css'
 
 import TitleScreen from './js/stage/title'
 import PlayScreen from './js/stage/play'
+import LoadingScreen from './js/stage/loading'
 import PlayerEntity from './js/renderables/player'
 
 import DataManifest from './manifest'
 
 const init = (w: number, h: number) => {
   // initialize the display canvas once the device/browser is ready
-  video.init(w, h, {
+  video.init(640, 480, {
     parent: 'screen',
     scale: 'auto',
     scaleMethod: 'fill'
@@ -29,9 +30,12 @@ const init = (w: number, h: number) => {
   // Initialize the audio.
   audio.init('mp3,ogg')
 
+  // Start the game
+  state.set(state.LOADING, new LoadingScreen())
+  state.change(state.LOADING, false)
+
   // set and load all resources.
   loader.preload(DataManifest, function () {
-    // set the user defined game stages
     state.set(state.MENU, new TitleScreen())
     state.set(state.PLAY, new PlayScreen())
 
@@ -48,8 +52,7 @@ const init = (w: number, h: number) => {
     input.bindKey(input.KEY.UP, 'jump', true)
     input.bindKey(input.KEY.SPACE, 'jump', true)
 
-    // Start the game
-    state.change(state.PLAY, false)
+    state.change(state.MENU, false)
   })
 }
 
