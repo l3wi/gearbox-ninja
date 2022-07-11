@@ -2,6 +2,8 @@ import {
   Stage,
   game,
   input,
+  state,
+  event,
   ColorLayer,
   BitmapText
 } from 'melonjs/dist/melonjs.module.js'
@@ -19,7 +21,7 @@ class TitleScreen extends Stage {
       // @ts-ignore
       new BitmapText(game.viewport.width / 2, game.viewport.height / 2, {
         font: 'PressStart2P',
-        size: 2.0,
+        size: 1.0,
         textBaseline: 'middle',
         textAlign: 'center',
         text: 'Hello Ninjas!'
@@ -28,21 +30,28 @@ class TitleScreen extends Stage {
 
     game.world.addChild(
       // @ts-ignore
-      new BitmapText(game.viewport.width / 2, game.viewport.height / 2 + 100, {
+      new BitmapText(game.viewport.width / 2, game.viewport.height / 2 + 50, {
         font: 'PressStart2P',
-        size: 1.0,
+        size: 0.5,
         textBaseline: 'middle',
         textAlign: 'center',
-        text: 'Press SPACE to start'
+        text: 'Press ENTER to start'
       })
     )
+
+    input.bindKey(input.KEY.ENTER, 'enter', true)
+    event.once(event.KEYDOWN, function (action: string) {
+      if (action === 'enter') {
+        state.change(state.PLAY, false)
+      }
+    })
   }
 
   /**
    *  action to perform when leaving this screen (state change)
    */
   onDestroyEvent() {
-    // TODO
+    input.unbindKey(input.KEY.ENTER)
   }
 }
 
