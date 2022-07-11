@@ -1,0 +1,35 @@
+{
+  "name": "es7-ts-webpack",
+  "version": "1.0.0",
+  "description": "Boilerplate melonjs",
+  "main": "main.ts",
+  "scripts": {
+    "test": "test",
+    "dev": "webpack-dev-server --open",
+    "prod": "webpack --production"
+  },
+  "keywords": [
+    "game",
+    "melonjs",
+    "es7"
+  ],
+  "author": "Chris Tarttelin",
+  "license": "MIT",
+  "dependencies": {
+    "melonjs": "^12.0.0",
+    "typescript": "^4.7.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "babel-loader": "^8.0.6",
+    "css-loader": "^3.2.0",
+    "file-loader": "^4.2.0",
+    "html-webpack-plugin": "^3.2.0",
+    "style-loader": "^1.0.0",
+    "ts-loader": "^6.0.4",
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.3.7",
+    "webpack-dev-server": "^3.8.0"
+  }
+}
