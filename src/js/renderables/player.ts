@@ -1,4 +1,11 @@
-import { Body, Rect, Sprite, game, input } from 'melonjs/dist/melonjs.module.js'
+import {
+  Body,
+  Rect,
+  Sprite,
+  game,
+  input,
+  collision
+} from 'melonjs/dist/melonjs.module.js'
 
 interface Settings {
   width: number
@@ -25,7 +32,7 @@ class PlayerEntity extends Sprite {
     // setup body
     this.body = new Body(this)
     this.body.addShape(new Rect(0, 0, this.width, this.height))
-
+    this.body.collisionType = collision.types.PLAYER_OBJECT
     this.body.setMaxVelocity(3, 15)
     this.body.setFriction(0.4, 0)
 
