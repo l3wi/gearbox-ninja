@@ -6,7 +6,7 @@ class PlayScreen extends Stage {
    */
   onResetEvent() {
     // load a level
-    level.load('area01')
+    level.load('app')
   }
 
   /**

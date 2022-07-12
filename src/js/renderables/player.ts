@@ -95,11 +95,41 @@ class PlayerEntity extends Sprite {
   }
 
   /**
-   * colision handler
-   * (called when colliding with other objects)
+   * collision handler
    */
   onCollision(response: any, other: any) {
-    // Make all other objects solid
+    switch (response.b.body.collisionType) {
+      case collision.types.WORLD_SHAPE:
+        // Simulate a platform object
+        if (other.type === 'platform') {
+          if (
+            this.body.falling &&
+            !input.isKeyPressed('down') &&
+            // Shortest overlap would move the player upward
+            response.overlapV.y > 0 &&
+            // The velocity is reasonably fast enough to have penetrated to the overlap depth
+            ~~this.body.vel.y >= ~~response.overlapV.y
+          ) {
+            // Disable collision on the x axis
+            response.overlapV.x = 0
+
+            // Repond to the platform (it is solid)
+            return true
+          }
+
+          // Do not respond to the platform (pass through)
+          return false
+        }
+        break
+
+      // Fall through
+
+      default:
+        // Do not respond to other objects (e.g. coins)
+        return false
+    }
+
+    // Make the object solid
     return true
   }
 }

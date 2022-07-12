@@ -21,10 +21,10 @@ import DataManifest from './manifest'
 
 const init = (w: number, h: number) => {
   // initialize the display canvas once the device/browser is ready
-  video.init(640, 480, {
+  video.init(1024, 512, {
     parent: 'screen',
     scale: 'auto',
-    scaleMethod: 'fill'
+    scaleMethod: 'flex-width'
   })
 
   // Initialize the audio.

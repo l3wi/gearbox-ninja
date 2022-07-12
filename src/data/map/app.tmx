@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.9" tiledversion="1.9.0" orientation="orthogonal" renderorder="right-down" width="64" height="8" tilewidth="64" tileheight="64" infinite="0" nextlayerid="8" nextobjectid="10">
+ <layer id="1" name="Tile Layer 1" width="64" height="8">
+  <data encoding="csv">
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+</data>
+ </layer>
+ <imagelayer id="2" name="tubes">
+  <image source="../img/map/tubes.png" width="1023" height="512"/>
+ </imagelayer>
+ <imagelayer id="4" name="gary" offsetx="1023" offsety="0">
+  <image source="../img/map/gary.png" width="1023" height="512"/>
+ </imagelayer>
+ <imagelayer id="6" name="dojos" offsetx="3069" offsety="0">
+  <image source="../img/map/dojos.png" width="1023" height="512"/>
+ </imagelayer>
+ <imagelayer id="5" name="macdonalds" offsetx="2046" offsety="0">
+  <image source="../img/map/macdonalds.png" width="1023" height="512"/>
+ </imagelayer>
+ <objectgroup color="#34dc54" id="3" name="Entities">
+  <object id="1" name="mainPlayer" x="1098.07" y="353.462" width="62.8763" height="64">
+   <properties>
+    <property name="framewidth" value="64"/>
+    <property name="image" value="gripe_run_right"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup color="#ff201a" id="7" name="collisions">
+  <object id="2" x="0" y="421.405" width="4096" height="18.7291"/>
+  <object id="3" x="-21.4225" y="1.07112" width="17.138" height="419.88"/>
+  <object id="5" x="4092.76" y="3.21337" width="16.0668" height="416.667"/>
+  <object id="9" x="799.933" y="327.373">
+   <properties>
+    <property name="type" value="platform"/>
+   </properties>
+   <polyline points="0,0 125.007,0"/>
+  </object>
+ </objectgroup>
+</map>
