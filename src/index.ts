@@ -39,6 +39,8 @@ const init = (w: number, h: number) => {
     state.set(state.MENU, new TitleScreen())
     state.set(state.PLAY, new PlayScreen())
 
+    state.transition('fade', '#000', 250)
+
     // add our player entity in the entity pool
     pool.register('mainPlayer', PlayerEntity)
     // pool.register('CoinEntity', CoinEntity)
