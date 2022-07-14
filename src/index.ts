@@ -2,22 +2,21 @@ import {
   audio,
   loader,
   state,
-  device,
   video,
-  utils,
-  plugin,
   input,
   pool
 } from 'melonjs/dist/melonjs.module.js'
 
 import 'index.css'
 
-import TitleScreen from './js/stage/title'
-import PlayScreen from './js/stage/play'
-import LoadingScreen from './js/stage/loading'
-import PlayerEntity from './js/renderables/player'
-
+import TitleScreen from './game/stage/title'
+import PlayScreen from './game/stage/play'
+import LoadingScreen from './game/stage/loading'
+import PlayerEntity from './game/renderables/player'
 import DataManifest from './manifest'
+
+import redux from './store'
+import { connect, activate } from './utils/web3'
 
 const init = (w: number, h: number) => {
   // initialize the display canvas once the device/browser is ready
@@ -58,9 +57,14 @@ const init = (w: number, h: number) => {
   })
 }
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   const h = window.innerHeight
   const w = window.innerWidth
   console.log('Ready to Go')
   init(w, h)
+
+  /// initialize redux factory
+  redux.init()
+  connect()
+  // activate('metamask')
 })
