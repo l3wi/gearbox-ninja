@@ -3,10 +3,13 @@ import {
   Rect,
   Sprite,
   game,
+  state,
   input,
   collision
 } from 'melonjs/dist/melonjs.module.js'
 
+import { declare } from '../../utils/web3'
+import { store } from '../../store'
 interface Settings {
   width: number
   height: number
@@ -105,20 +108,21 @@ class PlayerEntity extends Sprite {
           if (
             this.body.falling &&
             !input.isKeyPressed('down') &&
-            // Shortest overlap would move the player upward
             response.overlapV.y > 0 &&
-            // The velocity is reasonably fast enough to have penetrated to the overlap depth
             ~~this.body.vel.y >= ~~response.overlapV.y
           ) {
-            // Disable collision on the x axis
             response.overlapV.x = 0
-
-            // Repond to the platform (it is solid)
             return true
           }
-
-          // Do not respond to the platform (pass through)
           return false
+        } else if (other.type === 'declare') {
+          const state = store.getState()
+          if (state.auth.notIllegal) {
+            return false
+          } else if (!state.auth.pending && !state.auth.notIllegal) {
+            declare()
+          }
+          return true
         }
         break
 

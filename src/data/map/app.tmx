@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.0" orientation="orthogonal" renderorder="right-down" width="64" height="8" tilewidth="64" tileheight="64" infinite="0" nextlayerid="8" nextobjectid="10">
+<map version="1.9" tiledversion="1.9.0" orientation="orthogonal" renderorder="right-down" width="64" height="8" tilewidth="64" tileheight="64" infinite="0" nextlayerid="8" nextobjectid="11">
  <layer id="1" name="Tile Layer 1" width="64" height="8">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -41,6 +41,11 @@
     <property name="type" value="platform"/>
    </properties>
    <polyline points="0,0 125.007,0"/>
+  </object>
+  <object id="10" x="1429.25" y="186.372" width="14.245" height="231.481">
+   <properties>
+    <property name="type" value="declare"/>
+   </properties>
   </object>
  </objectgroup>
 </map>
