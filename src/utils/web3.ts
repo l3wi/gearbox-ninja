@@ -1,13 +1,8 @@
-import { BigNumber } from 'ethers'
-import { Web3Provider } from '@ethersproject/providers'
-
 import { CHAIN_ID } from '../config'
-
 import { store } from '../store'
 import actions from '../store/actions'
 
 import { Wallets, walletsToConnectors } from '../config/connectors'
-import { Web3 } from '../config/web3'
 
 type EthProvider = {
   isCoinbaseWallet?: boolean
@@ -33,8 +28,6 @@ declare global {
   }
 }
 
-// export let web3 = store.getState()
-
 // Merges functionality from useSync, useWeb3 & web3-react to manage Metamask & WC
 
 // Connect web3 READ ONLY
@@ -44,7 +37,9 @@ export const connect = async () => {
 
 // Connect Signer
 // 1. Figure out which connector
-// 2. create
+// 2. Connect Wallet
+// 3. Activate Listeners for changes
+// X. Throw if errors
 export const activate = async (w: Wallets) => {
   const isInjectedWallet = w === 'metamask' // removed coinbase
 
@@ -57,7 +52,7 @@ export const activate = async (w: Wallets) => {
     // WC uses propmts post to provider setup
     connector = walletsToConnectors[w]
     //@ts-ignore
-    await connector.enable() // need to extend Web#Provider interface
+    await connector.enable() // need to extend Web3Provider interface
   }
 
   try {
@@ -102,9 +97,17 @@ export const activate = async (w: Wallets) => {
   }
 }
 
+export const declare = () => {
+  try {
+    store.dispatch(actions.auth.signDeclaration())
+  } catch (e: any) {
+    alert('Call Gary we have rulebreaker' + e)
+  }
+}
+
 export const deactivate = async () => {
   store.dispatch(actions.web3.disconnectSigner())
   store.dispatch(actions.web3.setWalletType(undefined))
 }
 
-export default { activate, deactivate }
+export default { connect, declare, activate, deactivate }

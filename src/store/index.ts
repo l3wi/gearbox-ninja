@@ -6,10 +6,9 @@ import { applyMiddleware, Middleware, compose, createStore } from 'redux'
 import reducer from './reducer'
 import thunk from 'redux-thunk'
 
-let composeEnhancers: typeof compose
-
 export type RootState = ReturnType<typeof reducer>
 
+// Ghetto logger
 const logger: Middleware<{}, RootState> = (store) => (next) => (action) => {
   console.group(action.type)
   console.info('dispatching', action)
