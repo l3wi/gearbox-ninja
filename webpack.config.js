@@ -2,7 +2,10 @@ const path = require('path')
 const fs = require('fs')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
-const FaviconsWebpackPlugin = require('favicons-webpack-plugin')
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin')
+
+const { ProvidePlugin, DefinePlugin } = require('webpack')
+
 require('@babel/register')
 
 module.exports = {
@@ -72,26 +75,29 @@ module.exports = {
         }
       ]
     }),
-    new FaviconsWebpackPlugin({
-      logo: './src/favicon/logo.png', // svg works too!
-      mode: 'auto', // optional can be 'webapp', 'light' or 'auto' - 'auto' by default
-      devMode: 'webapp', // optional can be 'webapp' or 'light' - 'light' by default
-      favicons: {
-        appName: 'Stealthy Ninja game',
-        appDescription: '',
-        developerName: '',
-        developerURL: 'https://gearbox.fi', // prevent retrieving from the nearest package.json
-        icons: {
-          coast: false,
-          yandex: false,
-          appleStartup: false
-        }
-      }
+    new NodePolyfillPlugin({ excludeAliases: ['process'] }),
+    new ProvidePlugin({
+      Buffer: ['buffer', 'Buffer']
+    }),
+    new DefinePlugin({
+      'process.env': JSON.stringify(process.env),
+      'process.release.name': 'your-mum'
     })
   ],
   resolve: {
     modules: [path.resolve('./src'), path.resolve('./node_modules')],
-    extensions: ['.ts', '.tsx', '.js', '...']
+    extensions: ['.ts', '.js', '.tsx', '...'],
+    fallback: {
+      util: require.resolve(`util/`),
+      url: require.resolve(`url/`),
+      assert: require.resolve(`assert/`),
+      tls: require.resolve('tls-browserify'),
+      net: require.resolve('net-browserify'),
+      async_hooks: false,
+      path: false,
+      fs: false
+    },
+    symlinks: false
   },
   devServer: {
     static: {
@@ -101,6 +107,10 @@ module.exports = {
     hot: true,
     port: 9000,
     open: true
+  },
+  externals: {
+    bufferutil: 'commonjs bufferutil',
+    'utf-8-validate': 'commonjs utf-8-validate'
   },
   watch: false
 }
