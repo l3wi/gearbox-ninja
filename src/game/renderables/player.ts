@@ -8,7 +8,7 @@ import {
   collision
 } from 'melonjs/dist/melonjs.module.js'
 
-import { declare } from '../../utils/web3'
+import { activateAndDeclare } from '../../utils/web3'
 import { store } from '../../store'
 interface Settings {
   width: number
@@ -119,8 +119,12 @@ class PlayerEntity extends Sprite {
           const state = store.getState()
           if (state.auth.notIllegal) {
             return false
-          } else if (!state.auth.pending && !state.auth.notIllegal) {
-            declare()
+          } else if (
+            !state.auth.pending &&
+            !state.auth.notIllegal &&
+            input.isKeyPressed('right')
+          ) {
+            activateAndDeclare('metamask')
           }
           return true
         }

@@ -71,7 +71,13 @@ export const activate = async (w: Wallets) => {
     }
 
     // Set Wallet trype
-    store.dispatch(actions.web3.setWalletType(w))
+    await store.dispatch(actions.web3.setWalletType(w))
+
+    // try {
+    //   store.dispatch(actions.auth.signDeclaration())
+    // } catch (e: any) {
+    //   alert('Call Gary we have rulebreaker' + e)
+    // }
   } catch (eo: any) {
     if (window.ethereum && isInjectedWallet) {
       try {
@@ -97,9 +103,19 @@ export const activate = async (w: Wallets) => {
   }
 }
 
-export const declare = () => {
+export const activateAndDeclare = async (w: Wallets) => {
   try {
-    store.dispatch(actions.auth.signDeclaration())
+    const { account } = store.getState().web3
+    if (!account) await activate(w)
+    await declare()
+  } catch (e: any) {
+    alert('Broken' + e)
+  }
+}
+
+export const declare = async () => {
+  try {
+    await store.dispatch(actions.auth.signDeclaration())
   } catch (e: any) {
     alert('Call Gary we have rulebreaker' + e)
   }

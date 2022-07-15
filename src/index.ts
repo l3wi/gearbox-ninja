@@ -65,5 +65,6 @@ window.addEventListener('load', async () => {
 
   /// initialize redux factory
   redux.init()
-  activate('metamask')
+  // connect()
+  // activate('metamask')
 })
