@@ -23,13 +23,13 @@ export const signDeclaration =
         type: 'SIGN_MESSAGE',
         payload: { notIllegal: true }
       })
-      state.pause()
+      state.resume()
     } catch (e: any) {
       dispatch({
         type: 'SIGN_MESSAGE',
         payload: { notIllegal: false }
       })
-      alert('Cant signup: ' + e)
-      state.pause()
+      console.error('Cant signup: ' + e)
+      state.resume()
     }
   }
