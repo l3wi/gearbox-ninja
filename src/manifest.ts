@@ -20,19 +20,9 @@ const DataManifest = [
     src: 'data/img/map/dojos.png'
   },
   {
-    name: 'gary',
+    name: 'tiles',
     type: 'image',
-    src: 'data/img/map/gary.png'
-  },
-  {
-    name: 'macdonalds',
-    type: 'image',
-    src: 'data/img/map/macdonalds.png'
-  },
-  {
-    name: 'tubes',
-    type: 'image',
-    src: 'data/img/map/tubes.png'
+    src: 'data/img/map/tiles.png'
   },
   {
     name: 'gripe_run_right',
