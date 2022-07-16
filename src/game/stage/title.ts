@@ -8,6 +8,9 @@ import {
   BitmapText
 } from 'melonjs/dist/melonjs.module.js'
 
+import { store } from '../../store'
+import actions from '../../store/actions'
+
 class TitleScreen extends Stage {
   /**
    *  action to perform on state change
@@ -40,9 +43,10 @@ class TitleScreen extends Stage {
     )
 
     input.bindKey(input.KEY.ENTER, 'enter', true)
+
     event.once(event.KEYDOWN, function (action: string) {
       if (action === 'enter') {
-        state.change(state.PLAY, false)
+        store.dispatch(actions.game.ChangeScreen('PLAY'))
       }
     })
   }

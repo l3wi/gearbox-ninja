@@ -9,7 +9,10 @@ import {
 } from 'melonjs/dist/melonjs.module.js'
 
 import { activateAndDeclare } from '../../utils/web3'
+
 import { store } from '../../store'
+import actions from '../../store/actions'
+
 interface Settings {
   width: number
   height: number
@@ -127,6 +130,14 @@ class PlayerEntity extends Sprite {
             activateAndDeclare('metamask')
           }
           return true
+        } else if (other.type === 'portal') {
+          const state = store.getState()
+          if (!this.debounce) {
+            this.debounce = true
+            store.dispatch(actions.game.ChangeScreen('MENU', true))
+          }
+
+          return true
         }
         break
 
@@ -140,6 +151,9 @@ class PlayerEntity extends Sprite {
     // Make the object solid
     return true
   }
+
+  // Transition state
+  debounce = false
 }
 
 export default PlayerEntity
