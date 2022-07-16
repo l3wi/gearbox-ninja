@@ -3,6 +3,7 @@ import { GameActions, GameThunkAction } from './index'
 export type Stages = Record<string, any>
 
 export interface GameState {
+  isInit: boolean
   isPaused: boolean
   stages: Stages // Need to fix (Stage Class)
   lastPosition: { x: number; y: number }
@@ -10,9 +11,10 @@ export interface GameState {
 }
 
 const initialState: GameState = {
+  isInit: false,
   isPaused: false,
   stages: {},
-  lastPosition: { x: 0, y: 0 },
+  lastPosition: { x: 1000, y: 300 },
   currentStage: 'MENU'
 }
 
@@ -23,7 +25,8 @@ export function gameReducer(
   switch (action.type) {
     case 'INIT_GAME':
       return {
-        ...state
+        ...state,
+        isInit: true
       }
     case 'PAUSE_GAME':
       return {

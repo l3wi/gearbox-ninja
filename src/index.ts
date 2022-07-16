@@ -1,7 +1,7 @@
 import 'index.css'
 
-import redux from './store'
-import { connect, activate } from './utils/web3'
+import redux, { store } from './store'
+import actions from './store/actions'
 import { init } from './utils/game'
 
 window.addEventListener('load', async () => {
@@ -16,5 +16,5 @@ window.addEventListener('load', async () => {
   redux.init()
 
   // Init game
-  init(w, h)
+  store.dispatch(actions.game.InitGame(w, h))
 })

@@ -16,12 +16,6 @@
 </data>
  </layer>
  <objectgroup color="#34dc54" id="3" name="Entities">
-  <object id="1" name="mainPlayer" x="1098.07" y="353.462" width="62.8763" height="64">
-   <properties>
-    <property name="framewidth" value="64"/>
-    <property name="image" value="gripe_run_right"/>
-   </properties>
-  </object>
   <object id="33" name="me.Trigger" x="2760.39" y="588.189" width="378.459" height="14.1922">
    <properties>
     <property name="duration" value="500"/>
@@ -110,7 +104,7 @@
    <polyline points="0,0 2.92633,-506.987"/>
   </object>
   <object id="31" x="2867.07" y="442.607" width="9.51057" height="70.2319"/>
-  <object id="35" x="415.517" y="258.614" width="31.5383" height="143.499">
+  <object id="35" x="1237.88" y="247.575" width="31.5383" height="143.499">
    <properties>
     <property name="type" value="portal"/>
    </properties>

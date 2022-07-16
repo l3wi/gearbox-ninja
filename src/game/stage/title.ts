@@ -46,7 +46,7 @@ class TitleScreen extends Stage {
 
     event.once(event.KEYDOWN, function (action: string) {
       if (action === 'enter') {
-        store.dispatch(actions.game.ChangeScreen('PLAY'))
+        store.dispatch(actions.game.ChangeStage('PLAY'))
       }
     })
   }

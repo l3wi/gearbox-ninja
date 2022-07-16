@@ -17,14 +17,14 @@ interface Settings {
   width: number
   height: number
   name: string
-  id: string
+  // id: string
   image: string
-  anchorPoint: any
+  // anchorPoint: any
   framewidth: number
   frameheight: number
-  type: string
-  collisionMask: number
-  shapes: any
+  // type: string
+  // collisionMask: number
+  // shapes: any
 }
 
 class PlayerEntity extends Sprite {
@@ -131,10 +131,15 @@ class PlayerEntity extends Sprite {
           }
           return true
         } else if (other.type === 'portal') {
-          const state = store.getState()
           if (!this.debounce) {
             this.debounce = true
-            store.dispatch(actions.game.ChangeScreen('MENU', true))
+            console.log('Saving pos: ', this.pos._x, this.pos._y)
+            store.dispatch(
+              actions.game.ChangeStage('MENU', {
+                x: +this.pos._x.toFixed(2) - 5,
+                y: +this.pos._y.toFixed(2)
+              })
+            )
           }
 
           return true

@@ -8,6 +8,7 @@ import {
   state,
   video,
   input,
+  game,
   pool
 } from 'melonjs/dist/melonjs.module.js'
 
@@ -39,7 +40,7 @@ export const InitGame =
       store.dispatch(
         actions.game.RegisterScreen('LOADING', new LoadingScreen())
       )
-      store.dispatch(actions.game.ChangeScreen('LOADING'))
+      store.dispatch(actions.game.ChangeStage('LOADING'))
 
       loader.preload(DataManifest, function () {
         // Set default state transition
@@ -51,38 +52,36 @@ export const InitGame =
 
         // add our player entity in the entity pool
         pool.register('mainPlayer', PlayerEntity)
-        // pool.register('CoinEntity', CoinEntity)
-        // pool.register('EnemyEntity', EnemyEntity)
 
-        store.dispatch(actions.game.ChangeScreen('MENU'))
+        store.dispatch(actions.game.ChangeStage('MENU'))
       })
     } catch (e: any) {
       alert('Error : ' + e)
     }
   }
 
-export const ChangeScreen =
-  (key: keyof Stages, keepPos?: boolean): GameThunkAction =>
+export const ChangeStage =
+  (key: keyof Stages, pos?: { x: number; y: number }): GameThunkAction =>
   async (dispatch, getState) => {
     try {
-      const { stages, currentStage } = getState().game
+      const { stages, currentStage, lastPosition } = getState().game
       if (!stages[key]) return console.error("Error: Stage doesn't exist")
 
-      // If PLAY & keepPos, save player pos
-      if (currentStage === 'PLAY' && keepPos) {
-        //@ts-ignore
-        const position = PlayerEntity.getAbsolutePosition()
-        console.log(position)
-
-        dispatch({
-          type: 'CHANGE_STAGE',
-          payload: { currentStage: key, lastPosition: { x: 0, y: 0 } }
-        })
+      // If PLAY & pos, save player pos
+      if (currentStage === 'PLAY' && pos) {
         //@ts-ignore
         state.change(state[key], false) // pls fix
+        dispatch({
+          type: 'CHANGE_STAGE',
+          payload: { currentStage: key, lastPosition: { x: pos.x, y: pos.y } }
+        })
       } else {
         //@ts-ignore
         state.change(state[key], false) // pls fix
+        dispatch({
+          type: 'CHANGE_STAGE',
+          payload: { currentStage: key }
+        })
       }
     } catch (e: any) {
       console.error('Error : ' + e)

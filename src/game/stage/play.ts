@@ -1,5 +1,5 @@
-import { Stage, level, game, input } from 'melonjs/dist/melonjs.module.js'
-
+import { Stage, level, game, input, pool } from 'melonjs/dist/melonjs.module.js'
+// import PlayerEntity from '../renderables/player'
 import { store } from '../../store'
 
 class PlayScreen extends Stage {
@@ -7,8 +7,8 @@ class PlayScreen extends Stage {
    *  action to perform on state change
    */
   onResetEvent() {
-    const { game } = store.getState()
-    console.log(game)
+    const { lastPosition } = store.getState().game
+
     // enable the keyboard
     input.bindKey(input.KEY.LEFT, 'left')
     input.bindKey(input.KEY.RIGHT, 'right')
@@ -19,6 +19,15 @@ class PlayScreen extends Stage {
 
     // load a level
     level.load('app')
+
+    const player = pool.pull('mainPlayer', lastPosition.x, lastPosition.y, {
+      name: 'mainPlayer',
+      framewidth: 64,
+      image: 'gripe_run_right'
+    })
+
+    // @ts-ignore
+    game.world.addChild(player, 1)
   }
 
   /**
