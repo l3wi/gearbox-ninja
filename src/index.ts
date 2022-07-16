@@ -2,7 +2,6 @@ import 'index.css'
 
 import redux, { store } from './store'
 import actions from './store/actions'
-import { init } from './utils/game'
 
 window.addEventListener('load', async () => {
   const h = window.innerHeight
