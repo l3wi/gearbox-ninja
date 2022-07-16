@@ -106,11 +106,20 @@ class PlayerEntity extends Sprite {
   onCollision(response: any, other: any) {
     switch (response.b.body.collisionType) {
       case collision.types.WORLD_SHAPE:
-        // Simulate a platform object
-        if (other.type === 'platform') {
-          if (
+        // TUBE COLLISION + ACTIVATE
+        if (other.type === 'tube') {
+          if (input.isKeyPressed('down') && !this.debounce) {
+            this.debounce = true
+            console.log('Saving pos: ', this.pos._x, this.pos._y)
+            store.dispatch(
+              actions.game.ChangeStage('CREDITS', {
+                x: +this.pos._x.toFixed(2),
+                y: +(this.pos._y - 1).toFixed(2)
+              })
+            )
+            return false
+          } else if (
             this.body.falling &&
-            !input.isKeyPressed('down') &&
             response.overlapV.y > 0 &&
             ~~this.body.vel.y >= ~~response.overlapV.y
           ) {
@@ -118,6 +127,19 @@ class PlayerEntity extends Sprite {
             return true
           }
           return false
+          // PLATFORM COLLISION
+        } else if (other.type === 'platform') {
+          if (
+            !input.isKeyPressed('down') &&
+            this.body.falling &&
+            response.overlapV.y > 0 &&
+            ~~this.body.vel.y >= ~~response.overlapV.y
+          ) {
+            response.overlapV.x = 0
+            return true
+          }
+          return false
+          // DECLARATION BARRIER COLLISION
         } else if (other.type === 'declare') {
           const state = store.getState()
           if (state.auth.notIllegal) {
@@ -130,18 +152,15 @@ class PlayerEntity extends Sprite {
             activateAndDeclare('metamask')
           }
           return true
-        } else if (other.type === 'portal') {
-          if (!this.debounce) {
-            this.debounce = true
-            console.log('Saving pos: ', this.pos._x, this.pos._y)
-            store.dispatch(
-              actions.game.ChangeStage('MENU', {
-                x: +this.pos._x.toFixed(2) - 5,
-                y: +this.pos._y.toFixed(2)
-              })
-            )
-          }
-
+          // RESET COLLISION
+        } else if (other.type === 'reset' && !this.debounce) {
+          this.debounce = true
+          store.dispatch(
+            actions.game.ChangeStage('PLAY', {
+              x: 1000,
+              y: 350
+            })
+          )
           return true
         }
         break

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.0" orientation="orthogonal" renderorder="right-down" width="64" height="8" tilewidth="64" tileheight="64" infinite="0" backgroundcolor="#595c72" nextlayerid="9" nextobjectid="37">
+<map version="1.9" tiledversion="1.9.0" orientation="orthogonal" renderorder="right-down" width="64" height="8" tilewidth="64" tileheight="64" infinite="0" backgroundcolor="#595c72" nextlayerid="9" nextobjectid="40">
  <tileset firstgid="1" name="tiles" tilewidth="64" tileheight="64" tilecount="256" columns="32">
   <image source="../img/map/tiles.png" width="2048" height="512"/>
  </tileset>
@@ -15,22 +15,15 @@
 225,226,227,228,229,230,231,225,226,227,228,229,230,231,232,233,234,234,225,226,227,228,229,230,231,232,233,234,225,226,227,228,229,230,231,232,233,234,225,226,227,228,229,230,231,98,99,225,226,227,228,229,230,231,232,233,234,231,225,226,227,228,229,230
 </data>
  </layer>
- <objectgroup color="#34dc54" id="3" name="Entities">
-  <object id="33" name="me.Trigger" x="2760.39" y="588.189" width="378.459" height="14.1922">
-   <properties>
-    <property name="duration" value="500"/>
-    <property name="fade" value="#000"/>
-    <property name="to" value="app"/>
-   </properties>
-  </object>
- </objectgroup>
+ <objectgroup color="#34dc54" id="3" name="Entities"/>
  <objectgroup color="#ff201a" id="7" name="collisions">
   <object id="2" x="0" y="421.405" width="2877.74" height="18.7291"/>
-  <object id="3" x="-21.4225" y="1.07112" width="17.138" height="419.88"/>
+  <object id="3" x="-21.4225" y="-110.89" width="17.138" height="531.841"/>
   <object id="5" x="4092.76" y="3.21337" width="16.0668" height="416.667"/>
   <object id="9" x="770.171" y="273.802">
    <properties>
-    <property name="type" value="platform"/>
+    <property name="asset" value="USDC"/>
+    <property name="type" value="tube"/>
    </properties>
    <polyline points="0,0 125.007,0"/>
   </object>
@@ -41,19 +34,22 @@
   </object>
   <object id="11" x="579.762" y="336.905">
    <properties>
-    <property name="type" value="platform"/>
+    <property name="asset" value="wbtc"/>
+    <property name="type" value="tube"/>
    </properties>
    <polyline points="0,0 125.007,0"/>
   </object>
   <object id="12" x="322.619" y="209.524">
    <properties>
-    <property name="type" value="platform"/>
+    <property name="asset" value="ETH"/>
+    <property name="type" value="tube"/>
    </properties>
    <polyline points="0,0 125.007,0"/>
   </object>
   <object id="13" x="130.952" y="271.429">
    <properties>
-    <property name="type" value="platform"/>
+    <property name="asset" value="DAI"/>
+    <property name="type" value="tube"/>
    </properties>
    <polyline points="0,0 125.007,0"/>
   </object>
@@ -104,9 +100,9 @@
    <polyline points="0,0 2.92633,-506.987"/>
   </object>
   <object id="31" x="2867.07" y="442.607" width="9.51057" height="70.2319"/>
-  <object id="35" x="1237.88" y="247.575" width="31.5383" height="143.499">
+  <object id="38" x="2773" y="596.073" width="363.479" height="12.6153">
    <properties>
-    <property name="type" value="portal"/>
+    <property name="type" value="reset"/>
    </properties>
   </object>
  </objectgroup>
