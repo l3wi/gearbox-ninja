@@ -1,16 +1,22 @@
 import { GameActions, GameThunkAction } from './index'
 
+export type Stages = Record<string, any>
+
 export interface GameState {
   isPaused: boolean
-  pending: boolean
+  stages: Stages // Need to fix (Stage Class)
+  lastPosition: { x: number; y: number }
+  currentStage: keyof Stages
 }
 
 const initialState: GameState = {
   isPaused: false,
-  pending: false
+  stages: {},
+  lastPosition: { x: 0, y: 0 },
+  currentStage: 'MENU'
 }
 
-export function authReducer(
+export function gameReducer(
   state: GameState = initialState,
   action: GameActions
 ): GameState {
@@ -28,6 +34,19 @@ export function authReducer(
       return {
         ...state,
         isPaused: false
+      }
+    case 'CHANGE_STAGE':
+      return {
+        ...state,
+        currentStage: action.payload.currentStage,
+        lastPosition: action.payload.lastPosition
+          ? action.payload.lastPosition
+          : state.lastPosition
+      }
+    case 'REGISTER_STAGE':
+      return {
+        ...state,
+        stages: { ...state.stages, [action.payload.key]: action.payload.stage }
       }
   }
 
