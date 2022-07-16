@@ -14,6 +14,7 @@ import {
 
 import TitleScreen from '../../game/stage/title'
 import PlayScreen from '../../game/stage/play'
+import Web3Screen from '../../game/stage/web3'
 import LoadingScreen from '../../game/stage/loading'
 import PlayerEntity from '../../game/renderables/player'
 import DataManifest from '../../game/manifest'
@@ -49,6 +50,7 @@ export const InitGame =
         // Register Stages into the game
         store.dispatch(actions.game.RegisterScreen('MENU', new TitleScreen()))
         store.dispatch(actions.game.RegisterScreen('PLAY', new PlayScreen()))
+        store.dispatch(actions.game.RegisterScreen('CREDITS', new Web3Screen()))
 
         // add our player entity in the entity pool
         pool.register('mainPlayer', PlayerEntity)
