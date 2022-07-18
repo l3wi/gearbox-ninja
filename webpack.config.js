@@ -46,7 +46,7 @@ module.exports = {
     new CopyWebpackPlugin({
       patterns: [
         {
-          from: './src/data',
+          from: './src/game/data',
           to: './data',
           filter: async (resourcePath) => {
             const data = await fs.promises.readFile(resourcePath)

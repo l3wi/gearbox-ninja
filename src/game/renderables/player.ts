@@ -116,13 +116,18 @@ class PlayerEntity extends Sprite {
     switch (response.b.body.collisionType) {
       case collision.types.WORLD_SHAPE:
         // TUBE COLLISION + ACTIVATE
-        if (other.type === 'tube') {
+        if (
+          typeof other.type === 'string' &&
+          other.type.indexOf('tube') != -1
+        ) {
           if (input.isKeyPressed('down') && !this.debounce) {
             this.debounce = true
             this.body.gravityScale = 0.1
-            console.log(game.world.getChildByName('foreground'))
+
             // @ts-ignore
             game.world.getChildByName('foreground')[0].setOpacity(1)
+
+            console.log(other.type.split('-'))
 
             const currentPos = this.pos
             store.dispatch(
@@ -131,6 +136,13 @@ class PlayerEntity extends Sprite {
                 y: +(currentPos._y - 1).toFixed(2)
               })
             )
+
+            setTimeout(() => {
+              store.dispatch(
+                actions.form.populateForm(other.type.split('-')[1])
+              )
+              store.dispatch(actions.form.toggleForm())
+            }, 500)
 
             return false
           } else if (
