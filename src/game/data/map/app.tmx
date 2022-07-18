@@ -20,8 +20,7 @@
   <object id="2" x="0" y="421.405" width="2627.57" height="18.7291"/>
   <object id="9" x="762.351" y="273.802">
    <properties>
-    <property name="asset" value="USDC"/>
-    <property name="type" value="tube"/>
+    <property name="type" value="tube-usdc"/>
    </properties>
    <polyline points="0,0 137.296,0"/>
   </object>
@@ -32,22 +31,19 @@
   </object>
   <object id="11" x="571.546" y="338.348">
    <properties>
-    <property name="asset" value="wbtc"/>
-    <property name="type" value="tube"/>
+    <property name="type" value="tube-wbtc"/>
    </properties>
    <polyline points="0,0 136.738,0"/>
   </object>
   <object id="12" x="314.566" y="210.176">
    <properties>
-    <property name="asset" value="ETH"/>
-    <property name="type" value="tube"/>
+    <property name="type" value="tube-eth"/>
    </properties>
    <polyline points="0,0 141.765,0"/>
   </object>
   <object id="13" x="122.014" y="273.594">
    <properties>
-    <property name="asset" value="DAI"/>
-    <property name="type" value="tube"/>
+    <property name="type" value="tube-dai"/>
    </properties>
    <polyline points="0,0 135.62,0"/>
   </object>
@@ -77,8 +73,7 @@
   <object id="45" x="2749.07" y="-178.417" width="9.51057" height="597.703"/>
   <object id="47" x="1720.74" y="338.531">
    <properties>
-    <property name="asset" value="USDC"/>
-    <property name="type" value="tube"/>
+    <property name="type" value="tube-wbtc"/>
    </properties>
    <polyline points="0,0 140.254,0"/>
   </object>
