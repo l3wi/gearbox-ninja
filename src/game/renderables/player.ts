@@ -3,9 +3,11 @@ import {
   Rect,
   Sprite,
   game,
-  state,
+  video,
+  level,
   input,
-  collision
+  collision,
+  Vector2d
 } from 'melonjs/dist/melonjs.module.js'
 
 import { activateAndDeclare } from '../../utils/web3'
@@ -17,9 +19,8 @@ interface Settings {
   width: number
   height: number
   name: string
-  // id: string
   image: string
-  // anchorPoint: any
+  anchorPoint: Vector2d
   framewidth: number
   frameheight: number
   // type: string
@@ -97,6 +98,14 @@ class PlayerEntity extends Sprite {
       this.body.force.y = 0
     }
 
+    if (!this.inViewport && this.pos.y > video.renderer.getHeight()) {
+      this.body.vel.y -= this.body.maxVel.y * 1.6
+      game.world.removeChild(this)
+      game.viewport.fadeIn('#000000', 500, function () {
+        store.dispatch(actions.game.BeginStage())
+      })
+    }
+
     return super.update(dt) || this.body.vel.x !== 0 || this.body.vel.y !== 0
   }
 
@@ -110,13 +119,19 @@ class PlayerEntity extends Sprite {
         if (other.type === 'tube') {
           if (input.isKeyPressed('down') && !this.debounce) {
             this.debounce = true
-            console.log('Saving pos: ', this.pos._x, this.pos._y)
+            this.body.gravityScale = 0.1
+            console.log(game.world.getChildByName('foreground'))
+            // @ts-ignore
+            game.world.getChildByName('foreground')[0].setOpacity(1)
+
+            const currentPos = this.pos
             store.dispatch(
               actions.game.ChangeStage('CREDITS', {
-                x: +this.pos._x.toFixed(2),
-                y: +(this.pos._y - 1).toFixed(2)
+                x: +currentPos._x.toFixed(2),
+                y: +(currentPos._y - 1).toFixed(2)
               })
             )
+
             return false
           } else if (
             this.body.falling &&
@@ -147,9 +162,13 @@ class PlayerEntity extends Sprite {
           } else if (
             !state.auth.pending &&
             !state.auth.notIllegal &&
-            input.isKeyPressed('right')
+            input.isKeyPressed('left')
           ) {
-            activateAndDeclare('metamask')
+            try {
+              activateAndDeclare('metamask')
+            } catch (e: any) {
+              console.error(e)
+            }
           }
           return true
           // RESET COLLISION
@@ -165,9 +184,8 @@ class PlayerEntity extends Sprite {
         }
         break
 
-      // Fall through
-
       default:
+        // Fall through
         // Do not respond to other objects (e.g. coins)
         return false
     }

@@ -8,6 +8,7 @@ import {
 } from 'melonjs/dist/melonjs.module.js'
 // import PlayerEntity from '../renderables/player'
 import { store } from '../../store'
+import actions from '../../store/actions'
 
 class PlayScreen extends Stage {
   player = {}
@@ -27,27 +28,13 @@ class PlayScreen extends Stage {
     // load a level
     level.load('app')
 
-    const { lastPosition } = store.getState().game
-    console.log(lastPosition)
-    this.player = pool.pull('mainPlayer', lastPosition.x, lastPosition.y, {
-      name: 'mainPlayer',
-      framewidth: 64,
-      image: 'gripe_run_right',
-      anchorPoint: new Vector2d(0.5, 0)
-    })
-
-    // @ts-ignore
-    game.world.addChild(this.player, 1)
+    store.dispatch(actions.game.BeginStage())
   }
 
   /**
    *  action to perform when leaving this screen (state change)
    */
-  onDestroyEvent() {
-    console.log('Leaving Screen')
-    // @ts-ignore
-    game.world.removeChild(this.player, 1)
-  }
+  onDestroyEvent() {}
 }
 
 export default PlayScreen

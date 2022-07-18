@@ -9,7 +9,8 @@ import {
   video,
   input,
   game,
-  pool
+  pool,
+  Vector2d
 } from 'melonjs/dist/melonjs.module.js'
 
 import TitleScreen from '../../game/stage/title'
@@ -89,6 +90,23 @@ export const ChangeStage =
       console.error('Error : ' + e)
     }
   }
+
+export const BeginStage = (): GameThunkAction => async (dispatch, getState) => {
+  try {
+    const { lastPosition } = getState().game
+    const player = pool.pull('mainPlayer', lastPosition.x, lastPosition.y, {
+      name: 'mainPlayer',
+      framewidth: 64,
+      image: 'gripe_run_right',
+      anchorPoint: new Vector2d(0, 0)
+    })
+
+    // @ts-ignore
+    game.world.addChild(player, 1)
+  } catch (e: any) {
+    alert('Error : ' + e)
+  }
+}
 
 export const RegisterScreen =
   (key: any, stage: any): GameThunkAction =>

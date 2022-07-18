@@ -14,7 +14,7 @@ const initialState: GameState = {
   isInit: false,
   isPaused: false,
   stages: {},
-  lastPosition: { x: 1000, y: 300 },
+  lastPosition: { x: 1926, y: 340 },
   currentStage: 'MENU'
 }
 
@@ -37,6 +37,10 @@ export function gameReducer(
       return {
         ...state,
         isPaused: false
+      }
+    case 'BEGIN_STAGE':
+      return {
+        ...state
       }
     case 'CHANGE_STAGE':
       return {

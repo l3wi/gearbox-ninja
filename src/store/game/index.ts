@@ -20,5 +20,8 @@ export type GameActions =
       type: 'CHANGE_STAGE'
       payload: { currentStage: string; lastPosition?: { x: number; y: number } }
     }
+  | {
+      type: 'BEGIN_STAGE'
+    }
 
 export type GameThunkAction = ThunkAction<void, RootState, unknown, GameActions>
