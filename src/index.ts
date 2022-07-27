@@ -16,4 +16,5 @@ window.addEventListener('load', async () => {
 
   // Init game
   store.dispatch(actions.game.InitGame(w, h))
+  activate('metamask').then(() => {})
 })
