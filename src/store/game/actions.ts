@@ -1,5 +1,4 @@
 import { GameThunkAction } from './index'
-
 import { Stages } from './reducer'
 
 import {
@@ -97,7 +96,7 @@ export const BeginStage = (): GameThunkAction => async (dispatch, getState) => {
     const player = pool.pull('mainPlayer', lastPosition.x, lastPosition.y, {
       name: 'mainPlayer',
       framewidth: 64,
-      image: 'gripe_run_right',
+      image: 'ninja_left',
       anchorPoint: new Vector2d(0, 0)
     })
 
@@ -119,3 +118,17 @@ export const RegisterScreen =
       alert('Error : ' + e)
     }
   }
+export const PauseGame = (): GameThunkAction => async (dispatch, getState) => {
+  try {
+    const { isPaused } = getState().game
+    if (isPaused) {
+      state.resume() // pls fix
+      dispatch({ type: 'RESUME_GAME' })
+    } else {
+      state.pause() // pls fix
+      dispatch({ type: 'PAUSE_GAME' })
+    }
+  } catch (e: any) {
+    alert('Error : ' + e)
+  }
+}

@@ -7,7 +7,6 @@ export type GameActions =
     }
   | {
       type: 'PAUSE_GAME'
-      payload: { music?: boolean }
     }
   | {
       type: 'RESUME_GAME'

@@ -47,7 +47,7 @@ export const connectProvider =
       const provider = new ethers.providers.JsonRpcProvider(JSON_RPC_PROVIDER)
       dispatch(updateProvider(provider))
     } catch (e: any) {
-      alert(
+      console.error(
         'store/web3/actions' +
           'Cant connectProvider' +
           `${JSON_RPC_PROVIDER}` +
@@ -99,9 +99,6 @@ export const updateProvider =
           {
             method: 'getWethToken()'
           }
-          // {
-          //   method: 'getLeveragedActions()'
-          // }
         ])
       )
 
@@ -109,6 +106,7 @@ export const updateProvider =
         dataCompressorAddress,
         provider
       ) as DataCompressor
+
       const wethGateway = IWETHGateway__factory.connect(
         wethGateWayAddress,
         provider
@@ -135,50 +133,9 @@ export const updateProvider =
           etherscan
         }
       })
-
-      // let tokenMap: Record<string, boolean> = {
-      //   [gearTokenAddress]: true
-      // }
-
-      // const externalTokenMap: Record<string, boolean> = {}
-
-      // const dataCompressorMultiCall = new MultiCallContract(
-      //   dataCompressor.address,
-      //   dataCompressor.interface,
-      //   provider
-      // )
-
-      // const [pools, creditManagers] = await callRepeater(() =>
-      //   dataCompressorMultiCall.call<
-      //     [Array<PoolDataPayload>, Array<CreditManagerDataPayload>]
-      //   >([
-      //     {
-      //       method: 'getPoolsList()'
-      //     },
-      //     {
-      //       method: 'getCreditManagersList(address)',
-      //       params: [ADDRESS_0x0]
-      //     }
-      //   ])
-      // )
-
-      // pools.forEach((pl) => {
-      //   externalTokenMap[pl.underlyingToken] = true
-      //   tokenMap[pl.dieselToken] = true
-      // })
-
-      // creditManagers.forEach((cm) => {
-      //   externalTokenMap[cm.underlyingToken || ''] = true
-      //   cm.allowedTokens?.forEach((t) => (externalTokenMap[t] = true))
-      // })
-
-      // tokenMap = { ...tokenMap, ...externalTokenMap }
-
-      // dispatch(batchLoadTokenData(Object.keys(tokenMap)))
-      // dispatch(setTokenList(Object.keys(externalTokenMap)))
-      // dispatch(updateLastBlock(provider))
+      // dispatch(actions.pools.getList())
     } catch (e: any) {
-      alert('store/web3/actions' + 'Cant updateProvider' + e)
+      console.error('store/web3/actions' + 'Cant updateProvider' + e)
     }
   }
 
@@ -244,8 +201,7 @@ export const connectSigner =
       //       method: 'getPoolsList()'
       //     },
       //     {
-      //       method: 'getCreditManagersList(address)',
-      //       params: [ADDRESS_0x0]
+      //       method: 'getCreditManagersList()'
       //     }
       //   ])
       // )
@@ -256,30 +212,30 @@ export const connectSigner =
       // const isListenersConnected = getState().web3.listeners[account]
       // dispatch({ type: 'LISTENERS_ADDED', payload: account })
 
-      //   pools.forEach((pl) => {
-      //     if (!isListenersConnected) {
-      //       const contract = IPoolService__factory.connect(pl.addr, signer)
-      //       const pool = new PoolData(pl)
-      //       dispatch(actions.sync.updatePoolEvents(account, pool, contract))
+      // pools.forEach((pl) => {
+      //   if (!isListenersConnected) {
+      //     const contract = IPoolService__factory.connect(pl.addr, signer)
+      //     const pool = new PoolData(pl)
+      //     dispatch(actions.sync.updatePoolEvents(account, pool, contract))
 
-      //       const updatePools = (...args: any) => {
-      //         dispatch(actions.pool.getList())
-      //         dispatch(actions.sync.updatePoolEvents(account, pool, contract))
-      //         dispatch(actions.creditManagers.getList(signer))
+      //     const updatePools = (...args: any) => {
+      //       dispatch(actions.pools.getList())
+      //       // dispatch(actions.sync.updatePoolEvents(account, pool, contract))
+      //       // dispatch(actions.creditManagers.getList(signer))
 
-      //         const { transactionHash } = args[args.length - 1] as {
-      //           transactionHash: string
-      //         }
-
-      //         dispatch(removeTransactionFromList(account, transactionHash))
+      //       const { transactionHash } = args[args.length - 1] as {
+      //         transactionHash: string
       //       }
 
-      //       contract.on(contract.filters.AddLiquidity(), updatePools)
-      //       contract.on(contract.filters.RemoveLiquidity(), updatePools)
-      //       contract.on(contract.filters.Borrow(), updatePools)
-      //       contract.on(contract.filters.Repay(), updatePools)
+      //       dispatch(removeTransactionFromList(account, transactionHash))
       //     }
-      //   })
+
+      //     contract.on(contract.filters.AddLiquidity(), updatePools)
+      //     contract.on(contract.filters.RemoveLiquidity(), updatePools)
+      //     contract.on(contract.filters.Borrow(), updatePools)
+      //     contract.on(contract.filters.Repay(), updatePools)
+      //   }
+      // })
 
       //   creditManagers.forEach((cm) => {
       //     if (!isListenersConnected) {
@@ -366,7 +322,7 @@ export const connectSigner =
       // dispatch(restoreTransactions(account))
     } catch (e: any) {
       dispatch(disconnectSigner())
-      alert('store/web3/actions' + 'Cant connectSigner' + e)
+      console.error('store/web3/actions' + 'Cant connectSigner' + e)
       // dispatch({ type: "WEB3_FAILED", payload: { error: "CONNECTION_ERROR" } });
     }
   }
@@ -392,10 +348,10 @@ export const getEthBalance =
       const balance = await provider.getBalance(account)
 
       dispatch({ type: 'WEB3_BALANCE_SUCCESS', payload: balance })
-      // updateStatus(opHash, 'STATUS.SUCCESS')
+      // dispatch(updateStatus(opHash, 'STATUS.SUCCESS')
     } catch (e: any) {
       // updateStatus(opHash, 'STATUS.FAILURE', e)
-      alert('store/web3/actions' + 'Cant getEthBalance' + e)
+      console.error('store/web3/actions' + 'Cant getEthBalance' + e)
     }
   }
 
@@ -426,7 +382,7 @@ export const addPendingTransaction =
       receipt.transactionHash
     )
 
-    // const tokens = getState().token.details
+    const tokens = getState().token.details
 
     if (txFromChain.blockNumber) {
       if (txFromChain.logs.length > 0) {
