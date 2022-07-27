@@ -56,28 +56,22 @@ export const activate = async (w: Wallets) => {
   }
 
   try {
-    store.dispatch(actions.web3.connectSigner(connector))
+    await store.dispatch(actions.web3.connectSigner(connector))
 
     if (window.ethereum && isInjectedWallet) {
       window.ethereum.on('chainChanged', () => {
         ;(window.ethereum as any).removeAllListeners('chainChanged')
+        store.dispatch(actions.web3.disconnectSigner())
       })
 
-      store.dispatch(actions.web3.disconnectSigner())
       window.ethereum.on('accountsChanged', async () => {
         ;(window.ethereum as any).removeAllListeners('chainChanged')
         store.dispatch(actions.web3.setWalletType(w))
       })
     }
 
-    // Set Wallet trype
+    // Set Wallet type
     await store.dispatch(actions.web3.setWalletType(w))
-
-    // try {
-    //   store.dispatch(actions.auth.signDeclaration())
-    // } catch (e: any) {
-    //   alert('Call Gary we have rulebreaker' + e)
-    // }
   } catch (eo: any) {
     if (window.ethereum && isInjectedWallet) {
       try {
@@ -92,14 +86,14 @@ export const activate = async (w: Wallets) => {
           })
         }
       } catch (e: any) {
-        alert('Cant useWeb3' + e)
+        console.error('Cant useWeb3' + e)
         // e.code === 4902 - chain not added
         // e.code === -32002 - request already pending
       }
     }
 
     store.dispatch(actions.web3.setWalletType(undefined))
-    alert('Cant Web3' + eo)
+    console.error('Cant Web3' + eo)
   }
 }
 
@@ -109,7 +103,7 @@ export const activateAndDeclare = async (w: Wallets) => {
     if (!account) await activate(w)
     await declare()
   } catch (e: any) {
-    alert('Broken' + e)
+    console.error('Broken' + e)
   }
 }
 
@@ -117,7 +111,7 @@ export const declare = async () => {
   try {
     await store.dispatch(actions.auth.signDeclaration())
   } catch (e: any) {
-    alert('Call Gary we have rulebreaker' + e)
+    console.error('Call Gary we have rulebreaker' + e)
   }
 }
 

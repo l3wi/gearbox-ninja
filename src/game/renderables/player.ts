@@ -10,7 +10,7 @@ import {
   Vector2d
 } from 'melonjs/dist/melonjs.module.js'
 
-import { activateAndDeclare } from '../../utils/web3'
+import { activate, declare } from '../../utils/web3'
 
 import { store } from '../../store'
 import actions from '../../store/actions'
@@ -56,6 +56,8 @@ class PlayerEntity extends Sprite {
     // define a standing animation (using the first frame)
     this.addAnimation('stand', [0])
 
+    this.addAnimation('jump', [16])
+
     // set the standing animation as default
     this.setCurrentAnimation('stand')
   }
@@ -66,7 +68,7 @@ class PlayerEntity extends Sprite {
   update(dt: any) {
     if (input.isKeyPressed('left')) {
       // flip the sprite on horizontal axis
-      this.flipX(true)
+      this.flipX(false)
       // update the default force
       this.body.force.x = -this.body.maxVel.x
       // change to the walking animation
@@ -75,7 +77,7 @@ class PlayerEntity extends Sprite {
       }
     } else if (input.isKeyPressed('right')) {
       // unflip the sprite
-      this.flipX(false)
+      this.flipX(true)
       // update the entity velocity
       this.body.force.x = this.body.maxVel.x
       // change to the walking animation
@@ -83,9 +85,14 @@ class PlayerEntity extends Sprite {
         this.setCurrentAnimation('walk')
       }
     } else {
-      this.body.force.x = 0
-      // change to the standing animation
       this.setCurrentAnimation('stand')
+      this.body.force.x = 0
+    }
+
+    if (this.body.vel.y > 0 || this.body.jumping) {
+      if (!this.isCurrentAnimation('jump')) {
+        this.setCurrentAnimation('jump')
+      }
     }
 
     if (input.isKeyPressed('jump')) {
@@ -93,6 +100,10 @@ class PlayerEntity extends Sprite {
         // set current vel to the maximum defined value
         // gravity will then do the rest
         this.body.force.y = -this.body.maxVel.y
+        // this.setCurrentAnimation('stand')
+      }
+      if (!this.isCurrentAnimation('jump')) {
+        this.setCurrentAnimation('jump')
       }
     } else {
       this.body.force.y = 0
@@ -102,6 +113,12 @@ class PlayerEntity extends Sprite {
       this.body.vel.y -= this.body.maxVel.y * 1.6
       game.world.removeChild(this)
       game.viewport.fadeIn('#000000', 500, function () {
+        store.dispatch(
+          actions.game.ChangeStage('PLAY', {
+            x: 1926,
+            y: 340
+          })
+        )
         store.dispatch(actions.game.BeginStage())
       })
     }
@@ -126,8 +143,6 @@ class PlayerEntity extends Sprite {
 
             // @ts-ignore
             game.world.getChildByName('foreground')[0].setOpacity(1)
-
-            console.log(other.type.split('-'))
 
             const currentPos = this.pos
             store.dispatch(
@@ -169,29 +184,29 @@ class PlayerEntity extends Sprite {
           // DECLARATION BARRIER COLLISION
         } else if (other.type === 'declare') {
           const state = store.getState()
+          // If declared wall is passable
           if (state.auth.notIllegal) {
             return false
           } else if (
-            !state.auth.pending &&
             !state.auth.notIllegal &&
+            !state.web3.account &&
             input.isKeyPressed('left')
           ) {
+            // If declared wall is passable
             try {
-              activateAndDeclare('metamask')
+              store.dispatch(actions.game.PauseGame())
+              if (!state.web3.account)
+                activate('metamask').then(() => {
+                  console.log('Connected Wallet')
+                  declare().then(() => {
+                    console.log('Declaration signed')
+                    store.dispatch(actions.game.PauseGame())
+                  })
+                })
             } catch (e: any) {
               console.error(e)
             }
           }
-          return true
-          // RESET COLLISION
-        } else if (other.type === 'reset' && !this.debounce) {
-          this.debounce = true
-          store.dispatch(
-            actions.game.ChangeStage('PLAY', {
-              x: 1000,
-              y: 350
-            })
-          )
           return true
         }
         break
