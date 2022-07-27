@@ -187,24 +187,20 @@ class PlayerEntity extends Sprite {
           // If declared wall is passable
           if (state.auth.notIllegal) {
             return false
-          } else if (
-            !state.auth.notIllegal &&
-            !state.web3.account &&
-            input.isKeyPressed('left')
-          ) {
-            // If declared wall is passable
+            // If running into & no declaration, prompt user
+          } else if (!state.auth.notIllegal && input.isKeyPressed('left')) {
             try {
               store.dispatch(actions.game.PauseGame())
-              if (!state.web3.account)
-                activate('metamask').then(() => {
-                  console.log('Connected Wallet')
-                  declare().then(() => {
-                    console.log('Declaration signed')
-                    store.dispatch(actions.game.PauseGame())
-                  })
+              activate('metamask').then(() => {
+                console.log('Connected Wallet')
+                declare().then(() => {
+                  console.log('Declaration signed')
+                  store.dispatch(actions.game.PauseGame())
                 })
+              })
             } catch (e: any) {
               console.error(e)
+              store.dispatch(actions.game.PauseGame())
             }
           }
           return true
