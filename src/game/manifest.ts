@@ -25,9 +25,9 @@ const DataManifest = [
     src: 'data/img/map/tiles.png'
   },
   {
-    name: 'gripe_run_right',
+    name: 'ninja_left',
     type: 'image',
-    src: 'data/img/sprite/gripe_run_right.png'
+    src: 'data/img/sprite/ninja_left.png'
   }
 ]
 
