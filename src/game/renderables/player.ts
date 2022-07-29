@@ -14,6 +14,7 @@ import { activate, declare } from '../../utils/web3'
 
 import { store } from '../../store'
 import actions from '../../store/actions'
+import { Token } from '../../store/form/reducer'
 
 interface Settings {
   width: number
@@ -23,9 +24,6 @@ interface Settings {
   anchorPoint: Vector2d
   framewidth: number
   frameheight: number
-  // type: string
-  // collisionMask: number
-  // shapes: any
 }
 
 class PlayerEntity extends Sprite {
@@ -132,6 +130,7 @@ class PlayerEntity extends Sprite {
   onCollision(response: any, other: any) {
     switch (response.b.body.collisionType) {
       case collision.types.WORLD_SHAPE:
+        const state = store.getState()
         // TUBE COLLISION + ACTIVATE
         if (
           typeof other.type === 'string' &&
@@ -153,9 +152,16 @@ class PlayerEntity extends Sprite {
             )
 
             setTimeout(() => {
-              store.dispatch(
-                actions.form.populateForm(other.type.split('-')[1])
-              )
+              const symbol = other.type.split('-')[1].toUpperCase()
+              const token = Object.values(state.token.details).filter(
+                (item: Token) => item.symbol === symbol
+              )[0]
+
+              // need to fix
+              // @ts-ignore
+              const balance = state.token.balances[token.id]
+              // @ts-ignore
+              store.dispatch(actions.form.populateForm(symbol, token, balance))
               store.dispatch(actions.form.toggleForm())
             }, 500)
 
@@ -183,22 +189,28 @@ class PlayerEntity extends Sprite {
           return false
           // DECLARATION BARRIER COLLISION
         } else if (other.type === 'declare') {
-          const state = store.getState()
           // If declared wall is passable
-          if (state.auth.notIllegal) {
+          if (state.web3.notIllegal) {
             return false
             // If running into & no declaration, prompt user
-          } else if (!state.auth.notIllegal && input.isKeyPressed('left')) {
+          } else if (
+            !this.debounce &&
+            !state.web3.notIllegal &&
+            input.isKeyPressed('left')
+          ) {
             try {
+              this.debounce = true
               store.dispatch(actions.game.PauseGame())
               activate('metamask').then(() => {
                 console.log('Connected Wallet')
                 declare().then(() => {
                   console.log('Declaration signed')
+                  this.debounce = false
                   store.dispatch(actions.game.PauseGame())
                 })
               })
             } catch (e: any) {
+              this.debounce = false
               console.error(e)
               store.dispatch(actions.game.PauseGame())
             }

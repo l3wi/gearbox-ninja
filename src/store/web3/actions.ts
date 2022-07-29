@@ -37,7 +37,7 @@ import {
 import actions from '../actions'
 // import { setTokenList } from '../price/actions'
 // import { clearCreditAccounts } from '../creditAccounts/actions'
-// import { updateLastBlock } from '../sync/actions'
+import { updateLastBlock } from '../sync/actions'
 
 import { ThunkWeb3Action, Web3Actions } from './index'
 
@@ -133,7 +133,6 @@ export const updateProvider =
           etherscan
         }
       })
-      // dispatch(actions.pools.getList())
     } catch (e: any) {
       console.error('store/web3/actions' + 'Cant updateProvider' + e)
     }
@@ -181,149 +180,67 @@ export const connectSigner =
         }
       })
 
-      // const { dataCompressor } = getState().web3
+      const { dataCompressor } = getState().web3
 
-      // if (!dataCompressor) {
-      //   throw new Error('datacompressor is undefined')
-      // }
+      if (!dataCompressor) {
+        throw new Error('datacompressor is undefined')
+      }
 
-      // const dataCompressorMultiCall = new MultiCallContract(
-      //   dataCompressor.address,
-      //   dataCompressor.interface,
-      //   signer.provider
-      // )
+      const dataCompressorMultiCall = new MultiCallContract(
+        dataCompressor.address,
+        dataCompressor.interface,
+        signer.provider
+      )
 
-      // const [pools, creditManagers] = await callRepeater(() =>
-      //   dataCompressorMultiCall.call<
-      //     [Array<PoolDataPayload>, Array<CreditManagerDataPayload>]
-      //   >([
-      //     {
-      //       method: 'getPoolsList()'
-      //     },
-      //     {
-      //       method: 'getCreditManagersList()'
-      //     }
-      //   ])
-      // )
+      const [pools, creditManagers] = await callRepeater(() =>
+        dataCompressorMultiCall.call<
+          [Array<PoolDataPayload>, Array<CreditManagerDataPayload>]
+        >([
+          {
+            method: 'getPoolsList()'
+          },
+          {
+            method: 'getCreditManagersList()'
+          }
+        ])
+      )
 
       //   dispatch(actions.creditManagers.getList(signer))
-      //   dispatch(updateLastBlock(signer.provider))
+      dispatch(updateLastBlock(signer.provider))
 
-      // const isListenersConnected = getState().web3.listeners[account]
-      // dispatch({ type: 'LISTENERS_ADDED', payload: account })
+      const isListenersConnected = getState().web3.listeners[account]
+      dispatch({ type: 'LISTENERS_ADDED', payload: account })
 
-      // pools.forEach((pl) => {
-      //   if (!isListenersConnected) {
-      //     const contract = IPoolService__factory.connect(pl.addr, signer)
-      //     const pool = new PoolData(pl)
-      //     dispatch(actions.sync.updatePoolEvents(account, pool, contract))
+      pools.forEach((pl) => {
+        if (!isListenersConnected) {
+          const contract = IPoolService__factory.connect(pl.addr, signer)
+          const pool = new PoolData(pl)
+          dispatch(actions.sync.updatePoolEvents(account, pool, contract))
 
-      //     const updatePools = (...args: any) => {
-      //       dispatch(actions.pools.getList())
-      //       // dispatch(actions.sync.updatePoolEvents(account, pool, contract))
-      //       // dispatch(actions.creditManagers.getList(signer))
+          const updatePools = (...args: any) => {
+            dispatch(actions.pools.getList())
+            dispatch(actions.sync.updatePoolEvents(account, pool, contract))
+            // dispatch(actions.creditManagers.getList(signer))
 
-      //       const { transactionHash } = args[args.length - 1] as {
-      //         transactionHash: string
-      //       }
+            const { transactionHash } = args[args.length - 1] as {
+              transactionHash: string
+            }
 
-      //       dispatch(removeTransactionFromList(account, transactionHash))
-      //     }
+            dispatch(removeTransactionFromList(account, transactionHash))
+          }
 
-      //     contract.on(contract.filters.AddLiquidity(), updatePools)
-      //     contract.on(contract.filters.RemoveLiquidity(), updatePools)
-      //     contract.on(contract.filters.Borrow(), updatePools)
-      //     contract.on(contract.filters.Repay(), updatePools)
-      //   }
-      // })
+          contract.on(contract.filters.AddLiquidity(), updatePools)
+          contract.on(contract.filters.RemoveLiquidity(), updatePools)
+          contract.on(contract.filters.Borrow(), updatePools)
+          contract.on(contract.filters.Repay(), updatePools)
+        }
+      })
 
-      //   creditManagers.forEach((cm) => {
-      //     if (!isListenersConnected) {
-      //       const contract = ICreditManager__factory.connect(cm.addr, signer)
-
-      //       const creditManager = new CreditManagerData(cm)
-
-      //       dispatch(
-      //         actions.sync.updateCreditManagerEvents(
-      //           account,
-      //           creditManager,
-      //           contract
-      //         )
-      //       )
-
-      //       const updateCreditManagers = (...args: any) => {
-      //         const { transactionHash } = args[args.length - 1] as {
-      //           transactionHash: string
-      //         }
-      //         dispatch(removeTransactionFromList(account, transactionHash))
-
-      //         dispatch(actions.creditAccounts.getList())
-
-      //         dispatch(
-      //           actions.sync.updateCreditManagerEvents(
-      //             account,
-      //             creditManager,
-      //             contract
-      //             // ev.blockNumber
-      //           )
-      //         )
-      //       }
-
-      //       contract.on(
-      //         contract.filters.OpenCreditAccount(null, account),
-      //         updateCreditManagers
-      //       )
-
-      //       contract.on(
-      //         contract.filters.CloseCreditAccount(account),
-      //         updateCreditManagers
-      //       )
-
-      //       contract.on(
-      //         contract.filters.RepayCreditAccount(account),
-      //         updateCreditManagers
-      //       )
-
-      //       contract.on(contract.filters.LiquidateCreditAccount(account), () => {
-      //         updateCreditManagers()
-      //         dispatch(
-      //           actions.creditAccounts.deleteByCreditManager(
-      //             creditManager.address
-      //           )
-      //         )
-
-      //         dispatch(
-      //           actions.sync.updateCreditManagerEvents(
-      //             account,
-      //             creditManager,
-      //             contract
-      //           )
-      //         )
-      //       })
-      //       contract.on(
-      //         contract.filters.AddCollateral(account),
-      //         updateCreditManagers
-      //       )
-      //       contract.on(
-      //         contract.filters.IncreaseBorrowedAmount(account),
-      //         updateCreditManagers
-      //       )
-      //       contract.on(contract.filters.ExecuteOrder(account), () => {
-      //         dispatch(
-      //           actions.creditAccounts.getByCreditManager(
-      //             creditManager.address,
-      //             account
-      //           )
-      //         )
-      //       })
-      //     }
-      //   })
-
-      // dispatch(restoreTransactions(account))
+      dispatch(restoreTransactions(account))
     } catch (e: any) {
       dispatch(disconnectSigner())
       console.error('store/web3/actions' + 'Cant connectSigner' + e)
-      // dispatch({ type: "WEB3_FAILED", payload: { error: "CONNECTION_ERROR" } });
+      dispatch({ type: 'WEB3_FAILED', payload: { error: 'CONNECTION_ERROR' } })
     }
   }
 
@@ -335,6 +252,35 @@ export const disconnectSigner =
     // dispatch(clearCreditAccounts())
     // dispatch(clearBalancesAllowances())
     dispatch({ type: 'WEB3_RESET' })
+  }
+
+export const signDeclaration =
+  (): ThunkWeb3Action => async (dispatch, getState) => {
+    try {
+      const { account, signer } = getState().web3
+      if (!account || !signer) throw new Error('No account selected')
+
+      const agreement =
+        'I hereby further represent and warrant that:\n' +
+        '- I’m not a resident of or located in the United States of America (including its territories: American Samoa, Guam, Puerto Rico, the Northern Mariana Islands and the U.S. Virgin Islands) or any other Restricted Jurisdiction (as defined in the Terms of Service).\n' +
+        '- I’m not a Prohibited Person (as defined in the Terms of Service) nor acting on behalf of a Prohibited Person.\n' +
+        '- I understand that if I fail to maintain sufficient collateral when using the Gearbox Protocol, my credit account(s) may be liquidated, in which case a penalty may be charged by the protocol.\n' +
+        '- I acknowledge that Gearbox App and related software are experimental, and that the use of experimental software may result in complete loss of my funds.'
+
+      // @ts-ignore
+      const signature = await signer.signMessage(agreement)
+
+      dispatch({
+        type: 'SIGNED_MESSAGE',
+        payload: { notIllegal: true }
+      })
+    } catch (e: any) {
+      dispatch({
+        type: 'SIGNED_MESSAGE',
+        payload: { notIllegal: false, signRejected: true }
+      })
+      console.error('Cant signup: ' + e)
+    }
   }
 
 export const getEthBalance =

@@ -109,7 +109,7 @@ export const activateAndDeclare = async (w: Wallets) => {
 
 export const declare = async () => {
   try {
-    await store.dispatch(actions.auth.signDeclaration())
+    await store.dispatch(actions.web3.signDeclaration())
   } catch (e: any) {
     console.error('Call Gary we have rulebreaker' + e)
   }

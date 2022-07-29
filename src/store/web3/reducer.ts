@@ -28,13 +28,17 @@ export interface Web3State {
   error?: Web3Error
   listeners: Record<string, boolean>
   transactions: Record<string, Array<EVMTx>>
+  notIllegal: boolean
+  signRejected: boolean
 }
 
 const initialState: Web3State = {
   status: 'WEB3_STARTUP',
   etherscan: 'https://etherscan.io',
   listeners: {},
-  transactions: {}
+  transactions: {},
+  notIllegal: false,
+  signRejected: false
 }
 
 export function web3Reducer(
@@ -83,7 +87,12 @@ export function web3Reducer(
         error: action.payload.error,
         chainId: action.payload.chainId
       }
-
+    case 'SIGNED_MESSAGE':
+      return {
+        ...state,
+        notIllegal: action.payload.notIllegal,
+        signRejected: action.payload.signRejected
+      }
     case 'WEB3_BALANCE_SUCCESS':
       return {
         ...state,

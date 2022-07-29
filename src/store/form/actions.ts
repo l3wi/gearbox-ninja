@@ -1,5 +1,7 @@
+import { BigNumber, utils } from 'ethers'
 import actions from '../actions'
 import { FormThunkAction } from './index'
+import { Token } from './reducer'
 
 export const toggleForm = (): FormThunkAction => async (dispatch, getState) => {
   const { isHidden } = getState().form
@@ -15,7 +17,7 @@ export const toggleForm = (): FormThunkAction => async (dispatch, getState) => {
 }
 
 export const populateForm =
-  (symbol: string): FormThunkAction =>
+  (symbol: string, token: Token, balance: BigNumber): FormThunkAction =>
   async (dispatch, getState) => {
     const { isHidden } = getState().form
 
@@ -25,16 +27,27 @@ export const populateForm =
     tortor tincidunt fermentum scelerisque, urna augue tincidunt arcu,
     viverra rhoncus tortor erat nec eros.`
 
+    const readableBalance = balance
+      .div(BigNumber.from(token.decimals))
+      .toString()
+
     document.getElementById('title').textContent = title
     document.getElementById('desc').textContent = description
     document.getElementById('submit').textContent = 'deposit ' + symbol
+    document.getElementById('balance').textContent =
+      'balance: ' + readableBalance
+    // new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(
+    //   readableBalance
+    // )
 
     dispatch({
       type: 'POPULATE_FORM',
       payload: {
         title,
         description,
-        symbol
+        symbol,
+        token,
+        balance
       }
     })
   }

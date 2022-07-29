@@ -1,5 +1,7 @@
+import { BigNumber } from 'ethers'
 import { ThunkAction } from 'redux-thunk'
 import { RootState } from '../index'
+import { Token } from './reducer'
 
 export type FormActions =
   | {
@@ -14,6 +16,8 @@ export type FormActions =
         title: string
         description: string
         symbol: string
+        token: Token
+        balance: BigNumber
       }
     }
   | {

@@ -50,6 +50,10 @@ export type Web3Actions =
       payload: Wallets | undefined
     }
   | {
+      type: 'SIGNED_MESSAGE'
+      payload: { notIllegal: boolean; signRejected?: boolean }
+    }
+  | {
       type: 'WEB3_FAILED'
       payload: { error: Web3Error; chainId?: number }
     }

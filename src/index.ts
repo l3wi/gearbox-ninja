@@ -2,6 +2,7 @@ import 'index.css'
 
 import redux, { store } from './store'
 import actions from './store/actions'
+import { activate } from './utils/web3'
 
 window.addEventListener('load', async () => {
   const h = window.innerHeight
@@ -16,5 +17,5 @@ window.addEventListener('load', async () => {
 
   // Init game
   store.dispatch(actions.game.InitGame(w, h))
-  activate('metamask').then(() => {})
+  store.dispatch(actions.web3.connectProvider())
 })
