@@ -6,10 +6,11 @@ import {
   loader,
   state,
   video,
-  input,
+  Color,
   game,
   pool,
-  Vector2d
+  Vector2d,
+  BitmapText
 } from 'melonjs/dist/melonjs.module.js'
 
 import TitleScreen from '../../game/stage/title'
@@ -21,6 +22,8 @@ import DataManifest from '../../game/manifest'
 
 import { store } from '../index'
 import actions from '../actions'
+import HUD, { Notification } from '../../game/renderables/hud'
+import PAUSE, { TextSegment } from '../../game/renderables/pause'
 
 export const InitGame =
   (w: number, h: number): GameThunkAction =>
@@ -45,7 +48,7 @@ export const InitGame =
 
       loader.preload(DataManifest, function () {
         // Set default state transition
-        state.transition('fade', '#000', 250)
+        state.transition('fade', '#202020', 500)
 
         // Register Stages into the game
         store.dispatch(actions.game.RegisterScreen('MENU', new TitleScreen()))
@@ -92,16 +95,32 @@ export const ChangeStage =
 
 export const BeginStage = (): GameThunkAction => async (dispatch, getState) => {
   try {
-    const { lastPosition } = getState().game
+    const { lastPosition, hud } = getState().game
     const player = pool.pull('mainPlayer', lastPosition.x, lastPosition.y, {
       name: 'mainPlayer',
-      framewidth: 64,
-      image: 'ninja_left',
+      framewidth: 102,
+      image: 'ninja',
       anchorPoint: new Vector2d(0, 0)
     })
 
     // @ts-ignore
-    game.world.addChild(player, 1)
+    game.world.addChild(player)
+
+    const newHud = new HUD()
+    game.world.addChild(newHud)
+
+    const newPause = new PAUSE()
+    game.world.addChild(newPause)
+
+    newPause.addChild(
+      new TextSegment(
+        game.viewport.width / 2,
+        game.viewport.height / 2,
+        'Game Paused'
+      )
+    )
+
+    dispatch({ type: 'BEGIN_STAGE', payload: { hud: newHud, pause: newPause } })
   } catch (e: any) {
     alert('Error : ' + e)
   }
@@ -118,17 +137,59 @@ export const RegisterScreen =
       alert('Error : ' + e)
     }
   }
+
 export const PauseGame = (): GameThunkAction => async (dispatch, getState) => {
   try {
-    const { isPaused } = getState().game
+    let { isPaused, hud, pause } = getState().game
     if (isPaused) {
-      state.resume() // pls fix
+      state.resume()
+      pause.children.map((item) => pause.removeChild(item))
+      dispatch({ type: 'UPDATE_PAUSE', payload: { pause } })
       dispatch({ type: 'RESUME_GAME' })
     } else {
-      state.pause() // pls fix
+      state.pause()
+
+      pause.addChild(
+        // @ts-ignore
+        new BitmapText(game.viewport.width / 2, game.viewport.height / 2, {
+          font: 'PressStart2P',
+          size: 1.0,
+          textBaseline: 'middle',
+          textAlign: 'center',
+          text: 'Game Paused'
+        })
+      )
+      pause.addChild(
+        // @ts-ignore
+        new BitmapText(game.viewport.width / 2, game.viewport.height / 2 + 50, {
+          font: 'PressStart2P',
+          size: 1.0,
+          textBaseline: 'middle',
+          textAlign: 'center',
+          text: 'Waiting for wallet to connect'
+        })
+      )
+
+      // pause.addChild(new PauseOverlay('pause'))
+      dispatch({ type: 'UPDATE_PAUSE', payload: { pause } })
       dispatch({ type: 'PAUSE_GAME' })
     }
   } catch (e: any) {
     alert('Error : ' + e)
   }
 }
+
+export const AddNotification =
+  (text: string, duration: number = 3000): GameThunkAction =>
+  async (dispatch, getState) => {
+    const { hud } = getState().game
+    try {
+      const item = hud.addChild(new Notification(0, 0, text))
+      setTimeout(() => {
+        hud.removeChild(item)
+      }, duration)
+    } catch (e: any) {
+      alert('Error : ' + e)
+    }
+  }
+// hud.children.map((item) => hud.removeChild(item))
