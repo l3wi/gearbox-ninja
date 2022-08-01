@@ -10,7 +10,8 @@ const activeRpcUrl = {
 }
 
 export const injected = new Web3Provider(
-  (window as any).ethereum // Haaaaacky
+  (window as any).ethereum, // Haaaaacky
+  'any'
 )
 
 // Duplicate to keep TS happy
