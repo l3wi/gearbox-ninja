@@ -44,23 +44,23 @@ export type ThunkTokenAction = ThunkAction<
   TokenAction | OperationActions
 >
 
-export const tokenDataMapSelector = (state: RootState) => state.token.details
+export const tokenDataMapSelector = (state: RootState) => state.tokens.details
 
-export const tokenBalancesSelector = (state: RootState) => state.token.balances
+export const tokenBalancesSelector = (state: RootState) => state.tokens.balances
 export const tokenBalanceSelector = (address: string) => (state: RootState) =>
-  state.token.balances[address]
+  state.tokens.balances[address]
 
 export const allowancesSelector = () => (state: RootState) =>
-  state.token.allowances
+  state.tokens.allowances
 export const tokenAllowanceSelector =
   (address: string, to: string) => (state: RootState) =>
-    state.token.allowances[getAllowanceId(address, to)]
+    state.tokens.allowances[getAllowanceId(address, to)]
 
 export const virtualTokenAllowancesSelector = () => (state: RootState) =>
-  state.token.virtualAllowances
+  state.tokens.virtualAllowances
 export const virtualTokenAllowanceSelector =
   (address: string, to: string) => (state: RootState) =>
-    state.token.virtualAllowances[getAllowanceId(address, to)]
+    state.tokens.virtualAllowances[getAllowanceId(address, to)]
 
 export const getAllowanceId = (tokenAddress: string, to: string) =>
   `${tokenAddress}@${to}`

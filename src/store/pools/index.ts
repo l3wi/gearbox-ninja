@@ -14,5 +14,5 @@ export type PoolAction =
 
 export type PoolThunkAction = ThunkAction<void, RootState, unknown, PoolAction>
 
-export const poolsListSelector = (state: RootState) => state.pool.data
-export const poolsListErrorSelector = (state: RootState) => state.pool.error
+export const poolsListSelector = (state: RootState) => state.pools.data
+export const poolsListErrorSelector = (state: RootState) => state.pools.error

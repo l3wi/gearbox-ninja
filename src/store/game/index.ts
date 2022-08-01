@@ -1,3 +1,4 @@
+import { Container } from 'melonjs'
 import { ThunkAction } from 'redux-thunk'
 import { RootState } from '../index'
 
@@ -21,6 +22,15 @@ export type GameActions =
     }
   | {
       type: 'BEGIN_STAGE'
+      payload: { hud?: Container; pause?: Container }
+    }
+  | {
+      type: 'UPDATE_HUD'
+      payload: { hud: Container }
+    }
+  | {
+      type: 'UPDATE_PAUSE'
+      payload: { pause: Container }
     }
 
 export type GameThunkAction = ThunkAction<void, RootState, unknown, GameActions>

@@ -17,9 +17,9 @@ const reducer = combineReducers({
   web3: web3Reducer,
   game: gameReducer,
   form: formReducer,
-  pool: poolsReducer,
-  operation: operationReducer,
-  token: tokenReducer,
+  pools: poolsReducer,
+  operations: operationReducer,
+  tokens: tokenReducer,
   sync: syncReducer
 })
 

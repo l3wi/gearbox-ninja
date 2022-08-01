@@ -1,5 +1,6 @@
+import { game, Container } from 'melonjs'
 import { GameActions, GameThunkAction } from './index'
-
+import HUD from '../../game/renderables/hud'
 export type Stages = Record<string, any>
 
 export interface GameState {
@@ -8,14 +9,18 @@ export interface GameState {
   stages: Stages // Need to fix (Stage Class)
   lastPosition: { x: number; y: number }
   currentStage: keyof Stages
+  hud: Container
+  pause: Container
 }
 
 const initialState: GameState = {
   isInit: false,
   isPaused: false,
   stages: {},
-  lastPosition: { x: 1926, y: 340 },
-  currentStage: 'MENU'
+  lastPosition: { x: 1850, y: 350 },
+  currentStage: 'MENU',
+  hud: null,
+  pause: null
 }
 
 export function gameReducer(
@@ -40,7 +45,23 @@ export function gameReducer(
       }
     case 'BEGIN_STAGE':
       return {
-        ...state
+        ...state,
+        hud: action.payload.hud,
+        pause: action.payload.pause
+      }
+    case 'UPDATE_HUD':
+      return {
+        ...state,
+        hud: action.payload.hud
+      }
+    case 'UPDATE_PAUSE':
+      const index = game.world.children.findIndex(
+        (item: any, i: number) => item.name === 'PAUSE'
+      )
+      game.world.children[index] = action.payload.pause
+      return {
+        ...state,
+        pause: action.payload.pause
       }
     case 'CHANGE_STAGE':
       return {

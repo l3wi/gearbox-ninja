@@ -39,7 +39,7 @@ export const updateLastBlock =
       if (!pathFinder) throw new Error('pathfinder is undefined')
 
       //   const priceTokens = getState().price.tokensList
-      const allTokens = Object.keys(getState().token.details)
+      const allTokens = Object.keys(getState().tokens.details)
 
       const calls: [
         MCall<Multicall2Interface>,

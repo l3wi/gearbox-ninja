@@ -152,6 +152,14 @@ export const connectSigner =
       if (network.chainId !== CHAIN_ID) {
         dispatch(actions.web3.disconnectSigner())
         dispatch(actions.web3.setWalletType(undefined))
+
+        // Notify user
+        dispatch(
+          actions.game.AddNotification(
+            `wrong network: switch to ${CHAIN_ID === 42 ? 'kovan' : 'mainnet'}`,
+            3000
+          )
+        )
         throw new Error('Incorrect network')
       }
 
@@ -180,6 +188,8 @@ export const connectSigner =
         }
       })
 
+      dispatch({ type: 'LISTENERS_ADDED', payload: account })
+
       const { dataCompressor } = getState().web3
 
       if (!dataCompressor) {
@@ -205,12 +215,9 @@ export const connectSigner =
         ])
       )
 
-      //   dispatch(actions.creditManagers.getList(signer))
       dispatch(updateLastBlock(signer.provider))
 
       const isListenersConnected = getState().web3.listeners[account]
-      dispatch({ type: 'LISTENERS_ADDED', payload: account })
-
       pools.forEach((pl) => {
         if (!isListenersConnected) {
           const contract = IPoolService__factory.connect(pl.addr, signer)
@@ -236,7 +243,10 @@ export const connectSigner =
         }
       })
 
+      dispatch(actions.pools.getList())
+
       dispatch(restoreTransactions(account))
+      dispatch(actions.game.AddNotification('wallet connected', 3000))
     } catch (e: any) {
       dispatch(disconnectSigner())
       console.error('store/web3/actions' + 'Cant connectSigner' + e)
@@ -328,7 +338,7 @@ export const addPendingTransaction =
       receipt.transactionHash
     )
 
-    const tokens = getState().token.details
+    const tokens = getState().tokens.details
 
     if (txFromChain.blockNumber) {
       if (txFromChain.logs.length > 0) {

@@ -2,7 +2,14 @@
  * Copyright (c) 2020. Mikael Lazarev
  */
 
-import { applyMiddleware, Middleware, compose, createStore } from 'redux'
+import {
+  applyMiddleware,
+  Middleware,
+  compose,
+  createStore,
+  Store,
+  StoreCreator
+} from 'redux'
 import reducer from './reducer'
 import thunk from 'redux-thunk'
 

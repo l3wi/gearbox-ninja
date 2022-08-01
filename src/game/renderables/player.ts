@@ -38,7 +38,7 @@ class PlayerEntity extends Sprite {
     this.body = new Body(this)
     this.body.addShape(new Rect(0, 0, this.width, this.height))
     this.body.collisionType = collision.types.PLAYER_OBJECT
-    this.body.setMaxVelocity(3, 15)
+    this.body.setMaxVelocity(4, 15)
     this.body.setFriction(0.4, 0)
 
     // set the display to follow our position on both axis
@@ -49,12 +49,12 @@ class PlayerEntity extends Sprite {
     this.alwaysUpdate = true
 
     // define a basic walking animation (using all frames)
-    this.addAnimation('walk', [0, 1, 2, 3, 4, 5, 6, 7])
+    this.addAnimation('walk', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], 60)
 
     // define a standing animation (using the first frame)
     this.addAnimation('stand', [0])
 
-    this.addAnimation('jump', [16])
+    this.addAnimation('jump', [12])
 
     // set the standing animation as default
     this.setCurrentAnimation('stand')
@@ -100,9 +100,9 @@ class PlayerEntity extends Sprite {
         this.body.force.y = -this.body.maxVel.y
         // this.setCurrentAnimation('stand')
       }
-      if (!this.isCurrentAnimation('jump')) {
-        this.setCurrentAnimation('jump')
-      }
+      // if (!this.isCurrentAnimation('jump')) {
+      //   this.setCurrentAnimation('jump')
+      // }
     } else {
       this.body.force.y = 0
     }
@@ -139,7 +139,7 @@ class PlayerEntity extends Sprite {
           if (input.isKeyPressed('down') && !this.debounce) {
             this.debounce = true
             this.body.gravityScale = 0.1
-
+            console.log(game.world.getChildByName('foreground'))
             // @ts-ignore
             game.world.getChildByName('foreground')[0].setOpacity(1)
 
