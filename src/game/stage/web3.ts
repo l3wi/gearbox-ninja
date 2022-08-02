@@ -19,19 +19,21 @@ class Web3Screen extends Stage {
     // add a gray background to the default Stage
     game.world.addChild(new ColorLayer('background', '#202020'))
 
+    // Capture Action button
     document.getElementById('submit').onclick = function (e) {
       store.dispatch(actions.form.sendTransaction())
     }
 
-    this.input = document.querySelector('input')
-
-    this.input.addEventListener('input', (e: any) => {
-      store.dispatch(actions.form.updateForm(e.target.value))
-    })
-
+    // Capture Max button click
     document.getElementById('max').onclick = function (e) {
       store.dispatch(actions.form.maxAmount())
     }
+
+    // Add EventListener to input field
+    this.input = document.querySelector('input')
+    this.input.addEventListener('input', (e: any) => {
+      store.dispatch(actions.form.updateForm(e.target.value))
+    })
 
     // Cancel out of screen
     input.bindKey(input.KEY.ESC, 'esc', true)
