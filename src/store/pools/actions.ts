@@ -17,7 +17,7 @@ import { PoolThunkAction } from '.'
 
 export const getList = (): PoolThunkAction => async (dispatch, getState) => {
   try {
-    const { dataCompressor } = getState().web3
+    const { dataCompressor, account } = getState().web3
     if (!dataCompressor) {
       throw new Error('No account selected')
     }
@@ -30,6 +30,10 @@ export const getList = (): PoolThunkAction => async (dispatch, getState) => {
 
     for (let p of poolsPayload) {
       result[p.addr.toLowerCase()] = new PoolData(p)
+      if (account)
+        dispatch(
+          actions.tokens.getTokenAllowance(p.underlying, p.addr, account)
+        )
     }
 
     dispatch({
