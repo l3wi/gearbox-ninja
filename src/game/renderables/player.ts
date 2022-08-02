@@ -15,6 +15,7 @@ import { activate, declare } from '../../utils/web3'
 import { store } from '../../store'
 import actions from '../../store/actions'
 import { Token } from '../../store/form/reducer'
+import { PoolData, TokenData } from '@gearbox-protocol/sdk'
 
 interface Settings {
   width: number
@@ -43,7 +44,7 @@ class PlayerEntity extends Sprite {
 
     // set the display to follow our position on both axis
     // @ts-ignore
-    game.viewport.follow(this.pos, game.viewport.AXIS.BOTH, 0.4)
+    game.viewport.follow(this.pos, game.viewport.AXIS.BOTH, 0.2)
 
     // ensure the player is updated even when outside of the viewport
     this.alwaysUpdate = true
@@ -139,7 +140,7 @@ class PlayerEntity extends Sprite {
           if (input.isKeyPressed('down') && !this.debounce) {
             this.debounce = true
             this.body.gravityScale = 0.1
-            console.log(game.world.getChildByName('foreground'))
+
             // @ts-ignore
             game.world.getChildByName('foreground')[0].setOpacity(1)
 
@@ -152,16 +153,25 @@ class PlayerEntity extends Sprite {
             )
 
             setTimeout(() => {
-              const symbol = other.type.split('-')[1].toUpperCase()
-              const token = Object.values(state.token.details).filter(
+              const symbol = other.type.split('-')[1]
+              const token = Object.values(state.tokens.details).find(
                 (item: Token) => item.symbol === symbol
-              )[0]
+              )
 
               // need to fix
               // @ts-ignore
-              const balance = state.token.balances[token.id]
+              const balance = state.tokens.balances[token.id]
+              const pool = Object.values(state.pools.data).find(
+                // @ts-ignore
+                (item: PoolData) =>
+                  item.underlyingToken.toLowerCase() ===
+                  // @ts-ignore
+                  token.address.toLowerCase()
+              )
               // @ts-ignore
-              store.dispatch(actions.form.populateForm(symbol, token, balance))
+              store.dispatch(
+                actions.form.populateForm(symbol, token, pool, balance)
+              )
               store.dispatch(actions.form.toggleForm())
             }, 500)
 
@@ -202,9 +212,7 @@ class PlayerEntity extends Sprite {
               this.debounce = true
               store.dispatch(actions.game.PauseGame())
               activate('metamask').then(() => {
-                console.log('Connected Wallet')
                 declare().then(() => {
-                  console.log('Declaration signed')
                   this.debounce = false
                   store.dispatch(actions.game.PauseGame())
                 })

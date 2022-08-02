@@ -1,3 +1,4 @@
+import { PoolData } from '@gearbox-protocol/sdk'
 import { BigNumber } from 'ethers'
 import { FormActions } from './index'
 
@@ -17,7 +18,8 @@ export interface FormState {
   description: string
   symbol: string
   balance: BigNumber
-  token: Token
+  token?: Token
+  pool?: PoolData
 }
 
 const initialState: FormState = {
@@ -27,14 +29,7 @@ const initialState: FormState = {
   title: '',
   description: '',
   symbol: '',
-  balance: BigNumber.from(0),
-  token: {
-    address: '',
-    decimals: 6,
-    icon: '',
-    id: '',
-    symbol: ''
-  }
+  balance: BigNumber.from(0)
 }
 
 export function formReducer(
@@ -58,12 +53,19 @@ export function formReducer(
         description: action.payload.description,
         symbol: action.payload.symbol,
         token: action.payload.token,
-        balance: action.payload.balance
+        balance: action.payload.balance,
+        pool: action.payload.pool
       }
     case 'UPDATE_FORM':
       return {
         ...state,
         value: action.payload.value
+      }
+    case 'MAX_AMOUNT':
+      return {
+        ...state,
+        value: action.payload.value,
+        isMax: true
       }
   }
 

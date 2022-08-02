@@ -1,3 +1,4 @@
+import { PoolData } from '@gearbox-protocol/sdk'
 import { BigNumber, utils } from 'ethers'
 import actions from '../actions'
 import { FormThunkAction } from './index'
@@ -17,10 +18,14 @@ export const toggleForm = (): FormThunkAction => async (dispatch, getState) => {
 }
 
 export const populateForm =
-  (symbol: string, token: Token, balance: BigNumber): FormThunkAction =>
+  (
+    symbol: string,
+    token: any,
+    pool: any,
+    balance: BigNumber
+  ): FormThunkAction =>
   async (dispatch, getState) => {
     const { isHidden } = getState().form
-
     const title = 'Deposit ' + symbol.toUpperCase() + ' to Gearbox'
     const description = ` Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam in
     risus facilisis, tempor metus tincidunt, interdum sem. Ut varius,
@@ -28,17 +33,18 @@ export const populateForm =
     viverra rhoncus tortor erat nec eros.`
 
     const readableBalance = balance
-      .div(BigNumber.from(token.decimals))
-      .toString()
+      .div(BigNumber.from('10').pow(BigNumber.from(token.decimals)))
+      .toNumber()
 
     document.getElementById('title').textContent = title
     document.getElementById('desc').textContent = description
     document.getElementById('submit').textContent = 'deposit ' + symbol
     document.getElementById('balance').textContent =
-      'balance: ' + readableBalance
-    // new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(
-    //   readableBalance
-    // )
+      'balance: ' +
+      new Intl.NumberFormat('en-US', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(readableBalance)
 
     dispatch({
       type: 'POPULATE_FORM',
@@ -47,20 +53,54 @@ export const populateForm =
         description,
         symbol,
         token,
+        pool,
         balance
       }
     })
   }
 
-export const updateForm =
-  (input: number): FormThunkAction =>
-  async (dispatch, getState) => {
-    const { isHidden } = getState().form
+export const sendTransaction =
+  (): FormThunkAction => async (dispatch, getState) => {
+    const { pool, isMax, value, balance, token } = getState().form
+    let finalValue
+    if (isMax) {
+      finalValue = balance
+    } else {
+      finalValue = BigNumber.from(value).mul(
+        BigNumber.from('10').pow(BigNumber.from(token.decimals))
+      )
+    }
 
+    dispatch(actions.pools.addLiquidity(pool, finalValue))
+  }
+
+export const updateForm =
+  (input: string): FormThunkAction =>
+  async (dispatch, getState) => {
     dispatch({
       type: 'UPDATE_FORM',
       payload: {
-        value: input
+        value: +input,
+        isMax: false
       }
     })
   }
+
+export const maxAmount = (): FormThunkAction => async (dispatch, getState) => {
+  const { balance, token } = getState().form
+
+  const value = balance
+    .div(BigNumber.from('10').pow(BigNumber.from(token.decimals)))
+    .toString()
+
+  // Update input field
+  document.querySelector('input').value = value
+
+  dispatch({
+    type: 'MAX_AMOUNT',
+    payload: {
+      value: +value,
+      isMax: true
+    }
+  })
+}

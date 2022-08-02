@@ -1,3 +1,4 @@
+import { PoolData } from '@gearbox-protocol/sdk'
 import { BigNumber } from 'ethers'
 import { ThunkAction } from 'redux-thunk'
 import { RootState } from '../index'
@@ -11,6 +12,12 @@ export type FormActions =
       type: 'CLEAR_FORM'
     }
   | {
+      type: 'MAX_AMOUNT'
+      payload: {
+        value: number
+      }
+    }
+  | {
       type: 'POPULATE_FORM'
       payload: {
         title: string
@@ -18,6 +25,7 @@ export type FormActions =
         symbol: string
         token: Token
         balance: BigNumber
+        pool: PoolData
       }
     }
   | {
