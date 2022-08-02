@@ -28,6 +28,11 @@ const DataManifest = [
     name: 'ninja',
     type: 'image',
     src: 'data/img/sprite/ninja.png'
+  },
+  {
+    name: 'ninja-smol',
+    type: 'image',
+    src: 'data/img/sprite/ninja-smol.png'
   }
 ]
 

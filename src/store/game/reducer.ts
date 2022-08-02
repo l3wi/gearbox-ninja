@@ -17,7 +17,7 @@ const initialState: GameState = {
   isInit: false,
   isPaused: false,
   stages: {},
-  lastPosition: { x: 1850, y: 350 },
+  lastPosition: { x: 2175, y: 0 },
   currentStage: 'MENU',
   hud: null,
   pause: null

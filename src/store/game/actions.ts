@@ -98,8 +98,8 @@ export const BeginStage = (): GameThunkAction => async (dispatch, getState) => {
     const { lastPosition, hud } = getState().game
     const player = pool.pull('mainPlayer', lastPosition.x, lastPosition.y, {
       name: 'mainPlayer',
-      framewidth: 102,
-      image: 'ninja',
+      framewidth: 64,
+      image: 'ninja-smol',
       anchorPoint: new Vector2d(0, 0)
     })
 
