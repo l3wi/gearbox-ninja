@@ -21,7 +21,7 @@ class Web3Screen extends Stage {
 
     // Capture Action button
     document.getElementById('submit').onclick = function (e) {
-      store.dispatch(actions.form.sendTransaction())
+      store.dispatch(actions.form.handleSubmit())
     }
 
     // Capture Max button click
@@ -29,11 +29,18 @@ class Web3Screen extends Stage {
       store.dispatch(actions.form.maxAmount())
     }
 
+    // Capture Exit button click
+    document.getElementById('exit').onclick = function (e) {
+      store.dispatch(actions.form.toggleForm())
+      store.dispatch(actions.game.ChangeStage('PLAY'))
+    }
+
     // Add EventListener to input field
     this.input = document.querySelector('input')
-    this.input.addEventListener('input', (e: any) => {
+    this.inputFunction = (e: any) => {
       store.dispatch(actions.form.updateForm(e.target.value))
-    })
+    }
+    this.input.addEventListener('input', this.inputFunction)
 
     // Cancel out of screen
     input.bindKey(input.KEY.ESC, 'esc', true)
@@ -50,10 +57,11 @@ class Web3Screen extends Stage {
    */
   onDestroyEvent() {
     input.unbindKey(input.KEY.ESC)
-    this.input.removeEventListener('input')
+    this.input.removeEventListener('input', this.inputFunction)
   }
 
   input: any
+  inputFunction: any
 }
 
 export default Web3Screen

@@ -48,7 +48,7 @@ export const approveToken =
         payload: { id, allowance: MAX_INT }
       })
 
-      // await receipt.wait(1);
+      await receipt.wait(1)
 
       dispatch(actions.operations.updateStatus(opHash, 'STATUS.SUCCESS'))
       const evmTx = new TxApprove({
