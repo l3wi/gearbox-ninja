@@ -61,7 +61,7 @@ export const InitGame =
         store.dispatch(actions.game.ChangeStage('MENU'))
       })
     } catch (e: any) {
-      alert('Error : ' + e)
+      console.error('Error Init(): ' + e)
     }
   }
 
@@ -89,7 +89,7 @@ export const ChangeStage =
         })
       }
     } catch (e: any) {
-      console.error('Error : ' + e)
+      console.error('Error ChangeStage(): ' + e)
     }
   }
 
@@ -122,7 +122,7 @@ export const BeginStage = (): GameThunkAction => async (dispatch, getState) => {
 
     dispatch({ type: 'BEGIN_STAGE', payload: { hud: newHud, pause: newPause } })
   } catch (e: any) {
-    alert('Error : ' + e)
+    console.error('Error BeginStage(): ' + e)
   }
 }
 
@@ -134,7 +134,7 @@ export const RegisterScreen =
       state.set(state[key], stage) // pls fix
       dispatch({ type: 'REGISTER_STAGE', payload: { key, stage } })
     } catch (e: any) {
-      alert('Error : ' + e)
+      console.error('Error RegisterScreen(): ' + e)
     }
   }
 
@@ -175,7 +175,7 @@ export const PauseGame = (): GameThunkAction => async (dispatch, getState) => {
       dispatch({ type: 'PAUSE_GAME' })
     }
   } catch (e: any) {
-    alert('Error : ' + e)
+    console.error('Error PauseGame(): ' + e)
   }
 }
 
@@ -189,7 +189,7 @@ export const AddNotification =
         hud.removeChild(item)
       }, duration)
     } catch (e: any) {
-      alert('Error : ' + e)
+      console.error('Error AddNotification(): ' + e)
     }
   }
 // hud.children.map((item) => hud.removeChild(item))
