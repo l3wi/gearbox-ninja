@@ -36,7 +36,7 @@
   </object>
   <object id="12" x="504.622" y="211.553">
    <properties>
-    <property name="type" value="tube-WETH"/>
+    <property name="type" value="tube-eth"/>
    </properties>
    <polyline points="0,0 141.765,0"/>
   </object>
