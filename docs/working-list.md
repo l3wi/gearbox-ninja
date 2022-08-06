@@ -6,20 +6,20 @@ Overview of the current state of the game & tasks completed
 
 - [ ] Assets
   - [x] Game Floor
-  - [ ] Ninja Character
+  - [x] Ninja Character
   - [x] Mario Tubes
   - [x] Gary Building
   - [x] McDonalds pagoda
   - [x] Bridge
     - [ ] Rig bridge layers to allow crossing
-  - [ ] Strategy pagodas
+  - [x] Strategy pagodas
   - [ ] LP Deposit page background
   - [ ] Strategy Deposit page background
   - [ ] Signage
-    - [ ] Inital spawn point
+    - [x] Inital spawn point
 - [ ] Animation
   - [x] Running
-  - [ ] Jumping (initial jump jitter)
+  - [x] Jumping (initial jump jitter)
   - [x] Tube entry
   - [ ] Pagoda entry
 - [ ] HUD
@@ -33,8 +33,8 @@ Overview of the current state of the game & tasks completed
 
 - [x] Web3 data entry & inputs
 - [x] LP deposit page layout
-- [ ] Strategy deposit page layout
-- [ ] Graceful handling of input binding
+- [x] Strategy deposit page layout
+- [x] Graceful handling of input binding
 
 ### **Web3 Integration**
 
@@ -54,10 +54,10 @@ Overview of the current state of the game & tasks completed
   - [x] Fetch Balances
   - [ ] Fetch Whitelist NFT
   - [ ] Fetch Strategies
-  - [ ] Fetch APYs
+  - [x] Fetch APYs
 
 - [ ] **Sending**
-  - [ ] Deposit LP
+  - [x] Deposit LP
   - [ ] Deposit Strategy
 
 ### Web2 Integration
