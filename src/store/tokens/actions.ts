@@ -38,10 +38,13 @@ export const approveToken =
     const id = getAllowanceId(tokenAddress, to)
 
     try {
+      dispatch(actions.game.AddNotification('Waiting for user'))
+
       dispatch(actions.operations.updateStatus(opHash, 'STATUS.WAITING'))
       const token = await getTokenContract(getState, tokenAddress)
       const receipt = await token.approve(to, MAX_INT)
 
+      dispatch(actions.game.AddNotification('Approval Pending', 0))
       dispatch(actions.operations.updateStatus(opHash, 'STATUS.LOADING'))
       dispatch({
         type: 'TOKEN_VIRTUAL_ALLOWANCE',
@@ -50,6 +53,7 @@ export const approveToken =
 
       await receipt.wait(1)
 
+      dispatch(actions.game.AddNotification('Approval successful'))
       dispatch(actions.operations.updateStatus(opHash, 'STATUS.SUCCESS'))
       const evmTx = new TxApprove({
         txHash: receipt.hash,
@@ -63,6 +67,7 @@ export const approveToken =
         })
       )
     } catch (e: any) {
+      dispatch(actions.game.AddNotification('Approval failed'))
       dispatch({ type: 'TOKEN_DELETE_VIRTUAL_ALLOWANCE', payload: id })
       dispatch(
         actions.operations.updateStatus(opHash, 'STATUS.FAILURE', getError(e))

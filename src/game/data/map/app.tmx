@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.0" orientation="orthogonal" renderorder="right-down" width="80" height="8" tilewidth="64" tileheight="64" infinite="0" backgroundcolor="#595c72" nextlayerid="10" nextobjectid="68">
+<map version="1.9" tiledversion="1.9.0" orientation="orthogonal" renderorder="right-down" width="80" height="8" tilewidth="64" tileheight="64" infinite="0" backgroundcolor="#595c72" nextlayerid="10" nextobjectid="73">
  <tileset firstgid="1" name="tiles" tilewidth="64" tileheight="64" tilecount="304" columns="38">
   <image source="../img/map/tiles.png" width="2432" height="512"/>
  </tileset>
@@ -46,7 +46,7 @@
    </properties>
    <polyline points="0,0 135.62,0"/>
   </object>
-  <object id="29" x="3394.83" y="405.099" width="1715.72" height="18.7291"/>
+  <object id="29" x="3394.83" y="405.099" width="1725.04" height="18.7291"/>
   <object id="31" x="3397.89" y="434.325" width="9.51057" height="70.2319"/>
   <object id="41" x="65.0903" y="-184.766">
    <polyline points="0,0 5048.05,6.28457"/>
@@ -128,6 +128,31 @@
     <property name="type" value="platform"/>
    </properties>
    <polyline points="0,0 259.701,-0.721657"/>
+  </object>
+  <object id="68" x="2818.56" y="338.881" width="162.669" height="62.4362">
+   <properties>
+    <property name="type" value="entrance"/>
+   </properties>
+  </object>
+  <object id="69" x="3573.56" y="327.8" width="149.853" height="71.419">
+   <properties>
+    <property name="type" value="entrance"/>
+   </properties>
+  </object>
+  <object id="70" x="3956.3" y="363.918" width="146.358" height="35.3011">
+   <properties>
+    <property name="type" value="entrance"/>
+   </properties>
+  </object>
+  <object id="71" x="4344.86" y="341.198" width="102.084" height="60.9332">
+   <properties>
+    <property name="type" value="entrance"/>
+   </properties>
+  </object>
+  <object id="72" x="4745.65" y="348.189" width="102.084" height="51.6124">
+   <properties>
+    <property name="type" value="entrance"/>
+   </properties>
   </object>
  </objectgroup>
  <layer id="9" name="foreground" width="80" height="8" opacity="0">

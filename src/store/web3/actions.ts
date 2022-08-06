@@ -279,12 +279,14 @@ export const signDeclaration =
 
       // @ts-ignore
       const signature = await signer.signMessage(agreement)
+      dispatch(actions.game.AddNotification('Signed!'))
 
       dispatch({
         type: 'SIGNED_MESSAGE',
         payload: { notIllegal: true }
       })
     } catch (e: any) {
+      dispatch(actions.game.AddNotification('Signature Error'))
       dispatch({
         type: 'SIGNED_MESSAGE',
         payload: { notIllegal: false, signRejected: true }

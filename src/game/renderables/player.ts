@@ -137,6 +137,9 @@ class PlayerEntity extends Sprite {
           typeof other.type === 'string' &&
           other.type.indexOf('tube') != -1
         ) {
+          store.dispatch(
+            actions.game.AddNotification('Press DOWN to enter', 50)
+          )
           if (input.isKeyPressed('down') && !this.debounce) {
             this.debounce = true
             this.body.gravityScale = 0.1
@@ -224,6 +227,14 @@ class PlayerEntity extends Sprite {
             }
           }
           return true
+          // Building Entrance
+        } else if (
+          typeof other.type === 'string' &&
+          other.type.indexOf('entrance') != -1
+        ) {
+          store.dispatch(actions.game.AddNotification('Press UP to enter', 50))
+
+          return false
         }
         break
 
