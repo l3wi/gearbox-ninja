@@ -129,27 +129,27 @@
    </properties>
    <polyline points="0,0 259.701,-0.721657"/>
   </object>
-  <object id="68" x="2818.56" y="338.881" width="162.669" height="62.4362">
+  <object id="68" x="2862.6" y="265.695" width="72.6435" height="135.623">
    <properties>
     <property name="type" value="entrance"/>
    </properties>
   </object>
-  <object id="69" x="3573.56" y="327.8" width="149.853" height="71.419">
+  <object id="69" x="3624.08" y="327.8" width="49.4644" height="71.419">
    <properties>
     <property name="type" value="entrance"/>
    </properties>
   </object>
-  <object id="70" x="3956.3" y="363.918" width="146.358" height="35.3011">
+  <object id="70" x="4003.58" y="363.918" width="55.6841" height="35.3011">
    <properties>
     <property name="type" value="entrance"/>
    </properties>
   </object>
-  <object id="71" x="4344.86" y="341.198" width="102.084" height="60.9332">
+  <object id="71" x="4377.89" y="341.198" width="32.7839" height="60.9332">
    <properties>
     <property name="type" value="entrance"/>
    </properties>
   </object>
-  <object id="72" x="4745.65" y="348.189" width="102.084" height="51.6124">
+  <object id="72" x="4767.67" y="348.189" width="53.5089" height="51.6124">
    <properties>
     <property name="type" value="entrance"/>
    </properties>
