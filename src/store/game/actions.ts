@@ -104,23 +104,13 @@ export const BeginStage = (): GameThunkAction => async (dispatch, getState) => {
     })
 
     // @ts-ignore
-    game.world.addChild(player)
+    game.world.addChild(player, 1)
 
     const newHud = new HUD()
     game.world.addChild(newHud)
 
-    const newPause = new PAUSE()
-    game.world.addChild(newPause)
-
-    newPause.addChild(
-      new TextSegment(
-        game.viewport.width / 2,
-        game.viewport.height / 2,
-        'Game Paused'
-      )
-    )
-
-    dispatch({ type: 'BEGIN_STAGE', payload: { hud: newHud, pause: newPause } })
+    console.log(game.world)
+    dispatch({ type: 'BEGIN_STAGE', payload: { hud: newHud } })
   } catch (e: any) {
     console.error('Error BeginStage(): ' + e)
   }
@@ -182,12 +172,18 @@ export const PauseGame = (): GameThunkAction => async (dispatch, getState) => {
 export const AddNotification =
   (text: string, duration: number = 3000): GameThunkAction =>
   async (dispatch, getState) => {
-    const { hud } = getState().game
     try {
-      const item = hud.addChild(new Notification(0, 0, text))
-      setTimeout(() => {
-        hud.removeChild(item)
-      }, duration)
+      document.getElementById('notificationText').textContent = text
+      document.getElementById('notificationText').style.visibility = 'visible'
+      document.getElementById('notificationText').style.opacity = '1'
+
+      if (duration != 0) {
+        setTimeout(() => {
+          document.getElementById('notificationText').style.visibility =
+            'hidden'
+          document.getElementById('notificationText').style.opacity = '0'
+        }, duration)
+      }
     } catch (e: any) {
       console.error('Error AddNotification(): ' + e)
     }

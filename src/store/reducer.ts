@@ -11,6 +11,8 @@ import { poolsReducer } from './pools/reducer'
 import { operationReducer } from './operations/reducer'
 import { tokenReducer } from './tokens/reducer'
 import { syncReducer } from './sync/reducer'
+import { strategyReducer } from './strategy/reducer'
+import { priceReducer } from './prices/reducer'
 
 // eslint-disable-next-line import/no-anonymous-default-export
 const reducer = combineReducers({
@@ -20,7 +22,9 @@ const reducer = combineReducers({
   pools: poolsReducer,
   operations: operationReducer,
   tokens: tokenReducer,
-  sync: syncReducer
+  sync: syncReducer,
+  strategy: strategyReducer,
+  price: priceReducer
 })
 
 export type RootState = ReturnType<typeof reducer>

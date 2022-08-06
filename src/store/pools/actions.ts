@@ -57,6 +57,7 @@ export const addLiquidity =
       const signer = getSignerOrThrow(getState)
       const signerAddress = await signer.getAddress()
 
+      dispatch(actions.game.AddNotification('Waiting for user'))
       if (pool.isWETH) {
         const wethGateway = getWETHGatewayOrThrow(getState)
 
@@ -67,6 +68,8 @@ export const addLiquidity =
             value: amount
           })
         dispatch(actions.operations.updateStatus(opHash, 'STATUS.LOADING'))
+        dispatch(actions.game.AddNotification('Deposit Pending', 0))
+
         await receipt.wait()
       } else {
         const tx = await pool
@@ -75,6 +78,7 @@ export const addLiquidity =
 
         const receipt = await signer.sendTransaction(tx)
 
+        dispatch(actions.game.AddNotification('Deposit Pending', 0))
         dispatch(actions.operations.updateStatus(opHash, 'STATUS.LOADING'))
 
         // Add transaction to wait list
@@ -91,11 +95,14 @@ export const addLiquidity =
           )
         )
       }
+      dispatch(actions.game.AddNotification('Deposit successful!'))
       dispatch(actions.operations.updateStatus(opHash, 'STATUS.SUCCESS'))
     } catch (e: any) {
       dispatch(
         actions.operations.updateStatus(opHash, 'STATUS.FAILURE', getError(e))
       )
+      dispatch(actions.game.AddNotification('Deposit failed!'))
+
       console.error(
         'store/pools/actions',
         'Cant addLiquidity',

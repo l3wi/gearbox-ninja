@@ -10,6 +10,13 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <link
+      rel="preload"
+      href="/data/fnt/PressStart2P.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <title>Stealthy Ninja Game</title>
   </head>
   <body>
@@ -23,7 +30,7 @@
 
         <div id="depositForm">
           <div id="inputSuper">
-            <span>you deposit: </span>
+            <!-- <span></span> -->
             <span id="balance"></span>
           </div>
           <div id="inputGroup">
@@ -36,7 +43,10 @@
       <button id="exit">✕</button>
     </div>
 
+    <h2 id="notificationText"></h2>
+
     <!-- Canvas placeholder -->
     <div id="screen"></div>
+    <span id="text">.</span>
   </body>
 </html>
