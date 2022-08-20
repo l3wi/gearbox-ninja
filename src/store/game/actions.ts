@@ -133,35 +133,9 @@ export const PauseGame = (): GameThunkAction => async (dispatch, getState) => {
     let { isPaused, hud, pause } = getState().game
     if (isPaused) {
       state.resume()
-      pause.children.map((item) => pause.removeChild(item))
-      dispatch({ type: 'UPDATE_PAUSE', payload: { pause } })
       dispatch({ type: 'RESUME_GAME' })
     } else {
       state.pause()
-
-      pause.addChild(
-        // @ts-ignore
-        new BitmapText(game.viewport.width / 2, game.viewport.height / 2, {
-          font: 'PressStart2P',
-          size: 1.0,
-          textBaseline: 'middle',
-          textAlign: 'center',
-          text: 'Game Paused'
-        })
-      )
-      pause.addChild(
-        // @ts-ignore
-        new BitmapText(game.viewport.width / 2, game.viewport.height / 2 + 50, {
-          font: 'PressStart2P',
-          size: 1.0,
-          textBaseline: 'middle',
-          textAlign: 'center',
-          text: 'Waiting for wallet to connect'
-        })
-      )
-
-      // pause.addChild(new PauseOverlay('pause'))
-      dispatch({ type: 'UPDATE_PAUSE', payload: { pause } })
       dispatch({ type: 'PAUSE_GAME' })
     }
   } catch (e: any) {

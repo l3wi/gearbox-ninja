@@ -28,6 +28,7 @@ import { EVMTx } from '@gearbox-protocol/sdk/lib/core/eventOrTx'
 import { Wallets } from '../../config/connectors'
 import {
   ADDRESS_PROVIDER,
+  BLOCK_UPDATE_DELAY,
   CHAIN_ID,
   JSON_RPC_PROVIDER,
   PATHFINDER
@@ -38,7 +39,6 @@ import actions from '../actions'
 // import { setTokenList } from '../price/actions'
 // import { clearCreditAccounts } from '../creditAccounts/actions'
 import { updateLastBlock } from '../sync/actions'
-
 import { ThunkWeb3Action, Web3Actions } from './index'
 
 export const connectProvider =
@@ -244,7 +244,7 @@ export const connectSigner =
       })
 
       dispatch(actions.pools.getList())
-
+      dispatch(toggleSync())
       dispatch(restoreTransactions(account))
       dispatch(actions.game.AddNotification('wallet connected', 3000))
     } catch (e: any) {
@@ -258,9 +258,7 @@ export const disconnectSigner =
   (): ThunkWeb3Action => async (dispatch, getState) => {
     const { provider } = getState().web3
     dispatch(connectProvider())
-    // if (provider) dispatch(actions.creditManagers.getList(provider))
-    // dispatch(clearCreditAccounts())
-    // dispatch(clearBalancesAllowances())
+
     dispatch({ type: 'WEB3_RESET' })
   }
 
@@ -279,7 +277,7 @@ export const signDeclaration =
 
       // @ts-ignore
       const signature = await signer.signMessage(agreement)
-      dispatch(actions.game.AddNotification('Signed!'))
+      dispatch(actions.game.AddNotification('Signed Declaration'))
 
       dispatch({
         type: 'SIGNED_MESSAGE',
@@ -431,3 +429,19 @@ export const clearPendingTransactions =
     if (account)
       dispatch({ type: 'UPDATE_ALL_TX', payload: { account, txs: [] } })
   }
+
+export const toggleSync = (): ThunkWeb3Action => async (dispatch, getState) => {
+  const { signer, account } = getState().web3
+  let updateTask: any
+  if (signer.provider) {
+    const syncTask = () => {
+      // @ts-ignore
+      dispatch(updateLastBlock(signer.provider))
+    }
+    updateTask = setInterval(syncTask, BLOCK_UPDATE_DELAY)
+  }
+
+  return function syncCleanup() {
+    clearInterval(updateTask)
+  }
+}

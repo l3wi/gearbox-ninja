@@ -36,7 +36,7 @@
   </object>
   <object id="12" x="504.622" y="211.553">
    <properties>
-    <property name="type" value="tube-eth"/>
+    <property name="type" value="tube-ETH"/>
    </properties>
    <polyline points="0,0 141.765,0"/>
   </object>
@@ -129,27 +129,27 @@
    </properties>
    <polyline points="0,0 259.701,-0.721657"/>
   </object>
-  <object id="68" x="2862.6" y="265.695" width="72.6435" height="135.623">
+  <object id="68" x="2887.86" y="300.669" width="20.83" height="100.649">
    <properties>
     <property name="type" value="entrance"/>
    </properties>
   </object>
-  <object id="69" x="3624.08" y="327.8" width="49.4644" height="71.419">
+  <object id="69" x="3638.98" y="329.743" width="17.7286" height="71.419">
    <properties>
     <property name="type" value="entrance"/>
    </properties>
   </object>
-  <object id="70" x="4003.58" y="363.918" width="55.6841" height="35.3011">
+  <object id="70" x="4019.77" y="363.918" width="21.3577" height="35.3011">
    <properties>
     <property name="type" value="entrance"/>
    </properties>
   </object>
-  <object id="71" x="4377.89" y="341.198" width="32.7839" height="60.9332">
+  <object id="71" x="4386.31" y="341.198" width="14.0015" height="60.9332">
    <properties>
     <property name="type" value="entrance"/>
    </properties>
   </object>
-  <object id="72" x="4767.67" y="348.189" width="53.5089" height="51.6124">
+  <object id="72" x="4787.1" y="348.189" width="14.0011" height="51.6124">
    <properties>
     <property name="type" value="entrance"/>
    </properties>

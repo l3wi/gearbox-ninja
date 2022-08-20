@@ -1,9 +1,7 @@
-import { PoolData } from '@gearbox-protocol/sdk'
-import { BigNumber, utils } from 'ethers'
+import { BigNumber } from 'ethers'
 import { store } from '../index'
 import actions from '../actions'
 import { FormThunkAction } from './index'
-import { Token } from './reducer'
 
 const depositLPDescription = `Deposit your assets to Gearbox 
 protocol to earn yield. These assets will be lent out to Gearbox's 
@@ -38,11 +36,17 @@ export const populateForm =
     document.getElementById('title').textContent = title
     document.getElementById('desc').textContent = depositLPDescription
 
+    document.getElementById('tickersymbol').textContent = symbol
+    const imgUrl = `https://static.gearbox.fi/tokens/${symbol.toLowerCase()}.svg`
+
+    //@ts-ignore
+    document.getElementById('tickerimg').src = imgUrl
+
     // approval conditional text. separates concerns 🙄 pls fix
     if (tokens.allowances[pool.underlyingToken + '@' + pool.address].eq(0)) {
       document.getElementById('submit').textContent = 'approve ' + symbol
     } else {
-      document.getElementById('submit').textContent = 'deposit ' + symbol
+      document.getElementById('submit').textContent = 'deposit'
     }
 
     const readableBalance = balance
@@ -78,6 +82,7 @@ export const handleSubmit =
         BigNumber.from(0)
       )
     ) {
+      /// Refresh form after events
       let listener: any
       const repopulate = () => {
         // Repopulate form
@@ -89,7 +94,6 @@ export const handleSubmit =
           )
         ) {
           listener()
-          console.log(listener)
           dispatch(actions.form.populateForm(symbol, token, pool, balance))
         }
       }
@@ -104,6 +108,23 @@ export const handleSubmit =
         )
       )
     } else {
+      // /// Refresh form after events
+      // let listener: any
+      // const repopulate = () => {
+      //   // Repopulate form
+      //   const { operations } = getState()
+      //   const { symbol, token, pool, balance } = getState().form
+      //   if (
+      //     Object.values(operations).find((op) => op.id.indexOf(id) != -1)
+      //       .status === 'OPERATION_SUCCESS'
+      //   ) {
+      //     listener()
+      //     dispatch(actions.form.populateForm(symbol, token, pool, balance))
+      //   }
+      // }
+      // //@ts-ignore
+      // listener = store.subscribe(repopulate)
+
       dispatch(actions.form.sendTransaction())
     }
   }
@@ -115,9 +136,7 @@ export const sendTransaction =
     if (isMax) {
       finalValue = balance
     } else {
-      finalValue = BigNumber.from(value).mul(
-        BigNumber.from('10').pow(BigNumber.from(token.decimals))
-      )
+      finalValue = BigNumber.from(value * Math.pow(10, token.decimals))
     }
 
     dispatch(actions.pools.addLiquidity(pool, finalValue))

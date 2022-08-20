@@ -160,121 +160,121 @@ export const updatePoolEvents =
     }
   }
 
-export const updateCreditManagerEvents =
-  (
-    account: string,
-    creditManager: CreditManagerData,
-    contract: ICreditManager,
-    atBlock?: number
-  ): SyncThunkAction =>
-  async (dispatch, getState) => {
-    const eventMap: Record<string, EventOrTx> = {}
+// export const updateCreditManagerEvents =
+//   (
+//     account: string,
+//     creditManager: CreditManagerData,
+//     contract: ICreditManager,
+//     atBlock?: number
+//   ): SyncThunkAction =>
+//   async (dispatch, getState) => {
+//     const eventMap: Record<string, EventOrTx> = {}
 
-    const from = getState().sync.lastCreditManagerSync[account] || 0
-    const to = atBlock || getState().sync.lastBlock
+//     const from = getState().sync.lastCreditManagerSync[account] || 0
+//     const to = atBlock || getState().sync.lastBlock
 
-    try {
-      const open = await contract.queryFilter(
-        contract.filters.OpenCreditAccount(null, account),
-        from
-      )
-      open.forEach((e) => {
-        eventMap[e.transactionHash] = new EventOpenCreditAccount({
-          block: e.blockNumber,
-          txHash: e.transactionHash,
-          amount: e.args.amount.toString(),
-          timestamp: 0,
-          underlyingToken: creditManager.underlyingToken,
-          creditManager: creditManager.address,
-          leverage:
-            e.args.borrowAmount
-              .add(e.args.amount)
-              .mul(100)
-              .div(e.args.amount)
-              .toNumber() / 100
-        })
-      })
+//     try {
+//       const open = await contract.queryFilter(
+//         contract.filters.OpenCreditAccount(null, account),
+//         from
+//       )
+//       open.forEach((e) => {
+//         eventMap[e.transactionHash] = new EventOpenCreditAccount({
+//           block: e.blockNumber,
+//           txHash: e.transactionHash,
+//           amount: e.args.amount.toString(),
+//           timestamp: 0,
+//           underlyingToken: creditManager.underlyingToken,
+//           creditManager: creditManager.address,
+//           leverage:
+//             e.args.borrowAmount
+//               .add(e.args.amount)
+//               .mul(100)
+//               .div(e.args.amount)
+//               .toNumber() / 100
+//         })
+//       })
 
-      const close = await contract.queryFilter(
-        contract.filters.CloseCreditAccount(account),
-        from
-      )
-      close.forEach((e) => {
-        eventMap[e.transactionHash] = new EventCloseCreditAccount({
-          block: e.blockNumber,
-          txHash: e.transactionHash,
-          amount: e.args.remainingFunds.toString(),
-          timestamp: 0,
-          underlyingToken: creditManager.underlyingToken,
-          creditManager: creditManager.address
-        })
-      })
+//       const close = await contract.queryFilter(
+//         contract.filters.CloseCreditAccount(account),
+//         from
+//       )
+//       close.forEach((e) => {
+//         eventMap[e.transactionHash] = new EventCloseCreditAccount({
+//           block: e.blockNumber,
+//           txHash: e.transactionHash,
+//           amount: e.args.remainingFunds.toString(),
+//           timestamp: 0,
+//           underlyingToken: creditManager.underlyingToken,
+//           creditManager: creditManager.address
+//         })
+//       })
 
-      const repay = await contract.queryFilter(
-        contract.filters.RepayCreditAccount(account),
-        from
-      )
-      repay.forEach((e) => {
-        eventMap[e.transactionHash] = new EventRepayCreditAccount({
-          block: e.blockNumber,
-          txHash: e.transactionHash,
-          timestamp: 0,
-          underlyingToken: creditManager.underlyingToken,
-          creditManager: creditManager.address
-        })
-      })
+//       const repay = await contract.queryFilter(
+//         contract.filters.RepayCreditAccount(account),
+//         from
+//       )
+//       repay.forEach((e) => {
+//         eventMap[e.transactionHash] = new EventRepayCreditAccount({
+//           block: e.blockNumber,
+//           txHash: e.transactionHash,
+//           timestamp: 0,
+//           underlyingToken: creditManager.underlyingToken,
+//           creditManager: creditManager.address
+//         })
+//       })
 
-      const liquidate = await contract.queryFilter(
-        contract.filters.LiquidateCreditAccount(account),
-        from
-      )
-      liquidate.forEach((e) => {
-        eventMap[e.transactionHash] = new EventLiquidateCreditAccount({
-          block: e.blockNumber,
-          txHash: e.transactionHash,
-          amount: e.args.remainingFunds.toString(),
-          timestamp: 0,
-          underlyingToken: creditManager.underlyingToken,
-          creditManager: creditManager.address
-        })
-      })
+//       const liquidate = await contract.queryFilter(
+//         contract.filters.LiquidateCreditAccount(account),
+//         from
+//       )
+//       liquidate.forEach((e) => {
+//         eventMap[e.transactionHash] = new EventLiquidateCreditAccount({
+//           block: e.blockNumber,
+//           txHash: e.transactionHash,
+//           amount: e.args.remainingFunds.toString(),
+//           timestamp: 0,
+//           underlyingToken: creditManager.underlyingToken,
+//           creditManager: creditManager.address
+//         })
+//       })
 
-      const addCollateral = await contract.queryFilter(
-        contract.filters.AddCollateral(account),
-        from
-      )
+//       const addCollateral = await contract.queryFilter(
+//         contract.filters.AddCollateral(account),
+//         from
+//       )
 
-      addCollateral.forEach((e) => {
-        eventMap[e.transactionHash] = new EventAddCollateral({
-          block: e.blockNumber,
-          txHash: e.transactionHash,
-          timestamp: 0,
-          amount: e.args.value.toString(),
-          addedToken: e.args.token,
-          creditManager: creditManager.address
-        })
-      })
+//       addCollateral.forEach((e) => {
+//         eventMap[e.transactionHash] = new EventAddCollateral({
+//           block: e.blockNumber,
+//           txHash: e.transactionHash,
+//           timestamp: 0,
+//           amount: e.args.value.toString(),
+//           addedToken: e.args.token,
+//           creditManager: creditManager.address
+//         })
+//       })
 
-      const borrowMore = await contract.queryFilter(
-        contract.filters.IncreaseBorrowedAmount(account),
-        from
-      )
-      borrowMore.forEach((e) => {
-        eventMap[e.transactionHash] = new EventIncreaseBorrowAmount({
-          block: e.blockNumber,
-          txHash: e.transactionHash,
-          timestamp: 0,
-          amount: e.args.amount.toString(),
-          underlyingToken: creditManager.underlyingToken,
-          creditManager: creditManager.address
-        })
-      })
+//       const borrowMore = await contract.queryFilter(
+//         contract.filters.IncreaseBorrowedAmount(account),
+//         from
+//       )
+//       borrowMore.forEach((e) => {
+//         eventMap[e.transactionHash] = new EventIncreaseBorrowAmount({
+//           block: e.blockNumber,
+//           txHash: e.transactionHash,
+//           timestamp: 0,
+//           amount: e.args.amount.toString(),
+//           underlyingToken: creditManager.underlyingToken,
+//           creditManager: creditManager.address
+//         })
+//       })
 
-      dispatch({
-        type: 'EVENT_UPDATE',
-        payload: { account, events: eventMap, creditManagerSync: to }
-      })
-    } catch (e: any) {
-      console.error('store/sync/actions', 'Cant updateCreditManagerEvents', e)
-    }
-  }
+//       dispatch({
+//         type: 'EVENT_UPDATE',
+//         payload: { account, events: eventMap, creditManagerSync: to }
+//       })
+//     } catch (e: any) {
+//       console.error('store/sync/actions', 'Cant updateCreditManagerEvents', e)
+//     }
+//   }

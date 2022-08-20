@@ -137,9 +137,13 @@ class PlayerEntity extends Sprite {
           typeof other.type === 'string' &&
           other.type.indexOf('tube') != -1
         ) {
-          store.dispatch(
-            actions.game.AddNotification('Press DOWN to enter', 50)
-          )
+          // last time we hit an entrance
+          this.isEntrance = Date.now()
+          if (this.isEntrance > Date.now() - 50) {
+            store.dispatch(
+              actions.game.AddNotification('Press DOWN to enter', 100)
+            )
+          }
           if (input.isKeyPressed('down') && !this.debounce) {
             this.debounce = true
             this.body.gravityScale = 0.1
@@ -157,11 +161,17 @@ class PlayerEntity extends Sprite {
 
             setTimeout(() => {
               const symbol = other.type.split('-')[1]
-              const token = Object.values(state.tokens.details).find(
-                (item: Token) => item.symbol === symbol
-              )
 
-              // need to fix
+              let token: any
+              if (symbol === 'eth') {
+                token = Object.values(state.tokens.details).find(
+                  (item: Token) => item.symbol === 'WETH'
+                )
+              } else {
+                token = Object.values(state.tokens.details).find(
+                  (item: Token) => item.symbol === symbol
+                )
+              }
               // @ts-ignore
               const balance = state.tokens.balances[token.id]
               const pool = Object.values(state.pools.data).find(
@@ -232,24 +242,49 @@ class PlayerEntity extends Sprite {
           typeof other.type === 'string' &&
           other.type.indexOf('entrance') != -1
         ) {
-          store.dispatch(actions.game.AddNotification('Press UP to enter', 50))
-
+          // last time we hit an entrance
+          this.isEntrance = Date.now()
+          if (this.isEntrance > Date.now() - 50) {
+            store.dispatch(
+              actions.game.AddNotification('Press UP to enter', 100)
+            )
+          }
+          // Capture
+          if (input.isKeyPressed('jump')) {
+            this.body.force.y = 0
+            // Trigger the entrance
+            const currentPos = this.pos
+            store.dispatch(
+              actions.game.ChangeStage('CREDITS', {
+                x: +currentPos._x.toFixed(2),
+                y: +(currentPos._y - 1).toFixed(2)
+              })
+            )
+          }
           return false
+        } else if (
+          typeof other.type != 'string' ||
+          other.type.indexOf('entrance') === -1
+        ) {
+          // if the last time we collided with an entrance was more
+          // than 500 ms ago we turn off notification
+          if (this.isEntrance < Date.now() - 50) {
+            store.dispatch(actions.game.AddNotification('', 1))
+          }
+          return true
         }
         break
 
       default:
         // Fall through
-        // Do not respond to other objects (e.g. coins)
         return false
     }
 
-    // Make the object solid
     return true
   }
 
-  // Transition state
   debounce = false
+  isEntrance = Date.now()
 }
 
 export default PlayerEntity
