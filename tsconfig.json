@@ -6,8 +6,9 @@
     "target": "es5",
     "jsx": "react",
     "allowJs": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true
   },
   "exclude": ["node_modules"],
-  "files": ["./src/index.ts"]
+  "files": ["src/index.tsx"]
 }
