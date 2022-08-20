@@ -11,7 +11,6 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black" />
     <link
-      rel="preload"
       href="/data/fnt/PressStart2P.woff2"
       as="font"
       type="font/woff2"
@@ -20,24 +19,59 @@
     <title>Stealthy Ninja Game</title>
   </head>
   <body>
-    <div id="depositPage" style="visibility: hidden">
-      <!-- <div id="depositPage"> -->
-      <div id="depositContainer">
-        <div id="depositInfo">
+    <div id="poolPage" style="visibility: hidden">
+      <div id="poolContainer">
+        <div id="poolInfo">
           <h2 id="title"></h2>
           <p id="desc"></p>
         </div>
 
-        <div id="depositForm">
+        <div id="poolForm">
           <div id="inputSuper">
             <!-- <span></span> -->
             <span id="balance"></span>
           </div>
           <div id="inputGroup">
             <input id="numberInput" />
+            <span id="ticker">
+              <img
+                id="tickerimg"
+                src="https://static.gearbox.fi/tokens/dai.svg"
+              />
+              <span id="tickersymbol">DAI</span>
+            </span>
             <button id="max">max</button>
           </div>
           <button id="submit">deposit</button>
+        </div>
+      </div>
+      <button id="exit">✕</button>
+    </div>
+
+    <div id="poolPage" style="visibility: visible">
+      <div id="poolContainer">
+        <div id="poolInfo">
+          <h2 id="title"></h2>
+          <p id="desc"></p>
+        </div>
+
+        <div id="poolForm">
+          <div id="inputSuper">
+            <!-- <span></span> -->
+            <span id="balance"></span>
+          </div>
+          <div id="inputGroup">
+            <input id="numberInput" />
+            <span id="ticker">
+              <img
+                id="tickerimg"
+                src="https://static.gearbox.fi/tokens/dai.svg"
+              />
+              <span id="tickersymbol">DAI</span>
+            </span>
+            <button id="max">max</button>
+          </div>
+          <button id="submit">pool</button>
         </div>
       </div>
       <button id="exit">✕</button>
@@ -47,6 +81,6 @@
 
     <!-- Canvas placeholder -->
     <div id="screen"></div>
-    <span id="text">.</span>
+    <!-- <span id="text">.</span> -->
   </body>
 </html>

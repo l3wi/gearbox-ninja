@@ -1,4 +1,4 @@
-import { CHAIN_ID } from '../config'
+import { BLOCK_UPDATE_DELAY, CHAIN_ID } from '../config'
 import { store } from '../store'
 import actions from '../store/actions'
 

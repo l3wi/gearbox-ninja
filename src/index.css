@@ -34,7 +34,7 @@ body {
   height: 100vh;
 }
 
-#depositPage {
+#poolPage {
   transition: visibility 0.3s linear, opacity 0.3s linear;
   opacity: 0;
   font-family: 'Courier New', Courier, monospace;
@@ -52,17 +52,17 @@ body {
   color: white;
 }
 
-#depositContainer {
+#poolContainer {
   display: flex;
 }
 
-#depositInfo {
+#poolInfo {
   max-width: 480px;
   width: 100%;
   padding: 20px;
 }
 
-#depositForm {
+#poolForm {
   margin-top: 65px;
   font-size: 18px;
   max-width: 300px;
@@ -76,9 +76,12 @@ body {
 
 #inputGroup {
   width: 100%;
+  display: flex;
+  justify-content: space-between;
   border: 2px solid white;
-  padding: 3px 2px;
+  /* padding: 3px 2px; */
   box-sizing: border-box;
+  height: 40px;
 }
 
 #inputSuper {
@@ -88,25 +91,41 @@ body {
   justify-content: space-between;
 }
 
+#ticker {
+  display: flex;
+  align-items: center;
+}
+
+#ticker span {
+  padding-top: 2px;
+}
+
+#ticker img {
+  width: 20px;
+  padding-right: 4px;
+}
+
 #inputGroup input {
   border: none;
   outline: none;
   background: none;
   color: white;
-  width: 210px;
+  width: 150px;
   padding: 5px 8px 0px;
   font-size: 18px;
-  font-family: 'Press Start 2P';
+  /* font-family: 'Press Start 2P'; */
 }
 
 #inputGroup button {
   background: transparent;
   color: white;
   border: none;
-  width: 50px;
+  /* width: 50px; */
   font-size: 15px;
-  padding-bottom: 5px;
+  padding: 3px 5px;
+  text-align: center;
   font-family: 'Press Start 2P';
+  border-left: 2px solid white;
 }
 
 #submit {
