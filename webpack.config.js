@@ -27,10 +27,6 @@ module.exports = {
         exclude: /node_modules\/(?!(melonjs)\/).*/,
         use: 'babel-loader'
       }
-      // {
-      //   test: /\.css$/,
-      //   use: ['style-loader', 'css-loader']
-      // }
     ]
   },
   plugins: [
