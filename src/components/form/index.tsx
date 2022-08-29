@@ -98,12 +98,12 @@ const Form = () => {
           <InputSuper>
             <span>deposit</span>
             <span>
-              BALANCE:{'  '}
-              {new Intl.NumberFormat('en-US', {
+              {`BALANCE: 
+              ${new Intl.NumberFormat('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 8
-              }).format(readableBalance)}{' '}
-              {symbol.toUpperCase()}
+              }).format(readableBalance)} 
+              ${symbol.toUpperCase()}`}
             </span>
           </InputSuper>
           <InputGroup>
@@ -111,7 +111,7 @@ const Form = () => {
               value={value}
               onChange={(e) => updateValue(e.target.value)}
             />
-            <Asset id="ticker">
+            <Asset>
               <img
                 width={20}
                 src={`https://static.gearbox.fi/tokens/${symbol.toLowerCase()}.svg`}

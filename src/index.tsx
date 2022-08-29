@@ -5,8 +5,8 @@ import actions from './store/actions'
 
 import App from './app'
 
-// // @ts-ignore
-// if (module.hot) module.hot.accept()
+// @ts-ignore
+if (module.hot) module.hot.accept()
 
 window.addEventListener('load', () => begin())
 

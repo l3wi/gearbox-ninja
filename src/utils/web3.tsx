@@ -46,7 +46,7 @@ export const activate = async (w: Wallets) => {
   let connector
   if (isInjectedWallet) {
     // MM uses propmts prior to provider setup
-    await window.ethereum.enable()
+    await window.ethereum?.enable()
     connector = walletsToConnectors[w]
   } else {
     // WC uses propmts post to provider setup

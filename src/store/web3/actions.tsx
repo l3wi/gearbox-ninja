@@ -433,7 +433,7 @@ export const clearPendingTransactions =
 export const toggleSync = (): ThunkWeb3Action => async (dispatch, getState) => {
   const { signer, account } = getState().web3
   let updateTask: any
-  if (signer.provider) {
+  if (signer?.provider) {
     const syncTask = () => {
       // @ts-ignore
       dispatch(updateLastBlock(signer.provider))
