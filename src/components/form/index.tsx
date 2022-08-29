@@ -13,15 +13,17 @@ const Form = () => {
 
   const [value, setValue] = useState('0')
   const [approved, setApproved] = useState(
-    !allowances[form.pool.underlyingToken + '@' + form.pool.address].eq(
-      BigNumber.from(0)
-    )
+    form.pool
+      ? !allowances[form.pool.underlyingToken + '@' + form.pool.address].eq(
+          BigNumber.from(0)
+        )
+      : false
   )
 
   const { pool, isMax, balance, token, symbol, title, description } = form
 
   const readableBalance = balance
-    .div(BigNumber.from('10').pow(BigNumber.from(token.decimals)))
+    .div(BigNumber.from('10').pow(BigNumber.from(token?.decimals)))
     .toNumber()
 
   const updateValue = (input: string) => {
@@ -32,7 +34,7 @@ const Form = () => {
 
   const max = () => {
     const value = balance
-      .div(BigNumber.from('10').pow(BigNumber.from(token.decimals)))
+      .div(BigNumber.from('10').pow(BigNumber.from(token?.decimals)))
       .toString()
     updateValue(value)
     store.dispatch(actions.form.maxAmount())
@@ -95,7 +97,7 @@ const Form = () => {
 
         <FormContainer>
           <InputSuper>
-            <span>deposit</span>
+            <span>depost</span>
             <span>
               BALANCE:{'  '}
               {new Intl.NumberFormat('en-US', {

@@ -1,39 +1,44 @@
 const path = require('path')
 const fs = require('fs')
+
+const ReactRefreshPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin')
-
 const { ProvidePlugin, DefinePlugin } = require('webpack')
 
-require('@babel/register')
+const isDevelopment = process.env.NODE_ENV !== 'production'
 
 module.exports = {
-  entry: ['@babel/polyfill', './src/index.ts'],
-  output: {
-    path: __dirname + '/public',
-    filename: 'bundle.js'
+  mode: isDevelopment ? 'development' : 'production',
+  devServer: {
+    client: { overlay: false }
   },
+  entry: {
+    main: './src/index.tsx'
+  },
+
   module: {
     rules: [
       {
         test: /\.(ts)x?$/,
         exclude: /node_modules\/(?!(melonjs)\/).*/,
-        use: [
-          {
-            loader: 'ts-loader'
-          }
-        ]
-      },
-      {
-        test: /\.css$/,
-        use: ['style-loader', 'css-loader']
+        use: 'babel-loader'
       }
+      // {
+      //   test: /\.css$/,
+      //   use: ['style-loader', 'css-loader']
+      // }
     ]
   },
   plugins: [
+    isDevelopment && new ReactRefreshPlugin(),
+    new ForkTsCheckerWebpackPlugin(),
     new HtmlWebpackPlugin({
-      template: './src/index.html',
+      filename: './index.html',
+      template: './public/index.html',
       hash: true
     }),
     new CopyWebpackPlugin({
@@ -76,9 +81,9 @@ module.exports = {
       'process.env': JSON.stringify(process.env),
       'process.release.name': 'your-mum'
     })
-  ],
+  ].filter(Boolean),
   resolve: {
-    modules: [path.resolve('./src'), path.resolve('./node_modules')],
+    // modules: [path.resolve('./src'), path.resolve('./node_modules')],
     extensions: ['.tsx', '.ts', '.js', '...'],
     fallback: {
       util: require.resolve(`util/`),
@@ -92,18 +97,11 @@ module.exports = {
     },
     symlinks: false
   },
+  target: 'web',
+  // watch: false,
   devtool: 'inline-source-map',
-  devServer: {
-    static: {
-      directory: path.join(__dirname, 'public')
-    },
-    hot: true,
-    port: 9000,
-    open: true
-  },
   externals: {
     bufferutil: 'commonjs bufferutil',
     'utf-8-validate': 'commonjs utf-8-validate'
-  },
-  watch: false
+  }
 }

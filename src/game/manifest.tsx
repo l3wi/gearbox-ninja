@@ -13,12 +13,6 @@ const DataManifest = [
     type: 'binary',
     src: 'data/fnt/PressStart2P.fnt'
   },
-
-  {
-    name: 'dojos',
-    type: 'image',
-    src: 'data/img/map/dojos.png'
-  },
   {
     name: 'tiles',
     type: 'image',
