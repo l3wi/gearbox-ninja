@@ -23,41 +23,45 @@ import DataManifest from '../../game/manifest'
 import { store } from '../index'
 import actions from '../actions'
 
-export const InitGame = (): GameThunkAction => async (dispatch, getState) => {
-  console.log('Initializing Game')
-  // try {
-  // initialize the display canvas once the device/browser is ready
-  video.init(1024, 512, {
-    parent: 'screen',
-    scale: 'auto',
-    scaleMethod: 'flex-width'
-  })
+export const InitGame =
+  (w: number, h: number): GameThunkAction =>
+  async (dispatch, getState) => {
+    console.log('Initializing Game')
+    try {
+      // initialize the display canvas once the device/browser is ready
+      video.init(1024, 512, {
+        parent: 'screen',
+        scale: 'auto',
+        scaleMethod: 'flex-width'
+      })
 
-  // Initialize the audio.
-  audio.init('mp3,ogg')
+      // Initialize the audio.
+      audio.init('mp3,ogg')
 
-  // Load & Init the loading screen
-  store.dispatch(actions.game.RegisterScreen('LOADING', new LoadingScreen()))
-  store.dispatch(actions.game.ChangeStage('LOADING'))
+      // Load & Init the loading screen
+      store.dispatch(
+        actions.game.RegisterScreen('LOADING', new LoadingScreen())
+      )
+      store.dispatch(actions.game.ChangeStage('LOADING'))
 
-  loader.preload(DataManifest, function () {
-    // Set default state transition
-    state.transition('fade', '#202020', 500)
+      loader.preload(DataManifest, function () {
+        // Set default state transition
+        state.transition('fade', '#202020', 500)
 
-    // Register Stages into the game
-    store.dispatch(actions.game.RegisterScreen('MENU', new TitleScreen()))
-    store.dispatch(actions.game.RegisterScreen('PLAY', new PlayScreen()))
-    store.dispatch(actions.game.RegisterScreen('CREDITS', new Web3Screen()))
+        // Register Stages into the game
+        store.dispatch(actions.game.RegisterScreen('MENU', new TitleScreen()))
+        store.dispatch(actions.game.RegisterScreen('PLAY', new PlayScreen()))
+        store.dispatch(actions.game.RegisterScreen('CREDITS', new Web3Screen()))
 
-    // add our player entity in the entity pool
-    pool.register('mainPlayer', PlayerEntity)
+        // add our player entity in the entity pool
+        pool.register('mainPlayer', PlayerEntity)
 
-    store.dispatch(actions.game.ChangeStage('MENU'))
-  })
-  // } catch (e: any) {
-  //   console.error('Error Init(): ' + e)
-  // }
-}
+        store.dispatch(actions.game.ChangeStage('MENU'))
+      })
+    } catch (e: any) {
+      console.error('Error Init(): ' + e)
+    }
+  }
 
 export const ChangeStage =
   (key: keyof Stages, pos?: { x: number; y: number }): GameThunkAction =>

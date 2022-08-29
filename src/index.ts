@@ -9,20 +9,22 @@ import App from './app'
 // @ts-ignore
 if (module.hot) module.hot.accept()
 
-window.addEventListener('load', () => {
+window.addEventListener('load', () => begin())
+
+const begin = async () => {
+  const h = window.innerHeight
+  const w = window.innerWidth
   console.log('Ready to Go')
 
   /// Startup ////
-  ////////////////
-
   /// Init redux
   redux.init()
 
   // Init game
-  store.dispatch(actions.game.InitGame())
+  store.dispatch(actions.game.InitGame(w, h))
   store.dispatch(actions.web3.connectProvider())
 
   // Setup React app
   const root = ReactDOM.createRoot(document.getElementById('root'))
   root.render(App())
-})
+}
