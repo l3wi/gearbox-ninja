@@ -38,6 +38,11 @@ const Form = () => {
     store.dispatch(actions.form.maxAmount())
   }
 
+  const disableSubmit = () => {
+    if (parseFloat(value) > readableBalance) return true
+    return false
+  }
+
   const handleSubmit = () => {
     if (!approved) {
       store.dispatch(
@@ -95,7 +100,7 @@ const Form = () => {
               BALANCE:{'  '}
               {new Intl.NumberFormat('en-US', {
                 minimumFractionDigits: 2,
-                maximumFractionDigits: 2
+                maximumFractionDigits: 8
               }).format(readableBalance)}{' '}
               {symbol.toUpperCase()}
             </span>
@@ -115,8 +120,15 @@ const Form = () => {
             </span>
             <MaxButton onClick={() => max()}>max</MaxButton>
           </InputGroup>
-          <SubmitButton onClick={() => handleSubmit()}>
-            {approved ? 'deposit' : 'approve'}
+          <SubmitButton
+            disabled={disableSubmit()}
+            onClick={() => handleSubmit()}
+          >
+            {approved
+              ? disableSubmit()
+                ? 'not enough'
+                : 'deposit'
+              : 'approve'}
           </SubmitButton>
         </FormContainer>
       </Underground>
