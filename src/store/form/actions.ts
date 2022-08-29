@@ -9,15 +9,6 @@ Credit Accounts who pay a rate to borrow them. Deposit your assets
 and become a ninja today!`
 
 export const toggleForm = (): FormThunkAction => async (dispatch, getState) => {
-  const { isHidden } = getState().form
-  if (isHidden) {
-    document.getElementById('depositPage').style.visibility = 'visible'
-    document.getElementById('depositPage').style.opacity = '1'
-  } else {
-    document.getElementById('depositPage').style.visibility = 'hidden'
-    document.getElementById('depositPage').style.opacity = '0'
-  }
-
   dispatch({ type: 'TOGGLE_FORM' })
 }
 
@@ -33,32 +24,6 @@ export const populateForm =
 
     // Fill out HTML Elements
     const title = 'Deposit ' + symbol.toUpperCase() + ' to Gearbox'
-    document.getElementById('title').textContent = title
-    document.getElementById('desc').textContent = depositLPDescription
-
-    document.getElementById('tickersymbol').textContent = symbol
-    const imgUrl = `https://static.gearbox.fi/tokens/${symbol.toLowerCase()}.svg`
-
-    //@ts-ignore
-    document.getElementById('tickerimg').src = imgUrl
-
-    // approval conditional text. separates concerns 🙄 pls fix
-    if (tokens.allowances[pool.underlyingToken + '@' + pool.address].eq(0)) {
-      document.getElementById('submit').textContent = 'approve ' + symbol
-    } else {
-      document.getElementById('submit').textContent = 'deposit'
-    }
-
-    const readableBalance = balance
-      .div(BigNumber.from('10').pow(BigNumber.from(token.decimals)))
-      .toNumber()
-
-    document.getElementById('balance').textContent =
-      'balance: ' +
-      new Intl.NumberFormat('en-US', {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-      }).format(readableBalance)
 
     dispatch({
       type: 'POPULATE_FORM',

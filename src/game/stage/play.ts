@@ -9,7 +9,6 @@ import {
 // import PlayerEntity from '../renderables/player'
 import { store } from '../../store'
 import actions from '../../store/actions'
-import HUD from '../renderables/hud'
 
 class PlayScreen extends Stage {
   player = {}
@@ -34,13 +33,7 @@ class PlayScreen extends Stage {
   /**
    *  action to perform when leaving this screen (state change)
    */
-  onDestroyEvent() {
-    // remove the HUD from the game world
-    const { hud } = store.getState().game
-    game.world.removeChild(hud)
-  }
-
-  HUD: any
+  onDestroyEvent() {}
 }
 
 export default PlayScreen

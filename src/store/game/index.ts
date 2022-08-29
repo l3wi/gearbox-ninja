@@ -8,6 +8,7 @@ export type GameActions =
     }
   | {
       type: 'PAUSE_GAME'
+      payload: { pause: string }
     }
   | {
       type: 'RESUME_GAME'
@@ -22,15 +23,13 @@ export type GameActions =
     }
   | {
       type: 'BEGIN_STAGE'
-      payload: { hud?: Container; pause?: Container }
     }
   | {
       type: 'UPDATE_HUD'
-      payload: { hud: Container }
     }
   | {
       type: 'UPDATE_PAUSE'
-      payload: { pause: Container }
+      payload: { pause: string }
     }
 
 export type GameThunkAction = ThunkAction<void, RootState, unknown, GameActions>

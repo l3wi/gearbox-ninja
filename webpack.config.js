@@ -9,7 +9,7 @@ const { ProvidePlugin, DefinePlugin } = require('webpack')
 require('@babel/register')
 
 module.exports = {
-  entry: ['@babel/polyfill', './src/index.tsx'],
+  entry: ['@babel/polyfill', './src/index.ts'],
   output: {
     path: __dirname + '/public',
     filename: 'bundle.js'
@@ -17,16 +17,9 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(ts|js)x?$/,
+        test: /\.(ts)x?$/,
         exclude: /node_modules\/(?!(melonjs)\/).*/,
         use: [
-          {
-            loader: 'babel-loader',
-            options: {
-              generatorOpts: { compact: false },
-              presets: ['@babel/preset-env']
-            }
-          },
           {
             loader: 'ts-loader'
           }
@@ -86,7 +79,7 @@ module.exports = {
   ],
   resolve: {
     modules: [path.resolve('./src'), path.resolve('./node_modules')],
-    extensions: ['.ts', '.js', '.tsx', '...'],
+    extensions: ['.tsx', '.ts', '.js', '...'],
     fallback: {
       util: require.resolve(`util/`),
       url: require.resolve(`url/`),
@@ -99,11 +92,11 @@ module.exports = {
     },
     symlinks: false
   },
+  devtool: 'inline-source-map',
   devServer: {
     static: {
       directory: path.join(__dirname, 'public')
     },
-    compress: true,
     hot: true,
     port: 9000,
     open: true
