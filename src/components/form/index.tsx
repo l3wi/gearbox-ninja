@@ -46,11 +46,12 @@ const Form = () => {
   }
 
   const handleSubmit = () => {
+    if (!form.pool || !web3.account || !token || !pool) return
     if (!approved) {
       store.dispatch(
         actions.tokens.approveToken(
-          form.pool.underlyingToken,
-          form.pool.address,
+          form.pool?.underlyingToken,
+          form.pool?.address,
           web3.account
         )
       )
@@ -73,14 +74,12 @@ const Form = () => {
   }
 
   useEffect(() => {
-    // Check if approved
-
     if (
+      form.pool &&
       !allowances[form.pool.underlyingToken + '@' + form.pool.address].eq(
         BigNumber.from(0)
       )
     ) {
-      console.log('Approved')
       setApproved(true)
     }
   }, [allowances])
@@ -97,7 +96,7 @@ const Form = () => {
 
         <FormContainer>
           <InputSuper>
-            <span>depost</span>
+            <span>deposit</span>
             <span>
               BALANCE:{'  '}
               {new Intl.NumberFormat('en-US', {
@@ -112,14 +111,13 @@ const Form = () => {
               value={value}
               onChange={(e) => updateValue(e.target.value)}
             />
-            <span id="ticker">
+            <Asset id="ticker">
               <img
                 width={20}
-                id="tickerimg"
                 src={`https://static.gearbox.fi/tokens/${symbol.toLowerCase()}.svg`}
               />
-              <span id="tickersymbol">{symbol.toUpperCase()}</span>
-            </span>
+              <span>{symbol.toUpperCase()}</span>
+            </Asset>
             <MaxButton onClick={() => max()}>max</MaxButton>
           </InputGroup>
           <SubmitButton
@@ -140,6 +138,12 @@ const Form = () => {
 
 const Content = styled.div`
   max-width: 400px;
+`
+
+const Asset = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `
 
 const InputSuper = styled.div`
