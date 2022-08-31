@@ -4,7 +4,7 @@ export type Stages = Record<string, any>
 
 export interface Notification {
   value: string
-  duration?: number
+  duration: number
 }
 
 export interface GameState {

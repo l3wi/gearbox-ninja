@@ -142,11 +142,12 @@ export const AddNotification =
   (text: string, duration: number = 3000): GameThunkAction =>
   async (dispatch, getState) => {
     let { notification } = getState().game
-    if (!notification) {
+
+    if (!notification || notification.duration === 0) {
       try {
         dispatch({
           type: 'UPDATE_NOTIFICATION',
-          payload: { notification: { value: text } }
+          payload: { notification: { value: text, duration } }
         })
         if (duration != 0) {
           setTimeout(() => {

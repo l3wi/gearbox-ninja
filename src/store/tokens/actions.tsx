@@ -53,8 +53,8 @@ export const approveToken =
 
       await receipt.wait(1)
 
-      dispatch(actions.game.AddNotification('Approval successful'))
       dispatch(actions.operations.updateStatus(opHash, 'STATUS.SUCCESS'))
+      dispatch(actions.game.AddNotification('Approval successful'))
       const evmTx = new TxApprove({
         txHash: receipt.hash,
         token: tokenAddress,
