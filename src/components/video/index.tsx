@@ -1,12 +1,8 @@
 import React, { RefObject, useState } from 'react'
-import { useSelector } from 'react-redux'
 import styled, { keyframes } from 'styled-components'
-import useLocalStorage from '../../hooks/useLocalStorage'
 
 const Video = () => {
   const [visible, setVisible] = useState(true)
-  const [play, setAutoPlay] = useLocalStorage('autoPlay', true)
-
   const videoRef: any = React.createRef()
 
   const hide = () => {
@@ -18,7 +14,7 @@ const Video = () => {
     <Container visible={visible}>
       <VideoContainer
         playsInline
-        autoPlay={play}
+        autoPlay
         ref={videoRef}
         onEnded={() => hide()}
       >
