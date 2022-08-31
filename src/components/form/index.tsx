@@ -122,8 +122,8 @@ const Form = () => {
             <MaxButton onClick={() => max()}>max</MaxButton>
           </InputGroup>
           <APYGroup>
-            <span>Overall APY</span>
-            <span>5.35%</span>
+            <span>Deposit APY</span>
+            <span>{pool?.depositAPY.toFixed(2)}%</span>
           </APYGroup>
           <SubmitButton
             disabled={disableSubmit()}

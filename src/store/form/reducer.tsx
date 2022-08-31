@@ -12,7 +12,6 @@ export interface Token {
 
 export interface FormState {
   isHidden: boolean
-  isMax: boolean
   value: number
   title: string
   description: string
@@ -24,7 +23,6 @@ export interface FormState {
 
 const initialState: FormState = {
   isHidden: true,
-  isMax: false,
   value: 0,
   title: '',
   description: '',
@@ -60,12 +58,6 @@ export function formReducer(
       return {
         ...state,
         value: action.payload.value
-      }
-    case 'MAX_AMOUNT':
-      return {
-        ...state,
-        value: action.payload.value,
-        isMax: true
       }
   }
 

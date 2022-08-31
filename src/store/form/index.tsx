@@ -12,12 +12,6 @@ export type FormActions =
       type: 'CLEAR_FORM'
     }
   | {
-      type: 'MAX_AMOUNT'
-      payload: {
-        value: number
-      }
-    }
-  | {
       type: 'POPULATE_FORM'
       payload: {
         title: string

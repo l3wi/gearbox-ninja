@@ -49,19 +49,3 @@ export const updateForm =
       }
     })
   }
-
-export const maxAmount = (): FormThunkAction => async (dispatch, getState) => {
-  const { balance, token } = getState().form
-
-  const value = balance
-    .div(BigNumber.from('10').pow(BigNumber.from(token?.decimals)))
-    .toString()
-
-  dispatch({
-    type: 'MAX_AMOUNT',
-    payload: {
-      value: +value,
-      isMax: true
-    }
-  })
-}
