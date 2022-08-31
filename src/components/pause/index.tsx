@@ -1,20 +1,20 @@
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 import { RootState } from '../../store/reducer'
 
 const Pause = () => {
   const isPaused = useSelector((state: RootState) => state.game.isPaused)
 
   return (
-    <PauseBG invisible={isPaused}>
+    <PauseBG paused={isPaused}>
       <Title>Game Paused</Title>
     </PauseBG>
   )
 }
 
 interface BgProps {
-  readonly invisible: boolean
+  readonly paused: boolean
 }
 
 const Title = styled.h1`
@@ -33,7 +33,31 @@ const PauseBG = styled.div<BgProps>`
   display: flex;
   justify-content: center;
   align-items: center;
-  visibility: ${(props) => (props.invisible ? 'visible' : 'hidden')};
 `
+/* animation-fill-mode: ${(props) => (props.paused ? 'inherit' : 'forwards')};
+  animation: ${(props) =>
+    props.paused
+      ? `${outAnimation} 270ms ease-out`
+      : `${inAnimation} 250ms ease-in`};
+`
+const inAnimation = keyframes`
+  0% {
+    opacity: 0;
+    visibility: hidden;
+  }
+  100% {
+    opacity: 1;
+    visibility: visible;
+  }
+`
+const outAnimation = keyframes`
+ 0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+` */
 
 export default Pause

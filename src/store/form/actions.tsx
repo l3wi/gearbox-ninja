@@ -23,7 +23,7 @@ export const populateForm =
     const { tokens } = getState()
 
     // Fill out HTML Elements
-    const title = 'Deposit ' + symbol.toUpperCase() + ' to Gearbox'
+    const title = 'Stake ' + symbol.toUpperCase() + ' to Gearbox'
 
     dispatch({
       type: 'POPULATE_FORM',
