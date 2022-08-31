@@ -2,6 +2,8 @@ import { Container } from 'melonjs'
 import { ThunkAction } from 'redux-thunk'
 import { RootState } from '../index'
 
+import { Notification } from './reducer'
+
 export type GameActions =
   | {
       type: 'INIT_GAME'
@@ -25,7 +27,8 @@ export type GameActions =
       type: 'BEGIN_STAGE'
     }
   | {
-      type: 'UPDATE_HUD'
+      type: 'UPDATE_NOTIFICATION'
+      payload: { notification: Notification | null }
     }
   | {
       type: 'UPDATE_PAUSE'

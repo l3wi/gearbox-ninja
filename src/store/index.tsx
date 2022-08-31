@@ -17,6 +17,8 @@ export type RootState = ReturnType<typeof reducer>
 
 // Ghetto logger
 const logger: Middleware<{}, RootState> = (store) => (next) => (action) => {
+  // Skipp logger for notifications
+  if (action.type === 'UPDATE_NOTIFICATION') return next(action)
   console.group(action.type)
   console.info('dispatching', action)
   let result = next(action)

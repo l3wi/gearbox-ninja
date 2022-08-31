@@ -2,9 +2,15 @@ import { game, Container } from 'melonjs'
 import { GameActions, GameThunkAction } from './index'
 export type Stages = Record<string, any>
 
+export interface Notification {
+  value: string
+  duration?: number
+}
+
 export interface GameState {
   isInit: boolean
   isPaused: boolean
+  notification: Notification | null
   stages: Stages // Need to fix (Stage Class)
   lastPosition: { x: number; y: number }
   currentStage: keyof Stages
@@ -14,6 +20,7 @@ export interface GameState {
 const initialState: GameState = {
   isInit: false,
   isPaused: false,
+  notification: null,
   stages: {},
   lastPosition: { x: 2175, y: 0 },
   currentStage: 'MENU',
@@ -46,9 +53,10 @@ export function gameReducer(
       return {
         ...state
       }
-    case 'UPDATE_HUD':
+    case 'UPDATE_NOTIFICATION':
       return {
-        ...state
+        ...state,
+        notification: action.payload.notification
       }
     case 'UPDATE_PAUSE':
       return {

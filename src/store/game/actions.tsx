@@ -141,19 +141,24 @@ export const PauseGame = (): GameThunkAction => async (dispatch, getState) => {
 export const AddNotification =
   (text: string, duration: number = 3000): GameThunkAction =>
   async (dispatch, getState) => {
-    // try {
-    //   document.getElementById('notificationText').textContent = text
-    //   document.getElementById('notificationText').style.visibility = 'visible'
-    //   document.getElementById('notificationText').style.opacity = '1'
-    //   if (duration != 0) {
-    //     setTimeout(() => {
-    //       document.getElementById('notificationText').style.visibility =
-    //         'hidden'
-    //       document.getElementById('notificationText').style.opacity = '0'
-    //     }, duration)
-    //   }
-    // } catch (e: any) {
-    //   console.error('Error AddNotification(): ' + e)
-    // }
+    let { notification } = getState().game
+    if (!notification) {
+      try {
+        dispatch({
+          type: 'UPDATE_NOTIFICATION',
+          payload: { notification: { value: text } }
+        })
+        if (duration != 0) {
+          setTimeout(() => {
+            dispatch({
+              type: 'UPDATE_NOTIFICATION',
+              payload: { notification: null }
+            })
+          }, duration)
+        }
+      } catch (e: any) {
+        console.error('Error AddNotification(): ' + e)
+      }
+    }
   }
 // hud.children.map((item) => hud.removeChild(item))

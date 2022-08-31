@@ -5,14 +5,18 @@ import { RootState } from '../../store/reducer'
 import Pause from '../pause'
 import Form from '../form'
 import { useSelector } from 'react-redux'
+import Notification from '../notification'
 const Page = () => {
+  const isPaused = useSelector((state: RootState) => state.game.isPaused)
   const form = useSelector((state: RootState) => state.form)
   return (
     <Layout>
       {/* Paused */}
-      {/* <Pause /> */}
+      {isPaused && <Pause />}
       {/* Forms */}
       {!form.isHidden && <Form />}
+      {/* Notification */}
+      <Notification />
     </Layout>
   )
 }
