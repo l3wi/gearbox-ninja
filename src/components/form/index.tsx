@@ -12,6 +12,7 @@ const Form = () => {
   const form = useSelector((state: RootState) => state.form)
 
   const [value, setValue] = useState('0')
+  const [isMax, setMax] = useState(false)
   const [approved, setApproved] = useState(
     form.pool
       ? !allowances[form.pool.underlyingToken + '@' + form.pool.address].eq(
@@ -20,7 +21,7 @@ const Form = () => {
       : false
   )
 
-  const { pool, isMax, balance, token, symbol, title, description } = form
+  const { pool, balance, token, symbol, title, description } = form
 
   const readableBalance = balance
     .div(BigNumber.from('10').pow(BigNumber.from(token?.decimals)))
@@ -37,7 +38,7 @@ const Form = () => {
       .div(BigNumber.from('10').pow(BigNumber.from(token?.decimals)))
       .toString()
     updateValue(value)
-    store.dispatch(actions.form.maxAmount())
+    setMax(true)
   }
 
   const disableSubmit = () => {
@@ -61,7 +62,7 @@ const Form = () => {
         finalValue = balance
       } else {
         finalValue = BigNumber.from(
-          parseFloat(value) * Math.pow(10, token.decimals)
+          (parseFloat(value) * Math.pow(10, token.decimals)).toString()
         )
       }
       store.dispatch(actions.pools.addLiquidity(pool, finalValue))
@@ -96,7 +97,7 @@ const Form = () => {
 
         <FormContainer>
           <InputSuper>
-            <span>deposit</span>
+            <span>{`STAKE d${symbol.toUpperCase()}`}</span>
             <span>
               {`BALANCE: 
               ${new Intl.NumberFormat('en-US', {
@@ -120,6 +121,10 @@ const Form = () => {
             </Asset>
             <MaxButton onClick={() => max()}>max</MaxButton>
           </InputGroup>
+          <APYGroup>
+            <span>Overall APY</span>
+            <span>5.35%</span>
+          </APYGroup>
           <SubmitButton
             disabled={disableSubmit()}
             onClick={() => handleSubmit()}
@@ -136,20 +141,29 @@ const Form = () => {
   )
 }
 
+const APYGroup = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0px;
+  font-size: 14px;
+`
+
 const Content = styled.div`
   max-width: 400px;
 `
 
 const Asset = styled.div`
   display: flex;
-  justify-content: center;
+  justify-content: space-around;
   align-items: center;
+  padding: 6px 6px 4px;
+  min-width: 70px;
 `
 
 const InputSuper = styled.div`
   font-size: 14px;
   margin-bottom: 10px;
-  text-transform: uppercase;
   display: flex;
   justify-content: space-between;
 `
@@ -161,7 +175,7 @@ const InputGroup = styled.div`
   border: 2px solid white;
   /* padding: 3px 2px; */
   box-sizing: border-box;
-  height: 40px;
+  height: 45px;
 `
 
 const Input = styled.input`
@@ -169,7 +183,7 @@ const Input = styled.input`
   outline: none;
   background: none;
   color: white;
-  width: 150px;
+  width: 130px;
   padding: 5px 8px 0px;
   font-size: 18px;
 `
@@ -178,9 +192,8 @@ const MaxButton = styled.div`
   background: transparent;
   color: white;
   border: none;
-  /* width: 50px; */
-  font-size: 15px;
-  padding: 3px 5px;
+  font-size: 18px;
+  padding: 4px 6px;
   text-align: center;
   font-family: 'Press Start 2P';
   border-left: 2px solid white;
@@ -206,7 +219,7 @@ const SubmitButton = styled.button`
   font-weight: 800;
   text-transform: uppercase;
   font-size: 20px;
-  margin: 15px 0px;
+  margin: 0px;
   font-family: 'Press Start 2P';
 `
 
