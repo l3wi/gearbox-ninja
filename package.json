@@ -51,7 +51,7 @@
   },
   "scripts": {
     "dev": "webpack serve --hot",
-    "build": "cross-env NODE_ENV=production webpack"
+    "build": "NODE_ENV=production webpack"
   },
   "dependencies": {
     "@gearbox-protocol/sdk": "0.0.102",
