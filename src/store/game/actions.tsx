@@ -123,20 +123,22 @@ export const RegisterScreen =
     }
   }
 
-export const PauseGame = (): GameThunkAction => async (dispatch, getState) => {
-  try {
-    let { isPaused, pause } = getState().game
-    if (isPaused) {
-      state.resume()
-      dispatch({ type: 'RESUME_GAME' })
-    } else {
-      state.pause()
-      dispatch({ type: 'PAUSE_GAME', payload: { pause: 'Paused!' } })
+export const PauseGame =
+  (text: string = 'Game Paused'): GameThunkAction =>
+  async (dispatch, getState) => {
+    try {
+      let { isPaused, pause } = getState().game
+      if (isPaused) {
+        state.resume()
+        dispatch({ type: 'RESUME_GAME' })
+      } else {
+        state.pause()
+        dispatch({ type: 'PAUSE_GAME', payload: { pause: text } })
+      }
+    } catch (e: any) {
+      console.error('Error PauseGame(): ' + e)
     }
-  } catch (e: any) {
-    console.error('Error PauseGame(): ' + e)
   }
-}
 
 export const AddNotification =
   (text: string, duration: number = 3000): GameThunkAction =>
@@ -162,4 +164,3 @@ export const AddNotification =
       }
     }
   }
-// hud.children.map((item) => hud.removeChild(item))

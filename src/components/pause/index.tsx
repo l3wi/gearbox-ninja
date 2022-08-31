@@ -4,18 +4,40 @@ import styled, { keyframes } from 'styled-components'
 import { RootState } from '../../store/reducer'
 
 const Pause = () => {
-  const isPaused = useSelector((state: RootState) => state.game.isPaused)
+  const { currentStage, isPaused, pause } = useSelector(
+    (state: RootState) => state.game
+  )
 
   return (
     <PauseBG paused={isPaused}>
-      <Title>Game Paused</Title>
+      <Title>{isPaused && pause}</Title>
     </PauseBG>
   )
 }
 
-interface BgProps {
-  readonly paused: boolean
-}
+const fadeIn = keyframes`
+  from {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  to {
+    opacity: 1;
+    visibility: visible;
+  }
+`
+
+const fadeOut = keyframes`
+  from {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+`
 
 const Title = styled.h1`
   font-family: 'Courier New', Courier, monospace;
@@ -26,38 +48,14 @@ const Title = styled.h1`
   font-family: 'Press Start 2P';
 `
 
-const PauseBG = styled.div<BgProps>`
+const PauseBG = styled.div<{ paused: boolean }>`
   height: 100%;
   width: 100%;
   background: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
+  visibility: ${(props) => (props.paused ? 'visible' : 'hidden')};
+  animation: ${(props) => (props.paused ? fadeIn : fadeOut)} 0.5s ease-out;
 `
-/* animation-fill-mode: ${(props) => (props.paused ? 'inherit' : 'forwards')};
-  animation: ${(props) =>
-    props.paused
-      ? `${outAnimation} 270ms ease-out`
-      : `${inAnimation} 250ms ease-in`};
-`
-const inAnimation = keyframes`
-  0% {
-    opacity: 0;
-    visibility: hidden;
-  }
-  100% {
-    opacity: 1;
-    visibility: visible;
-  }
-`
-const outAnimation = keyframes`
- 0% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    visibility: hidden;
-  }
-` */
-
 export default Pause

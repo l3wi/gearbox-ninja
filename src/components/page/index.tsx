@@ -13,10 +13,10 @@ const Page = () => {
   return (
     <Layout>
       {/* Paused */}
-      {isPaused && <Pause />}
       {/* Forms */}
       {!form.isHidden && <Form />}
       {/* Notification */}
+      {isPaused && <Pause />}
       <Notification />
       <Video />
     </Layout>

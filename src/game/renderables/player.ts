@@ -223,7 +223,7 @@ class PlayerEntity extends Sprite {
           ) {
             try {
               this.debounce = true
-              store.dispatch(actions.game.PauseGame())
+              store.dispatch(actions.game.PauseGame('Connecting Wallet'))
               activate('metamask').then(() => {
                 declare().then(() => {
                   this.debounce = false
