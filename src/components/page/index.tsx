@@ -6,6 +6,7 @@ import Pause from '../pause'
 import Form from '../form'
 import { useSelector } from 'react-redux'
 import Notification from '../notification'
+import Video from '../video'
 const Page = () => {
   const isPaused = useSelector((state: RootState) => state.game.isPaused)
   const form = useSelector((state: RootState) => state.form)
@@ -17,6 +18,7 @@ const Page = () => {
       {!form.isHidden && <Form />}
       {/* Notification */}
       <Notification />
+      <Video />
     </Layout>
   )
 }
