@@ -8,11 +8,13 @@ import {
   TxRemoveLiquidity
 } from '@gearbox-protocol/sdk'
 
+import { CHAIN_ID } from "../../config";
 import { getSignerOrThrow, getWETHGatewayOrThrow } from '../web3'
 import { ThunkTokenAction } from '../tokens'
 import { getError } from '../operations'
 import actions from '../actions'
 
+import { addPendingTransaction } from "../web3/transactions";
 import { PoolThunkAction } from '.'
 
 export const getList = (): PoolThunkAction => async (dispatch, getState) => {
@@ -32,7 +34,7 @@ export const getList = (): PoolThunkAction => async (dispatch, getState) => {
       result[p.addr.toLowerCase()] = new PoolData(p)
       if (account)
         dispatch(
-          actions.tokens.getTokenAllowance(p.underlying, p.addr, account)
+          actions.tokens.getTokenAllowance({ tokenAddress: p.underlying, to: p.addr, account})
         )
     }
 
@@ -50,7 +52,8 @@ export const getList = (): PoolThunkAction => async (dispatch, getState) => {
 }
 
 export const addLiquidity =
-  (pool: PoolData, amount: BigNumber, opHash?: string): ThunkTokenAction =>
+  (pool: PoolData, amount: BigNumber, opHash?: string, chainId = CHAIN_ID
+  ): ThunkTokenAction =>
   async (dispatch, getState) => {
     try {
       dispatch(actions.operations.updateStatus(opHash, 'STATUS.WAITING'))
@@ -82,18 +85,18 @@ export const addLiquidity =
         dispatch(actions.operations.updateStatus(opHash, 'STATUS.LOADING'))
 
         // Add transaction to wait list
-        dispatch(
-          actions.web3.addPendingTransaction(
-            new TxAddLiquidity({
-              txHash: receipt.hash,
-              amount,
-              underlyingToken: pool.underlyingToken,
-              pool: pool.address,
-              timestamp: 0
-            }),
-            () => dispatch(getList())
-          )
-        )
+      dispatch(
+        addPendingTransaction({
+          chainId,
+          tx: new TxAddLiquidity({
+            txHash: receipt.hash,
+            amount,
+            underlyingToken: pool.underlyingToken,
+            pool: pool.address,
+            timestamp: 0,
+          }),
+          callback: () => dispatch(getList()),
+        }))
       }
       dispatch(actions.game.AddNotification('Deposit successful!'))
       dispatch(actions.operations.updateStatus(opHash, 'STATUS.SUCCESS'))
@@ -114,7 +117,7 @@ export const addLiquidity =
   }
 
 export const removeLiquidity =
-  (pool: PoolData, amount: BigNumber, opHash?: string): ThunkTokenAction =>
+  (pool: PoolData, amount: BigNumber, opHash?: string, chainId = CHAIN_ID): ThunkTokenAction =>
   async (dispatch, getState) => {
     try {
       dispatch(actions.operations.updateStatus(opHash, 'STATUS.WAITING'))
@@ -139,18 +142,18 @@ export const removeLiquidity =
         dispatch(actions.operations.updateStatus(opHash, 'STATUS.LOADING'))
 
         // Add transaction to wait list
-        dispatch(
-          actions.web3.addPendingTransaction(
-            new TxRemoveLiquidity({
-              txHash: receipt.hash,
-              amount,
-              dieselToken: pool.dieselToken,
-              pool: pool.address,
-              timestamp: 0
-            }),
-            () => dispatch(getList())
-          )
-        )
+      dispatch(
+        addPendingTransaction({
+          chainId,
+          tx: new TxAddLiquidity({
+            txHash: receipt.hash,
+            amount,
+            underlyingToken: pool.underlyingToken,
+            pool: pool.address,
+            timestamp: 0,
+          }),
+          callback: () => dispatch(getList()),
+        }))
       }
       dispatch(actions.operations.updateStatus(opHash, 'STATUS.SUCCESS'))
     } catch (e: any) {

@@ -1,9 +1,10 @@
-import { ThunkAction } from 'redux-thunk'
-import { RootState } from '../index'
+import { EventOrTx } from '@gearbox-protocol/sdk/'
 import { OperationActions } from '../operations'
-import { EventOrTx } from '@gearbox-protocol/sdk/lib/core/eventOrTx'
-import { Web3Actions } from '../web3'
+import { ThunkAction } from 'redux-thunk'
+
+import { RootState } from '../index'
 import { TokenAction } from '../tokens'
+import { Web3Actions } from '../web3'
 
 export type SyncActions =
   | {
@@ -26,3 +27,10 @@ export type SyncThunkAction = ThunkAction<
   unknown,
   SyncActions | OperationActions | Web3Actions | TokenAction
 >
+
+export const eventsSelector =
+  (account = '') =>
+  (state: RootState) =>
+    state.sync.events[account]
+
+export const syncSelector = (state: RootState) => state.sync

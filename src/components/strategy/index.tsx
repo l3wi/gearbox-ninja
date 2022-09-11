@@ -5,6 +5,7 @@ import styled from 'styled-components'
 import { store } from '../../store'
 import actions from '../../store/actions'
 import { RootState } from '../../store/reducer'
+import { generateNewHash } from "../../utils/opHash";
 
 const Form = () => {
   const allowances = useSelector((state: RootState) => state.tokens.allowances)
@@ -49,12 +50,15 @@ const Form = () => {
   const handleSubmit = () => {
     if (!form.pool || !web3.account || !token || !pool) return
     if (!approved) {
+      const opHash = generateNewHash("APPROVE-");
+
       store.dispatch(
-        actions.tokens.approveToken(
-          form.pool?.underlyingToken,
-          form.pool?.address,
-          web3.account
-        )
+        actions.tokens.approveToken({
+          tokenAddress: form.pool?.underlyingToken,
+          to: form.pool?.address,
+          account: web3.account,
+          opHash,
+        })
       )
     } else {
       let finalValue

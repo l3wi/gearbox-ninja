@@ -7,6 +7,8 @@ import * as tokens from './tokens/actions'
 import * as sync from './sync/actions'
 import * as strategy from './strategy/actions'
 import * as price from './prices/actions'
+import * as creditAccounts from './creditAccounts/actions'
+import * as creditManagers from './creditManagers/actions'
 
 // eslint-disable-next-line import/no-anonymous-default-export
 export default {
@@ -18,5 +20,7 @@ export default {
   strategy,
   tokens,
   price,
-  sync
+  sync,
+  creditAccounts,
+  creditManagers
 }

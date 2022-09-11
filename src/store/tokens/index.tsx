@@ -1,14 +1,12 @@
 import { ThunkAction } from 'redux-thunk'
-import { RootState } from '../index'
 import { OperationActions } from '../operations'
 import { TokenAllowance, TokenBalance, TokenData } from '@gearbox-protocol/sdk'
 import { BigNumber } from 'ethers'
 
+import type { RootState } from '../index'
+import type { Web3Actions } from '../web3'
+
 export type TokenAction =
-  | {
-      type: 'TOKEN_BATCH_DETAILS_SUCCESS'
-      payload: Record<string, TokenData>
-    }
   | {
       type: 'TOKEN_BALANCE_SUCCESS'
       payload: TokenBalance
@@ -41,14 +39,17 @@ export type ThunkTokenAction = ThunkAction<
   void,
   RootState,
   unknown,
-  TokenAction | OperationActions
+  TokenAction | Web3Actions | OperationActions
 >
 
 export const tokenDataMapSelector = (state: RootState) => state.tokens.details
 
 export const tokenBalancesSelector = (state: RootState) => state.tokens.balances
 export const tokenBalanceSelector = (address: string) => (state: RootState) =>
-  state.tokens.balances[address]
+  state.tokens.balances[address.toLowerCase()]
+
+export const getAllowanceId = (tokenAddress: string, to: string) =>
+  `${tokenAddress.toLowerCase()}@${to.toLowerCase()}`
 
 export const allowancesSelector = () => (state: RootState) =>
   state.tokens.allowances
@@ -61,6 +62,3 @@ export const virtualTokenAllowancesSelector = () => (state: RootState) =>
 export const virtualTokenAllowanceSelector =
   (address: string, to: string) => (state: RootState) =>
     state.tokens.virtualAllowances[getAllowanceId(address, to)]
-
-export const getAllowanceId = (tokenAddress: string, to: string) =>
-  `${tokenAddress}@${to}`

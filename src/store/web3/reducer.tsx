@@ -1,44 +1,35 @@
-import { Web3Actions, Web3Error, Web3Status } from './index'
 import {
+  EVMTx,
   IDataCompressor,
-  IWETHGateway,
-  PathFinder
+  IPathFinder,
+  IWETHGateway
 } from '@gearbox-protocol/sdk'
 import { BigNumberish, providers, Signer } from 'ethers'
-import { Wallets } from '../../config/connectors'
-import { EVMTx } from '@gearbox-protocol/sdk/lib/core/eventOrTx'
+
+import type { Web3Actions, Web3Error, Web3Status } from './index'
 
 export interface Web3State {
   provider?: providers.JsonRpcProvider
   signer?: Signer
-  walletId?: Wallets
   account?: string
 
   dataCompressor?: IDataCompressor
   balance?: BigNumberish
-  chainId?: number
   gearTokenAddress?: string
   wethGateway?: IWETHGateway
   wethTokenAddress?: string
-  leveragedActions?: string
-  pathFinder?: PathFinder
-  etherscan: string
+  pathFinder?: IPathFinder
 
   status: Web3Status
   error?: Web3Error
   listeners: Record<string, boolean>
   transactions: Record<string, Array<EVMTx>>
-  notIllegal: boolean
-  signRejected: boolean
 }
 
 const initialState: Web3State = {
   status: 'WEB3_STARTUP',
-  etherscan: 'https://etherscan.io',
   listeners: {},
-  transactions: {},
-  notIllegal: false,
-  signRejected: false
+  transactions: {}
 }
 
 export function web3Reducer(
@@ -52,17 +43,9 @@ export function web3Reducer(
         signer: undefined,
         account: undefined,
         wethGateway: undefined,
-        leveragedActions: undefined,
         status: 'WEB3_STARTUP',
         error: undefined,
         listeners: {}
-      }
-
-    case 'WEB3_INIT':
-      return {
-        ...state,
-        status: 'WEB3_STARTUP',
-        error: 'NO_ERROR'
       }
 
     case 'PROVIDER_CONNECTED':
@@ -78,31 +61,10 @@ export function web3Reducer(
         status: 'WEB3_CONNECTED'
       }
 
-    case 'WEB3_FAILED':
-      return {
-        ...state,
-        account: undefined,
-        signer: undefined,
-        status: 'NO_WEB3',
-        error: action.payload.error,
-        chainId: action.payload.chainId
-      }
-    case 'SIGNED_MESSAGE':
-      return {
-        ...state,
-        notIllegal: action.payload.notIllegal,
-        signRejected: action.payload.signRejected
-      }
     case 'WEB3_BALANCE_SUCCESS':
       return {
         ...state,
         balance: action.payload
-      }
-
-    case 'WALLET_SET':
-      return {
-        ...state,
-        walletId: action.payload
       }
 
     case 'LISTENERS_ADDED':
@@ -134,7 +96,8 @@ export function web3Reducer(
           [action.payload.account]: action.payload.txs
         }
       }
-  }
 
-  return state
+    default:
+      return state
+  }
 }

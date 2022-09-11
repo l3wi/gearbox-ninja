@@ -13,18 +13,23 @@ import { tokenReducer } from './tokens/reducer'
 import { syncReducer } from './sync/reducer'
 import { strategyReducer } from './strategy/reducer'
 import { priceReducer } from './prices/reducer'
+import { creditAccountsReducer } from './creditAccounts/reducer'
+import { creditManagerReducer } from './creditManagers/reducer'
 
 // eslint-disable-next-line import/no-anonymous-default-export
 const reducer = combineReducers({
-  web3: web3Reducer,
   game: gameReducer,
   form: formReducer,
+
+  web3: web3Reducer,
   pools: poolsReducer,
   operations: operationReducer,
   tokens: tokenReducer,
   sync: syncReducer,
-  strategy: strategyReducer,
-  price: priceReducer
+  price: priceReducer,
+  creditAccounts: creditAccountsReducer,
+  creditManagers: creditManagerReducer,
+  strategy: strategyReducer
 })
 
 export type RootState = ReturnType<typeof reducer>

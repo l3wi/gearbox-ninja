@@ -1,6 +1,7 @@
-import { SyncActions } from './index'
+/* eslint-disable default-param-last, @typescript-eslint/default-param-last */
+import { EventOrTx } from '@gearbox-protocol/sdk'
 
-import { EventOrTx } from '@gearbox-protocol/sdk/lib/core/eventOrTx'
+import type { SyncActions } from './index'
 
 export interface SyncState {
   lastBlock: number
@@ -27,7 +28,7 @@ export function syncReducer(
         lastBlock: action.payload
       }
 
-    case 'EVENT_UPDATE':
+    case 'EVENT_UPDATE': {
       const existingEvents = state.events[action.payload.account] || {}
       const newEvents = { ...existingEvents, ...action.payload.events }
       const { account } = action.payload
@@ -49,7 +50,8 @@ export function syncReducer(
             0
         }
       }
+    }
+    default:
+      return state
   }
-
-  return state
 }

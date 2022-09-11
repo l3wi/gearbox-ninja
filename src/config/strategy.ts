@@ -1,9 +1,11 @@
-import { StrategyPayload, Strategy } from '@gearbox-protocol/sdk'
+import { Strategy, StrategyPayload } from '@gearbox-protocol/sdk'
+
 import { currentTokenData } from './tokens'
 
-export const lidoPayload: StrategyPayload = {
+const lidoPayload: StrategyPayload = {
   name: 'Lido',
   lpToken: currentTokenData.STETH.toLowerCase(),
+  apyTokenSymbol: 'LDO',
 
   pools: [currentTokenData.WETH.toLowerCase()],
 
@@ -17,9 +19,10 @@ export const lidoPayload: StrategyPayload = {
   baseAssets: [currentTokenData.WETH.toLowerCase()]
 }
 
-export const fraxPayload: StrategyPayload = {
+const fraxPayload: StrategyPayload = {
   name: 'Convex frax3crv',
   lpToken: currentTokenData.cvxFRAX3CRV.toLowerCase(),
+  apyTokenSymbol: 'cvxFRAX3CRV',
 
   pools: [
     currentTokenData.USDC.toLowerCase(),
@@ -40,9 +43,10 @@ export const fraxPayload: StrategyPayload = {
   ]
 }
 
-export const lusdPayload: StrategyPayload = {
+const lusdPayload: StrategyPayload = {
   name: 'Convex lusd3crv',
   lpToken: currentTokenData.cvxLUSD3CRV.toLowerCase(),
+  apyTokenSymbol: 'cvxLUSD3CRV',
 
   pools: [
     currentTokenData.USDC.toLowerCase(),
@@ -63,9 +67,10 @@ export const lusdPayload: StrategyPayload = {
   ]
 }
 
-export const susdPayload: StrategyPayload = {
+const susdPayload: StrategyPayload = {
   name: 'Convex susd3crv',
   lpToken: currentTokenData.cvxcrvPlain3andSUSD.toLowerCase(),
+  apyTokenSymbol: 'cvxcrvPlain3andSUSD',
 
   pools: [
     currentTokenData.USDC.toLowerCase(),
@@ -92,3 +97,10 @@ export const DEFAULT_STRATEGIES = {
   [lusdPayload.lpToken]: new Strategy(lusdPayload),
   [susdPayload.lpToken]: new Strategy(susdPayload)
 }
+
+export const strategiesPayload = [
+  lidoPayload,
+  fraxPayload,
+  lusdPayload,
+  susdPayload
+]

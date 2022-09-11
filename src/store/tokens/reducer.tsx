@@ -23,15 +23,6 @@ export function tokenReducer(
   action: TokenAction
 ): TokenState {
   switch (action.type) {
-    case 'TOKEN_BATCH_DETAILS_SUCCESS':
-      return {
-        ...state,
-        details: {
-          ...state.details,
-          ...action.payload
-        }
-      }
-
     case 'TOKEN_BALANCE_SUCCESS':
       return {
         ...state,
@@ -77,13 +68,14 @@ export function tokenReducer(
         }
       }
 
-    case 'TOKEN_DELETE_VIRTUAL_ALLOWANCE':
+    case 'TOKEN_DELETE_VIRTUAL_ALLOWANCE': {
       const virtualAllowances = { ...state.virtualAllowances }
       delete virtualAllowances[action.payload]
       return {
         ...state,
         virtualAllowances
       }
+    }
 
     case 'TOKEN_BALANCES_ALLOWANCES_CLEAR':
       return {

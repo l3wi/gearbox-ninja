@@ -54,9 +54,17 @@ export const activate = async (w: Wallets) => {
     //@ts-ignore
     await connector.enable() // need to extend Web3Provider interface
   }
+  const { dataCompressor, account } = store.getState()
+  const chainId = CHAIN_ID
 
   try {
-    await store.dispatch(actions.web3.connectSigner(connector))
+    await store.dispatch(
+      actions.web3.connectSigner({
+        library: connector,
+        dataCompressor,
+        chainId
+      })
+    )
 
     if (window.ethereum && isInjectedWallet) {
       window.ethereum.on('chainChanged', () => {

@@ -1,45 +1,44 @@
 import { ethers } from 'ethers'
-// import { updateStatus } from 'dlt-operations'
+import { updateStatus } from '../operations'
 import {
-  IAddressProvider__factory,
-  IDataCompressor__factory,
-  IWETHGateway__factory,
-  PathFinder__factory
-} from '@gearbox-protocol/sdk/lib/types'
-import {
-  ADDRESS_0x0,
-  AddressProvider,
   callRepeater,
   CreditManagerData,
   CreditManagerDataPayload,
-  DataCompressor,
+  IAddressProvider__factory,
   ICreditManager__factory,
+  IDataCompressor,
+  IDataCompressor__factory,
+  IPathFinder__factory,
   IPoolService__factory,
-  KOVAN_NETWORK,
+  IWETHGateway__factory,
   MultiCallContract,
   PoolData,
-  PoolDataPayload,
-  TxSerializer
+  PoolDataPayload
 } from '@gearbox-protocol/sdk'
-// import { toast } from "react-toastify";
-import { Web3Provider } from '@ethersproject/providers'
-import { EVMTx } from '@gearbox-protocol/sdk/lib/core/eventOrTx'
+import { providers } from 'ethers'
 
 import { Wallets } from '../../config/connectors'
 import {
   ADDRESS_PROVIDER,
-  BLOCK_UPDATE_DELAY,
   CHAIN_ID,
   JSON_RPC_PROVIDER,
   PATHFINDER
 } from '../../config'
-// import { batchLoadTokenData, clearBalancesAllowances } from '../tokens/actions'
+import { captureException } from '../../utils/errors'
 
 import actions from '../actions'
-// import { setTokenList } from '../price/actions'
-// import { clearCreditAccounts } from '../creditAccounts/actions'
-import { updateLastBlock } from '../sync/actions'
+import {
+  clearCreditAccounts,
+  deleteByCreditManager,
+  getByCreditManager,
+  getList as caGetList
+} from '../creditAccounts/actions'
+import { getList as cmGetList } from '../creditManagers/actions'
+import { getList as poolGetList } from '../pools/actions'
+import { updateCreditManagerEvents, updatePoolEvents } from '../sync/actions'
+import { clearBalancesAllowances } from '../tokens/actions'
 import { ThunkWeb3Action, Web3Actions } from './index'
+import { removeTransactionFromList, restoreTransactions } from './transactions'
 
 export const connectProvider =
   (): ThunkWeb3Action => async (dispatch, getState) => {
@@ -56,23 +55,12 @@ export const connectProvider =
     }
   }
 
+type PossibleProviders = providers.JsonRpcProvider | providers.Web3Provider
+
 export const updateProvider =
-  (
-    provider:
-      | ethers.providers.JsonRpcProvider
-      | Promise<ethers.providers.Web3Provider>
-  ): ThunkWeb3Action =>
-  async (dispatch, getState) => {
+  (provider: PossibleProviders): ThunkWeb3Action =>
+  async (dispatch) => {
     try {
-      provider = await provider
-      const network = await provider.detectNetwork()
-
-      if (network.chainId !== CHAIN_ID) {
-        dispatch(actions.web3.disconnectSigner())
-        dispatch(actions.web3.setWalletType(undefined))
-        throw new Error('Incorrect network')
-      }
-
       const addressProviderMultiCall = new MultiCallContract(
         ADDRESS_PROVIDER,
         IAddressProvider__factory.createInterface(),
@@ -83,8 +71,7 @@ export const updateProvider =
         dataCompressorAddress,
         wethGateWayAddress,
         gearTokenAddress,
-        wethTokenAddress,
-        leveragedActions
+        wethTokenAddress
       ] = await callRepeater(() =>
         addressProviderMultiCall.call([
           {
@@ -105,19 +92,12 @@ export const updateProvider =
       const dataCompressor = IDataCompressor__factory.connect(
         dataCompressorAddress,
         provider
-      ) as DataCompressor
+      )
 
       const wethGateway = IWETHGateway__factory.connect(
         wethGateWayAddress,
         provider
       )
-
-      let etherscan = 'https://etherscan.io'
-
-      switch (network.chainId) {
-        case KOVAN_NETWORK:
-          etherscan = 'https://kovan.etherscan.io'
-      }
 
       dispatch({
         type: 'PROVIDER_CONNECTED',
@@ -127,10 +107,7 @@ export const updateProvider =
           gearTokenAddress,
           wethGateway,
           wethTokenAddress,
-          leveragedActions,
-          chainId: network.chainId,
-          pathFinder: PathFinder__factory.connect(PATHFINDER, provider),
-          etherscan
+          pathFinder: IPathFinder__factory.connect(PATHFINDER, provider)
         }
       })
     } catch (e: any) {
@@ -143,26 +120,20 @@ export const setWalletType = (w: Wallets | undefined): Web3Actions => ({
   payload: w
 })
 
+interface ConnectSignerProps {
+  library: providers.Web3Provider
+  dataCompressor: IDataCompressor
+  chainId?: number
+}
+
 export const connectSigner =
-  (library: Web3Provider): ThunkWeb3Action =>
+  ({
+    library,
+    dataCompressor,
+    chainId = CHAIN_ID
+  }: ConnectSignerProps): ThunkWeb3Action =>
   async (dispatch, getState) => {
     try {
-      const network = await library.detectNetwork()
-
-      if (network.chainId !== CHAIN_ID) {
-        dispatch(actions.web3.disconnectSigner())
-        dispatch(actions.web3.setWalletType(undefined))
-
-        // Notify user
-        dispatch(
-          actions.game.AddNotification(
-            `wrong network: switch to ${CHAIN_ID === 42 ? 'kovan' : 'mainnet'}`,
-            3000
-          )
-        )
-        throw new Error('Incorrect network')
-      }
-
       const signer = library.getSigner().connectUnchecked()
 
       const account = await signer.getAddress()
@@ -170,7 +141,7 @@ export const connectSigner =
       const addressProvider = IAddressProvider__factory.connect(
         ADDRESS_PROVIDER || '',
         signer.provider
-      ) as AddressProvider
+      )
 
       const wethGateWayAddress = await addressProvider.getWETHGateway()
 
@@ -187,14 +158,6 @@ export const connectSigner =
           wethGateway
         }
       })
-
-      dispatch({ type: 'LISTENERS_ADDED', payload: account })
-
-      const { dataCompressor } = getState().web3
-
-      if (!dataCompressor) {
-        throw new Error('datacompressor is undefined')
-      }
 
       const dataCompressorMultiCall = new MultiCallContract(
         dataCompressor.address,
@@ -215,25 +178,31 @@ export const connectSigner =
         ])
       )
 
-      dispatch(updateLastBlock(signer.provider))
-
       const isListenersConnected = getState().web3.listeners[account]
+      dispatch({ type: 'LISTENERS_ADDED', payload: account })
+
       pools.forEach((pl) => {
         if (!isListenersConnected) {
           const contract = IPoolService__factory.connect(pl.addr, signer)
           const pool = new PoolData(pl)
-          dispatch(actions.sync.updatePoolEvents(account, pool, contract))
+          dispatch(updatePoolEvents({ account, pool, contract }))
 
           const updatePools = (...args: any) => {
-            dispatch(actions.pools.getList())
-            dispatch(actions.sync.updatePoolEvents(account, pool, contract))
-            // dispatch(actions.creditManagers.getList(signer))
+            dispatch(poolGetList())
+            dispatch(updatePoolEvents({ account, pool, contract }))
+            dispatch(cmGetList(signer))
 
-            const { transactionHash } = args[args.length - 1] as {
+            const { transactionHash: txHash } = args[args.length - 1] as {
               transactionHash: string
             }
 
-            dispatch(removeTransactionFromList(account, transactionHash))
+            dispatch(
+              removeTransactionFromList({
+                account,
+                txHash,
+                chainId
+              })
+            )
           }
 
           contract.on(contract.filters.AddLiquidity(), updatePools)
@@ -243,9 +212,74 @@ export const connectSigner =
         }
       })
 
+      creditManagers.forEach((cm) => {
+        if (!isListenersConnected) {
+          const contract = ICreditManager__factory.connect(cm.addr, signer)
+
+          const creditManager = new CreditManagerData(cm)
+
+          dispatch(
+            updateCreditManagerEvents({ account, creditManager, contract })
+          )
+
+          const updateCreditManagers = (...args: any) => {
+            const { transactionHash: txHash } = args[args.length - 1] as {
+              transactionHash: string
+            }
+            dispatch(
+              removeTransactionFromList({
+                account,
+                txHash,
+                chainId
+              })
+            )
+
+            dispatch(caGetList())
+
+            dispatch(
+              updateCreditManagerEvents({ account, creditManager, contract })
+            )
+          }
+
+          contract.on(
+            contract.filters.OpenCreditAccount(null, account),
+            updateCreditManagers
+          )
+
+          contract.on(
+            contract.filters.CloseCreditAccount(account),
+            updateCreditManagers
+          )
+
+          contract.on(
+            contract.filters.RepayCreditAccount(account),
+            updateCreditManagers
+          )
+
+          contract.on(contract.filters.LiquidateCreditAccount(account), () => {
+            updateCreditManagers()
+            dispatch(deleteByCreditManager(creditManager.address))
+
+            dispatch(
+              updateCreditManagerEvents({ account, creditManager, contract })
+            )
+          })
+          contract.on(
+            contract.filters.AddCollateral(account),
+            updateCreditManagers
+          )
+          contract.on(
+            contract.filters.IncreaseBorrowedAmount(account),
+            updateCreditManagers
+          )
+          contract.on(contract.filters.ExecuteOrder(account), () => {
+            dispatch(getByCreditManager(creditManager.address, account))
+          })
+        }
+      })
+
       dispatch(actions.pools.getList())
-      dispatch(toggleSync())
-      dispatch(restoreTransactions(account))
+      dispatch(restoreTransactions({ account, chainId, provider: library }))
       dispatch(actions.game.AddNotification('wallet connected', 3000))
     } catch (e: any) {
       dispatch(disconnectSigner())
@@ -254,13 +288,17 @@ export const connectSigner =
     }
   }
 
-export const disconnectSigner =
-  (): ThunkWeb3Action => async (dispatch, getState) => {
-    const { provider } = getState().web3
-    dispatch(connectProvider())
-
-    dispatch({ type: 'WEB3_RESET' })
+export function disconnectSigner(): ThunkWeb3Action {
+  return async (dispatch) => {
+    try {
+      dispatch(clearCreditAccounts())
+      dispatch(clearBalancesAllowances())
+      dispatch({ type: 'WEB3_RESET' })
+    } catch (e: any) {
+      captureException('store/web3/actions', 'Cant disconnectSigner', e)
+    }
   }
+}
 
 export const signDeclaration =
   (): ThunkWeb3Action => async (dispatch, getState) => {
@@ -294,7 +332,7 @@ export const signDeclaration =
   }
 
 export const getEthBalance =
-  (opHash: string = '0'): ThunkWeb3Action =>
+  (opHash = '0'): ThunkWeb3Action =>
   async (dispatch, getState) => {
     try {
       const { provider, account } = getState().web3
@@ -304,144 +342,9 @@ export const getEthBalance =
       const balance = await provider.getBalance(account)
 
       dispatch({ type: 'WEB3_BALANCE_SUCCESS', payload: balance })
-      // dispatch(updateStatus(opHash, 'STATUS.SUCCESS')
+      updateStatus(opHash, 'STATUS.SUCCESS')
     } catch (e: any) {
-      // updateStatus(opHash, 'STATUS.FAILURE', e)
-      console.error('store/web3/actions' + 'Cant getEthBalance' + e)
+      updateStatus(opHash, 'STATUS.FAILURE', e)
+      console.error('store/web3/actions', 'Cant getEthBalance', e)
     }
   }
-
-export const addPendingTransaction =
-  (tx: EVMTx, callback: () => void): ThunkWeb3Action =>
-  async (dispatch, getState) => {
-    const { provider, account, transactions, chainId, etherscan } =
-      getState().web3
-
-    if (!provider || !account) throw new Error('Prov is empty')
-
-    const txForSaving = [...(transactions[account] || []), tx]
-
-    dispatch({
-      type: 'UPSERT_PENDING_TX',
-      payload: { account, tx }
-    })
-
-    localStorage.setItem(
-      `txs_${chainId}_${account.toLowerCase()}`,
-      TxSerializer.serialize(txForSaving)
-    )
-
-    const receipt = await provider.waitForTransaction(tx.txHash)
-    callback()
-
-    const txFromChain = await provider.getTransactionReceipt(
-      receipt.transactionHash
-    )
-
-    const tokens = getState().tokens.details
-
-    if (txFromChain.blockNumber) {
-      if (txFromChain.logs.length > 0) {
-        tx.success(txFromChain.blockNumber)
-        // toast.success(tx.toString(tokens), {
-        //   style: { background: '#111927', color: 'white' },
-        //   onClick: () => openInNewWindow(`${etherscan}/tx/${tx.txHash}`),
-        //   autoClose: 7500
-        // })
-      } else {
-        tx.revert(txFromChain.blockNumber)
-        // toast.error(tx.toString(tokens), {
-        //   style: { background: '#111927', color: 'white' },
-        //   onClick: () => openInNewWindow(`${etherscan}/tx/${tx.txHash}`),
-        //   autoClose: 12500
-        // })
-      }
-      dispatch({
-        type: 'UPSERT_PENDING_TX',
-        payload: { account, tx }
-      })
-    }
-  }
-
-export const restoreTransactions =
-  (account: string): ThunkWeb3Action =>
-  async (dispatch, getState) => {
-    const { provider, chainId } = getState().web3
-
-    if (!provider) {
-      console.error('Can get provider')
-      return
-    }
-
-    const storedTxs = localStorage.getItem(
-      `txs_${chainId}_${account.toLowerCase()}`
-    )
-    if (storedTxs !== null) {
-      const txs = TxSerializer.deserialize(storedTxs)
-      for (let tx of txs) {
-        if (tx.isPending) {
-          const txFromChain = await provider.getTransactionReceipt(tx.txHash)
-
-          if (txFromChain) {
-            if (txFromChain.logs.length > 0) {
-              tx.success(txFromChain.blockNumber)
-            } else {
-              tx.revert(txFromChain.blockNumber)
-            }
-          } else {
-            tx.revert(0)
-          }
-        }
-      }
-
-      dispatch({
-        type: 'UPDATE_ALL_TX',
-        payload: { account, txs }
-      })
-    }
-  }
-
-export const removeTransactionFromList =
-  (account: string, txHash: string): ThunkWeb3Action =>
-  async (dispatch, getState) => {
-    const { transactions, chainId } = getState().web3
-
-    const accTxs = transactions[account] || []
-    const txs = accTxs.filter(
-      (tx) => tx.txHash.toLowerCase() !== txHash.toLowerCase()
-    )
-
-    if (txs.length !== accTxs.length) {
-      localStorage.setItem(
-        `txs_${chainId}_${account.toLowerCase()}`,
-        TxSerializer.serialize(txs)
-      )
-      dispatch({
-        type: 'UPDATE_ALL_TX',
-        payload: { account, txs }
-      })
-    }
-  }
-
-export const clearPendingTransactions =
-  (): ThunkWeb3Action => async (dispatch, getState) => {
-    const { account } = getState().web3
-    if (account)
-      dispatch({ type: 'UPDATE_ALL_TX', payload: { account, txs: [] } })
-  }
-
-export const toggleSync = (): ThunkWeb3Action => async (dispatch, getState) => {
-  const { signer, account } = getState().web3
-  let updateTask: any
-  if (signer?.provider) {
-    const syncTask = () => {
-      // @ts-ignore
-      dispatch(updateLastBlock(signer.provider))
-    }
-    updateTask = setInterval(syncTask, BLOCK_UPDATE_DELAY)
-  }
-
-  return function syncCleanup() {
-    clearInterval(updateTask)
-  }
-}

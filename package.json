@@ -2,7 +2,7 @@
   "name": "leverage-ninjas",
   "version": "1.0.0",
   "main": "index.tsx",
-  "license": "MIT",
+  "private": true,
   "devDependencies": {
     "@babel/cli": "^7.18.6",
     "@babel/core": "^7.18.6",
@@ -54,8 +54,8 @@
     "build": "NODE_ENV=production webpack"
   },
   "dependencies": {
-    "@gearbox-protocol/sdk": "0.0.102",
-    "@walletconnect/web3-provider": "^1.7.8",
+    "@gearbox-protocol/sdk": "^1.5.7",
+    "@walletconnect/web3-provider": "^1.8.0",
     "axios": "^0.27.2",
     "ethers": "^5.6.9",
     "melonjs": "^13.0.0",
@@ -66,5 +66,14 @@
     "redux-thunk": "^2.4.1",
     "style-loader": "^3.3.1",
     "styled-components": "^5.3.5"
+  },
+  "prettier": "@gearbox-protocol/prettier-config",
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "stylelint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md}": "prettier --write"
   }
 }

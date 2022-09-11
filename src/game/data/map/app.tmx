@@ -136,22 +136,22 @@
   </object>
   <object id="69" x="3638.98" y="329.743" width="17.7286" height="71.419">
    <properties>
-    <property name="type" value="entrance"/>
+    <property name="type" value="entrance-frax3crv"/>
    </properties>
   </object>
   <object id="70" x="4019.77" y="363.918" width="21.3577" height="35.3011">
    <properties>
-    <property name="type" value="entrance"/>
+    <property name="type" value="entrance-lusd3crv"/>
    </properties>
   </object>
   <object id="71" x="4386.31" y="341.198" width="14.0015" height="60.9332">
    <properties>
-    <property name="type" value="entrance"/>
+    <property name="type" value="entrance-lido"/>
    </properties>
   </object>
   <object id="72" x="4787.1" y="348.189" width="14.0011" height="51.6124">
    <properties>
-    <property name="type" value="entrance"/>
+    <property name="type" value="entrance-susd3crv"/>
    </properties>
   </object>
  </objectgroup>

@@ -1,12 +1,13 @@
 import React from 'react'
 import styled from 'styled-components'
 import { RootState } from '../../store/reducer'
+import { useSelector } from 'react-redux'
 
 import Pause from '../pause'
-import Form from '../form'
-import { useSelector } from 'react-redux'
+import Form from '../pools'
 import Notification from '../notification'
 import Video from '../video'
+
 const Page = () => {
   const isPaused = useSelector((state: RootState) => state.game.isPaused)
   const form = useSelector((state: RootState) => state.form)

@@ -1,23 +1,13 @@
-import { BigNumber, ethers } from 'ethers'
 import {
-  ADDRESS_0x0,
-  PriceOracle__factory,
-  AddressProvider__factory
+  IAddressProvider__factory,
+  IPriceOracleV2__factory
 } from '@gearbox-protocol/sdk'
+import { BigNumber, ethers } from 'ethers'
 
-import { ETH_ADDRESS, WETH_ADDRESS } from '../../config/tokens'
 import { ADDRESS_PROVIDER } from '../../config'
-
+import { ETH_ADDRESS, WETH_ADDRESS } from '../../config/tokens'
+import { captureException } from '../../utils/errors'
 import { PriceThunkAction } from './index'
-
-export const setTokenList =
-  (tokens: Array<string>): PriceThunkAction =>
-  async (dispatch) => {
-    dispatch({
-      type: 'PRICE_TOKEN_LIST_SET',
-      payload: tokens
-    })
-  }
 
 export const parsePricesPayload =
   (pricesArray: Array<BigNumber>, tokens: string[]): PriceThunkAction =>
@@ -49,18 +39,18 @@ export const getPrices =
   ): PriceThunkAction =>
   async (dispatch) => {
     try {
-      const addressProvider = AddressProvider__factory.connect(
+      const addressProvider = IAddressProvider__factory.connect(
         ADDRESS_PROVIDER,
         provider
       )
 
-      const priceOracle = PriceOracle__factory.connect(
+      const priceOracle = IPriceOracleV2__factory.connect(
         await addressProvider.getPriceOracle(),
         provider
       )
 
       const resp = await Promise.allSettled(
-        tokens.map((token) => priceOracle.getPrice(ADDRESS_0x0, token))
+        tokens.map((token) => priceOracle.getPrice(token))
       )
 
       console.debug(
@@ -78,6 +68,6 @@ export const getPrices =
 
       dispatch(parsePricesPayload(pricesArr, tokens))
     } catch (e: any) {
-      console.error('store/pice/actions', 'Cant getPricesV2', e)
+      captureException('store/pice/actions', 'Cant getPricesV2', e)
     }
   }

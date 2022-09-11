@@ -249,18 +249,49 @@ class PlayerEntity extends Sprite {
               actions.game.AddNotification('Press UP to enter', 100)
             )
           }
+
+          setTimeout(() => {
+            const symbol = other.type.split('-')[1]
+            console.log(symbol)
+            // let token: any
+            // if (symbol === 'eth') {
+            //   token = Object.values(state.tokens.details).find(
+            //     (item: Token) => item.symbol === 'WETH'
+            //   )
+            // } else {
+            //   token = Object.values(state.tokens.details).find(
+            //     (item: Token) => item.symbol === symbol
+            //   )
+            // }
+            // // @ts-ignore
+            // const balance = state.tokens.balances[token.id]
+            // const pool = Object.values(state.pools.data).find(
+            //   // @ts-ignore
+            //   (item: PoolData) =>
+            //     item.underlyingToken.toLowerCase() ===
+            //     // @ts-ignore
+            //     token.address.toLowerCase()
+            // )
+            // // @ts-ignore
+            // store.dispatch(
+            //   actions.form.populateForm(symbol, token, pool, balance)
+            // )
+            // store.dispatch(actions.form.toggleForm())
+          }, 500)
+
           // Capture
-          if (input.isKeyPressed('jump')) {
-            this.body.force.y = 0
-            // Trigger the entrance
-            const currentPos = this.pos
-            store.dispatch(
-              actions.game.ChangeStage('CREDITS', {
-                x: +currentPos._x.toFixed(2),
-                y: +(currentPos._y - 1).toFixed(2)
-              })
-            )
-          }
+          // if (input.isKeyPressed('jump')) {
+          //   this.body.force.y = 0
+          //   // Trigger the entrance
+          //   const currentPos = this.pos
+          //   store.dispatch(
+          //     actions.game.ChangeStage('CREDITS', {
+          //       x: +currentPos._x.toFixed(2),
+          //       y: +(currentPos._y - 1).toFixed(2)
+          //     })
+          //   )
+          // }
+
           return false
         } else if (
           typeof other.type != 'string' ||
