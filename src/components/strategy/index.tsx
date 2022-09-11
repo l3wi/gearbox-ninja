@@ -5,9 +5,38 @@ import styled from 'styled-components'
 import { store } from '../../store'
 import actions from '../../store/actions'
 import { RootState } from '../../store/reducer'
-import { generateNewHash } from "../../utils/opHash";
+import { generateNewHash } from '../../utils/opHash'
+import { PoolData, TokenData } from '@gearbox-protocol/sdk'
+
+const depositLPDescription = `Deposit your assets to Gearbox 
+protocol to earn yield. These assets will be lent out to Gearbox's 
+Credit Accounts who pay a rate to borrow them. Deposit your assets 
+and become a ninja today!`
+
+const poolData = (symbol: string, state: RootState) => {
+  const { pools, tokens } = state
+  let token: any
+  if (symbol === 'eth') {
+    token = Object.values(tokens.details).find(
+      (item: TokenData) => item.symbol === 'WETH'
+    )
+  } else {
+    token = Object.values(tokens.details).find(
+      (item: TokenData) => item.symbol === symbol
+    )
+  }
+  const balance = tokens.balances[token.id]
+  const pool = Object.values(pools.data).find(
+    (item: PoolData) =>
+      item.underlyingToken.toLowerCase() === token.address.toLowerCase()
+  )
+  return { symbol, token, pool, balance }
+}
 
 const Form = () => {
+  const state = useSelector((state: RootState) => state)
+  const { symbol, token, pool, balance } = poolData(state.form.symbol, state)
+
   const allowances = useSelector((state: RootState) => state.tokens.allowances)
   const web3 = useSelector((state: RootState) => state.web3)
   const form = useSelector((state: RootState) => state.form)
@@ -15,14 +44,12 @@ const Form = () => {
   const [value, setValue] = useState('0')
   const [isMax, setMax] = useState(false)
   const [approved, setApproved] = useState(
-    form.pool
-      ? !allowances[form.pool.underlyingToken + '@' + form.pool.address].eq(
+    pool
+      ? !allowances[pool.underlyingToken + '@' + pool.address].eq(
           BigNumber.from(0)
         )
       : false
   )
-
-  const { pool, balance, token, symbol, title, description } = form
 
   const readableBalance = balance
     .div(BigNumber.from('10').pow(BigNumber.from(token?.decimals)))
@@ -48,16 +75,16 @@ const Form = () => {
   }
 
   const handleSubmit = () => {
-    if (!form.pool || !web3.account || !token || !pool) return
+    if (!pool || !web3.account || !token || !pool) return
     if (!approved) {
-      const opHash = generateNewHash("APPROVE-");
+      const opHash = generateNewHash('APPROVE-')
 
       store.dispatch(
         actions.tokens.approveToken({
-          tokenAddress: form.pool?.underlyingToken,
-          to: form.pool?.address,
+          tokenAddress: pool?.underlyingToken,
+          to: pool?.address,
           account: web3.account,
-          opHash,
+          opHash
         })
       )
     } else {
@@ -74,14 +101,14 @@ const Form = () => {
   }
 
   const exit = () => {
-    store.dispatch(actions.form.toggleForm())
+    store.dispatch(actions.form.toggleForm(''))
     store.dispatch(actions.game.ChangeStage('PLAY'))
   }
 
   useEffect(() => {
     if (
-      form.pool &&
-      !allowances[form.pool.underlyingToken + '@' + form.pool.address].eq(
+      pool &&
+      !allowances[pool.underlyingToken + '@' + pool.address].eq(
         BigNumber.from(0)
       )
     ) {
@@ -95,8 +122,8 @@ const Form = () => {
         <ExitButton onClick={() => exit()}>✕</ExitButton>
 
         <Content>
-          <h2>{title}</h2>
-          <p>{description}</p>
+          <h2>{`Stake ${symbol.toUpperCase()} to Gearbox`}</h2>
+          <p>{depositLPDescription}</p>
         </Content>
 
         <FormContainer>

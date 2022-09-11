@@ -14,8 +14,6 @@ import { activate, declare } from '../../utils/web3'
 
 import { store } from '../../store'
 import actions from '../../store/actions'
-import { Token } from '../../store/form/reducer'
-import { PoolData, TokenData } from '@gearbox-protocol/sdk'
 
 interface Settings {
   width: number
@@ -161,31 +159,7 @@ class PlayerEntity extends Sprite {
 
             setTimeout(() => {
               const symbol = other.type.split('-')[1]
-
-              let token: any
-              if (symbol === 'eth') {
-                token = Object.values(state.tokens.details).find(
-                  (item: Token) => item.symbol === 'WETH'
-                )
-              } else {
-                token = Object.values(state.tokens.details).find(
-                  (item: Token) => item.symbol === symbol
-                )
-              }
-              // @ts-ignore
-              const balance = state.tokens.balances[token.id]
-              const pool = Object.values(state.pools.data).find(
-                // @ts-ignore
-                (item: PoolData) =>
-                  item.underlyingToken.toLowerCase() ===
-                  // @ts-ignore
-                  token.address.toLowerCase()
-              )
-              // @ts-ignore
-              store.dispatch(
-                actions.form.populateForm(symbol, token, pool, balance)
-              )
-              store.dispatch(actions.form.toggleForm())
+              store.dispatch(actions.form.toggleForm(symbol))
             }, 500)
 
             return false

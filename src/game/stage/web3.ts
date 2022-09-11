@@ -23,7 +23,7 @@ class Web3Screen extends Stage {
     input.bindKey(input.KEY.ESC, 'esc', true)
     event.once(event.KEYDOWN, function (action: string) {
       if (action === 'esc') {
-        store.dispatch(actions.form.toggleForm())
+        store.dispatch(actions.form.toggleForm(''))
         store.dispatch(actions.game.ChangeStage('PLAY'))
       }
     })
