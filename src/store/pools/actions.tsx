@@ -20,8 +20,9 @@ import { PoolThunkAction } from '.'
 export const getList = (): PoolThunkAction => async (dispatch, getState) => {
   try {
     const { dataCompressor, account } = getState().web3
+
     if (!dataCompressor) {
-      throw new Error('No account selected')
+      throw new Error('No account selected!')
     }
 
     const poolsPayload: Array<PoolDataPayload> = await callRepeater(() =>

@@ -54,7 +54,7 @@ export const activate = async (w: Wallets) => {
     //@ts-ignore
     await connector.enable() // need to extend Web3Provider interface
   }
-  const { dataCompressor, account } = store.getState()
+  const { dataCompressor } = store.getState().web3
   const chainId = CHAIN_ID
 
   try {

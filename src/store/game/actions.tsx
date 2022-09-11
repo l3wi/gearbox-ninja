@@ -104,7 +104,6 @@ export const BeginStage = (): GameThunkAction => async (dispatch, getState) => {
     // @ts-ignore
     game.world.addChild(player, 1)
 
-    console.log(game.world)
     dispatch({ type: 'BEGIN_STAGE' })
   } catch (e: any) {
     console.error('Error BeginStage(): ' + e)
