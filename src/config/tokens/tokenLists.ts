@@ -19,7 +19,7 @@ export const tokenDataList = objectEntries(currentTokenData).reduce<
     const addrLC = addr.toLowerCase();
     acc[addrLC] = new TokenData({ ...data, addr: addrLC });
   }
-
+  delete acc['todo: deploy me'] // Remove GEAR token placehodler
   return acc;
 }, {});
 
