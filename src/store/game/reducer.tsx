@@ -10,6 +10,8 @@ export interface Notification {
 export interface GameState {
   isInit: boolean
   isPaused: boolean
+  isIllegal: boolean
+  signRejected: boolean
   notification: Notification | null
   stages: Stages // Need to fix (Stage Class)
   lastPosition: { x: number; y: number }
@@ -20,6 +22,8 @@ export interface GameState {
 const initialState: GameState = {
   isInit: false,
   isPaused: false,
+  isIllegal: true,
+  signRejected: true,
   notification: null,
   stages: {},
   lastPosition: { x: 2175, y: 0 },
@@ -76,6 +80,12 @@ export function gameReducer(
         ...state,
         stages: { ...state.stages, [action.payload.key]: action.payload.stage }
       }
+      case 'SIGNED_MESSAGE':
+        return {
+          ...state,
+          isIllegal: action.payload.isIllegal,
+          signRejected: action.payload.signRejected,
+        }
   }
 
   return state

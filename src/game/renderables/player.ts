@@ -213,12 +213,12 @@ class PlayerEntity extends Sprite {
           // DECLARATION BARRIER COLLISION
         } else if (other.type === 'declare') {
           // If declared wall is passable
-          if (state.web3.notIllegal) {
+          if (!state.game.isIllegal) {
             return false
             // If running into & no declaration, prompt user
           } else if (
             !this.debounce &&
-            !state.web3.notIllegal &&
+            state.game.isIllegal &&
             input.isKeyPressed('left')
           ) {
             try {

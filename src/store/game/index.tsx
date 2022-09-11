@@ -27,6 +27,10 @@ export type GameActions =
       type: 'BEGIN_STAGE'
     }
   | {
+    type: 'SIGNED_MESSAGE'
+    payload: { isIllegal: boolean; signRejected?: boolean }
+  }
+  | {
       type: 'UPDATE_NOTIFICATION'
       payload: { notification: Notification | null }
     }
