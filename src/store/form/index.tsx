@@ -8,6 +8,7 @@ export type FormActions =
       type: 'TOGGLE_FORM'
       payload: {
         symbol: string
+        type: string
       }
     }
   | {

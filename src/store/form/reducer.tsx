@@ -5,11 +5,13 @@ import { FormActions } from './index'
 export interface FormState {
   isHidden: boolean
   symbol: string
+  type: string
 }
 
 const initialState: FormState = {
   isHidden: true,
-  symbol: ''
+  symbol: '',
+  type: ''
 }
 
 export function formReducer(
@@ -21,7 +23,8 @@ export function formReducer(
       return {
         ...state,
         isHidden: !state.isHidden,
-        symbol: action.payload.symbol
+        symbol: action.payload.symbol,
+        type: action.payload.type
       }
   }
 

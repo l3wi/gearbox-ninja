@@ -1,21 +1,56 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { RootState } from '../../store/reducer'
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
+
+import actions from '../../store/actions'
 
 import Pause from '../pause'
-import Form from '../pools'
+import PoolForm from '../pools'
+import StrategyFrom from '../strategy'
 import Notification from '../notification'
 import Video from '../video'
+import { BLOCK_UPDATE_DELAY } from '../../config'
 
 const Page = () => {
   const isPaused = useSelector((state: RootState) => state.game.isPaused)
   const form = useSelector((state: RootState) => state.form)
+  const provider = useSelector((state: RootState) => state.web3.provider)
+
+  const dispatch = useDispatch()
+  const [cron, setCron] = useState<number | undefined>()
+
+  useEffect(() => {
+    if (provider) {
+      if (cron) window.clearInterval(cron)
+
+      const syncTask = () => {
+        //@ts-ignore
+        dispatch(actions.sync.updateLastBlock(provider))
+      }
+
+      syncTask()
+      const updateTask = window.setInterval(syncTask, BLOCK_UPDATE_DELAY)
+
+      setCron(updateTask)
+    }
+
+    return function syncCleanup() {
+      if (cron) {
+        clearInterval(cron)
+        setCron(undefined)
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [provider?.connection.url])
+
   return (
     <Layout>
       {/* Paused */}
       {/* Forms */}
-      {!form.isHidden && <Form />}
+      {!form.isHidden && form.type === 'tube' ? <PoolForm /> : null}
+      {!form.isHidden && form.type === 'entrance' ? <StrategyFrom /> : null}
+
       {/* Notification */}
       {isPaused && <Pause />}
       <Notification />
