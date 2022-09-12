@@ -52,10 +52,10 @@ const Form = () => {
   }
 
   const readableBalance =
-    asset && balances
+    asset && balances[asset.address]
       ? balances[asset.address]
           .div(BigNumber.from('10').pow(BigNumber.from(asset.decimals)))
-          .toNumber()
+          .toString()
       : null
 
   const max = () => {
@@ -67,7 +67,7 @@ const Form = () => {
   }
 
   const disableSubmit = () => {
-    if (parseFloat(value) > readableBalance) return true
+    if (parseFloat(value) > parseFloat(readableBalance)) return true
     return false
   }
 
@@ -130,7 +130,7 @@ const Form = () => {
               ${new Intl.NumberFormat('en-US', {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 8
-              }).format(readableBalance)} 
+              }).format(parseFloat(readableBalance))} 
               ${asset.symbol.toUpperCase()}`}
             </span>
           </InputSuper>
