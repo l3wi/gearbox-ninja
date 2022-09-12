@@ -101,7 +101,7 @@ const Form = () => {
   }
 
   const exit = () => {
-    store.dispatch(actions.form.toggleForm(''))
+    store.dispatch(actions.form.toggleForm('', ''))
     store.dispatch(actions.game.ChangeStage('PLAY'))
   }
 
