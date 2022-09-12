@@ -158,8 +158,9 @@ class PlayerEntity extends Sprite {
             )
 
             setTimeout(() => {
+              const type = other.type.split('-')[0]
               const symbol = other.type.split('-')[1]
-              store.dispatch(actions.form.toggleForm(symbol))
+              store.dispatch(actions.form.toggleForm(symbol, type))
             }, 500)
 
             return false
@@ -191,9 +192,10 @@ class PlayerEntity extends Sprite {
             return false
             // If running into & no declaration, prompt user
           } else if (
-            !this.debounce &&
-            state.game.isIllegal &&
-            input.isKeyPressed('left')
+            (!this.debounce &&
+              state.game.isIllegal &&
+              input.isKeyPressed('left')) ||
+            input.isKeyPressed('right')
           ) {
             try {
               this.debounce = true
@@ -223,48 +225,23 @@ class PlayerEntity extends Sprite {
               actions.game.AddNotification('Press UP to enter', 100)
             )
           }
+          if (input.isKeyPressed('jump') && !this.debounce) {
+            // @ts-ignore
+            game.world.getChildByName('foreground')[0].setOpacity(1)
 
-          setTimeout(() => {
-            const symbol = other.type.split('-')[1]
-            console.log(symbol)
-            // let token: any
-            // if (symbol === 'eth') {
-            //   token = Object.values(state.tokens.details).find(
-            //     (item: Token) => item.symbol === 'WETH'
-            //   )
-            // } else {
-            //   token = Object.values(state.tokens.details).find(
-            //     (item: Token) => item.symbol === symbol
-            //   )
-            // }
-            // // @ts-ignore
-            // const balance = state.tokens.balances[token.id]
-            // const pool = Object.values(state.pools.data).find(
-            //   // @ts-ignore
-            //   (item: PoolData) =>
-            //     item.underlyingToken.toLowerCase() ===
-            //     // @ts-ignore
-            //     token.address.toLowerCase()
-            // )
-            // // @ts-ignore
-            // store.dispatch(
-            //   actions.form.populateForm(symbol, token, pool, balance)
-            // )
-            // store.dispatch(actions.form.toggleForm())
-          }, 500)
-
-          // Capture
-          // if (input.isKeyPressed('jump')) {
-          //   this.body.force.y = 0
-          //   // Trigger the entrance
-          //   const currentPos = this.pos
-          //   store.dispatch(
-          //     actions.game.ChangeStage('CREDITS', {
-          //       x: +currentPos._x.toFixed(2),
-          //       y: +(currentPos._y - 1).toFixed(2)
-          //     })
-          //   )
-          // }
+            const currentPos = this.pos
+            store.dispatch(
+              actions.game.ChangeStage('CREDITS', {
+                x: +currentPos._x.toFixed(2),
+                y: +(currentPos._y - 1).toFixed(2)
+              })
+            )
+            setTimeout(() => {
+              const type = other.type.split('-')[0]
+              const symbol = other.type.split('-')[1]
+              store.dispatch(actions.form.toggleForm(symbol, type))
+            }, 500)
+          }
 
           return false
         } else if (
