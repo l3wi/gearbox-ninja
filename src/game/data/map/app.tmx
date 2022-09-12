@@ -55,7 +55,6 @@
    <polyline points="0,0 1.25691,-683.761"/>
   </object>
   <object id="43" x="3251.83" y="431.707" width="9.51057" height="70.2319"/>
-  <object id="45" x="2749.07" y="-178.417" width="9.51057" height="124.789"/>
   <object id="48" x="1103.41" y="167.424">
    <properties>
     <property name="type" value="platform"/>
@@ -128,11 +127,6 @@
     <property name="type" value="platform"/>
    </properties>
    <polyline points="0,0 259.701,-0.721657"/>
-  </object>
-  <object id="68" x="2887.86" y="300.669" width="20.83" height="100.649">
-   <properties>
-    <property name="type" value="entrance"/>
-   </properties>
   </object>
   <object id="69" x="3638.98" y="329.743" width="17.7286" height="71.419">
    <properties>
