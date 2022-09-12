@@ -158,8 +158,8 @@ export const connectSigner =
           wethGateway
         }
       })
-      
-      dispatch(actions.tokens.getTokenBalances({account}))
+
+      dispatch(actions.tokens.getTokenBalances({ account }))
 
       const dataCompressorMultiCall = new MultiCallContract(
         dataCompressor.address,
@@ -280,7 +280,7 @@ export const connectSigner =
         }
       })
 
-      // dispatch(actions.pools.getList())
+      dispatch(actions.pools.getList())
       dispatch(restoreTransactions({ account, chainId, provider: library }))
       dispatch(actions.game.AddNotification('wallet connected', 3000))
     } catch (e: any) {
