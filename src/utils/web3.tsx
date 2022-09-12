@@ -48,6 +48,11 @@ export const activate = async (w: Wallets) => {
     // MM uses propmts prior to provider setup
     await window.ethereum?.enable()
     connector = walletsToConnectors[w]
+
+    if (parseInt(window.ethereum?.networkVersion) !== CHAIN_ID) {
+      store.dispatch(actions.game.AddNotification('Wrong Network', 3000))
+      return
+    }
   } else {
     // WC uses propmts post to provider setup
     connector = walletsToConnectors[w]
