@@ -18,6 +18,7 @@ import { BigNumber } from 'ethers'
 
 import { CHAIN_ID, MULTICALL_ADDRESS } from '../../config'
 import { captureException } from '../../utils/errors'
+import actions from '../actions'
 import { RootState } from '../index'
 import { getError, updateStatus } from '../operations'
 import { addPendingTransaction } from '../web3/transactions'
@@ -105,14 +106,17 @@ export const approveToken =
 
     try {
       dispatch(updateStatus(opHash, 'STATUS.WAITING'))
+      dispatch(actions.game.AddNotification('Waiting for user'))
       const token = await getTokenContract(getState, tokenAddress)
       const receipt = await token.approve(to, MAX_INT)
 
       dispatch(updateStatus(opHash, 'STATUS.LOADING'))
+      dispatch(actions.game.AddNotification('Approval Pending', 0))
       dispatch({
         type: 'TOKEN_VIRTUAL_ALLOWANCE',
         payload: { id, allowance: MAX_INT }
       })
+      await receipt.wait()
 
       dispatch(updateStatus(opHash, 'STATUS.SUCCESS'))
       const evmTx = new TxApprove({
@@ -130,6 +134,7 @@ export const approveToken =
           }
         })
       )
+      dispatch(actions.game.AddNotification('Token Approved', 2000))
     } catch (e: any) {
       dispatch({ type: 'TOKEN_DELETE_VIRTUAL_ALLOWANCE', payload: id })
       dispatch(updateStatus(opHash, 'STATUS.FAILURE', getError(e)))
