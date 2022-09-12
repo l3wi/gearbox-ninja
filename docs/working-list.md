@@ -13,21 +13,36 @@ Overview of the current state of the game & tasks completed
   - [x] Bridge
     - [ ] Rig bridge layers to allow crossing
   - [x] Strategy pagodas
-  - [ ] LP Deposit page background
-  - [ ] Strategy Deposit page background
-  - [ ] Signage
-    - [x] Inital spawn point
-- [ ] Animation
+  - [x] LP Deposit page background
+  - [x] Strategy Deposit page background
+  - [ ] Iceage Spawn banner
+  - [ ] Directional Signage @ Spawn
+  - [ ] McDonalds
+    - [ ] Interior
+    - [ ] Buttons
+- [x] Animation
   - [x] Running
   - [x] Jumping (initial jump jitter)
   - [x] Tube entry
-  - [ ] Pagoda entry
+  - [x] Pagoda entry
 - [ ] HUD
   - [x] Notfication toast
   - [ ] Strategy limit "Lives"
-- [ ] Pause Overlay
-  - [ ] Title / Subtitle / Body text
-  - [ ] 0.5a overlay
+- [x] Pause Overlay
+  - [x] Title / Subtitle / Body text
+  - [x] 0.5a overlay
+
+### Text
+
+- [ ] Pool
+  - [ ] Title
+  - [ ] Description
+- [ ] Strategy
+  - [ ] Title Description
+- [ ] McDonalds
+  - [ ] Title 
+  - [ ] Description
+  - [ ] Buttons
 
 ### UI Dev
 
@@ -48,12 +63,14 @@ Overview of the current state of the game & tasks completed
   - [x] Check Network Alert
   - [x] Trigger Fetches
 - [x] **Disconnect/Reset**
+- [ ] **Auto Reconnect**
+- [ ] **Save declaration localhost**
 - [x] **Sign Non-USA declaration**
 - [ ] **Fetching**
   - [x] Fetch Pools
   - [x] Fetch Balances
   - [ ] Fetch Whitelist NFT
-  - [ ] Fetch Strategies
+  - [x] Fetch Strategies
   - [x] Fetch APYs
 
 - [ ] **Sending**
