@@ -1,36 +1,34 @@
-import { BigNumber, ethers } from 'ethers'
 import {
   Asset,
   CreditManagerData,
   getNetworkType,
   ICreditFacade__factory,
+  isTokenWithAPY,
   LPTokenDataI,
   LPTokens,
   LpTokensAPY,
   PRICE_DECIMALS,
   Strategy,
+  tokenSymbolByAddress,
   TxOpenMultitokenAccount
 } from '@gearbox-protocol/sdk'
 import { updateStatus } from '../operations'
+import { BigNumber, ethers } from 'ethers'
 
 import { CHAIN_ID } from '../../config'
-import { TradePath } from '../../config/closeTradePath'
 import { strategiesPayload } from '../../config/strategy'
-import { connectorTokenAddresses } from '../../config/tokens/tokenLists'
 import { captureException } from '../../utils/errors'
-
-import { getError } from '../operations'
-import { getSignerOrThrow } from '../web3'
-import { addPendingTransaction } from '../web3/transactions'
-import { getTokenBalances } from '../tokens/actions'
-
+import { generateNewHash } from '../../utils/opHash'
 import {
   getByCreditManager,
   getList as caGetList,
   openInProgressByCreditManager,
   removeOpenInProgressByCreditManager
 } from '../creditAccounts/actions'
-
+import { getError } from '../operations'
+import { getTokenBalances } from '../tokens/actions'
+import { getSignerOrThrow } from '../web3'
+import { addPendingTransaction } from '../web3/transactions'
 import {
   getAPYValue,
   getConvexAPY,
@@ -38,7 +36,7 @@ import {
   getLidoAPY,
   getYearnAPY
 } from './apy'
-import { StrategyThunkAction } from './index'
+import { StrategyAction, StrategyPath, StrategyThunkAction } from './index'
 
 const memoProvidePrice =
   (prices: Record<string, BigNumber>) =>
@@ -83,10 +81,10 @@ export const getApy =
 
       dispatch({
         type: 'SET_APY_BULK',
-        payload: { ...lpTokenAPY, LDO: ldo }
+        payload: { ...lpTokenAPY, STETH: ldo }
       })
     } catch (e: any) {
-      console.error('store/strategy/actions', 'Cant getApy', e)
+      captureException('store/strategy/actions', 'Cant getApy', e)
     }
   }
 
@@ -96,9 +94,17 @@ export const getStrategies =
     try {
       const strategies = strategiesPayload.reduce<Record<string, Strategy>>(
         (acc, payload) => {
+          const symbol = tokenSymbolByAddress[payload.lpToken]
+          if (!isTokenWithAPY(symbol)) {
+            console.error(
+              `Strategy LP token has no apy: ${payload.lpToken} ${symbol}`
+            )
+            return acc
+          }
+
           acc[payload.lpToken] = new Strategy({
             ...payload,
-            apy: apys[payload.apyTokenSymbol] || 0
+            apy: apys[symbol] || 0
           })
           return acc
         },
@@ -110,56 +116,82 @@ export const getStrategies =
         payload: strategies
       })
     } catch (e: any) {
-      console.error('store/pice/actions', 'Cant getStrategies', e)
+      captureException('store/pice/actions', 'Cant getStrategies', e)
     }
   }
 
+export const clearOpenStrategyPath = (): StrategyAction => ({
+  type: 'CLEAR_STRATEGY_OPEN_PATH'
+})
+
 interface GetOpenStrategyPathProps {
-  creditManagerAddress: string
+  creditManager: CreditManagerData
   targetTokenAddress: string
   assets: Array<Asset>
+  slippage: number
 }
 
 export const getOpenStrategyPath =
   ({
-    creditManagerAddress,
+    creditManager,
     assets,
-    targetTokenAddress
+    targetTokenAddress,
+    slippage
   }: GetOpenStrategyPathProps): StrategyThunkAction =>
   async (dispatch, getState) => {
+    const openId = generateNewHash('')
     try {
-      const slippage = 50
       const {
         web3: { pathFinder }
       } = getState()
       if (!pathFinder) throw new Error('pathfinder is undefined')
 
-      const [gotBalances, path] =
-        await pathFinder.callStatic.findOpenStrategyPath(
-          creditManagerAddress,
-          assets,
-          targetTokenAddress,
-          connectorTokenAddresses,
-          slippage
-        )
+      dispatch({ type: 'UPDATE_STRATEGY_OPEN_ID', payload: openId })
+
+      const record = assets.reduce<Record<string, BigNumber>>((acc, asset) => {
+        acc[asset.token] = asset.balance
+        return acc
+      }, {})
+
+      const { balances, calls } = await pathFinder.findOpenStrategyPath(
+        creditManager,
+        record,
+        targetTokenAddress,
+        slippage
+      )
+
+      const resultAssets = Object.entries(balances).reduce<Array<Asset>>(
+        (acc, [token, balance]) => {
+          acc.push({ token, balance })
+          return acc
+        },
+        []
+      )
 
       dispatch({
-        type: 'SET_STRATEGY_PATH',
-        payload: { balances: gotBalances, path }
+        type: 'SET_STRATEGY_OPEN_PATH',
+        payload: {
+          strategyPath: {
+            balances: resultAssets,
+            calls
+          },
+          openId
+        }
       })
     } catch (e: any) {
-      console.error('store/strategy/actions', 'Cant getStrategies', e)
+      captureException('store/strategy/actions', 'Cant getStrategies', e)
       dispatch({
-        type: 'SET_STRATEGY_PATH',
-        payload: { balances: [], path: {} as TradePath }
+        type: 'STRATEGY_OPEN_PATH_NOT_FOUND',
+        payload: openId
       })
     }
   }
+
 export interface OpenStrategyProps {
   creditManager: CreditManagerData
-  path: TradePath
+  strategyPath: StrategyPath
+  wrappedCollateral: Array<Asset>
   borrowedAmount: BigNumber
-  wrappedAssets: Array<Asset>
   ethAmount: BigNumber
   opHash: string
   chainId?: number
@@ -168,9 +200,9 @@ export interface OpenStrategyProps {
 export const openStrategy =
   ({
     creditManager,
-    path,
+    strategyPath,
+    wrappedCollateral,
     borrowedAmount,
-    wrappedAssets,
     ethAmount,
     opHash = '0',
     chainId = CHAIN_ID
@@ -191,12 +223,15 @@ export const openStrategy =
       )
       const account = await signer.getAddress()
 
-      const calls = path.calls
+      const collateralCalls = wrappedCollateral.map(
+        ({ token: tokenAddress, balance: amount }) =>
+          creditManager.encodeAddCollateral(account, tokenAddress, amount)
+      )
 
       const receipt = await creditFacade.openCreditAccountMulticall(
         borrowedAmount,
         account,
-        calls,
+        [...collateralCalls, ...strategyPath.calls],
         0,
         { value: ethAmount }
       )
@@ -209,7 +244,9 @@ export const openStrategy =
         timestamp: receipt.timestamp || 0,
         borrowedAmount,
         underlyingToken,
-        assets: wrappedAssets.map(({ token: tokenAddress }) => tokenAddress)
+        assets: strategyPath.balances
+          .filter(({ balance }) => balance.gt(1))
+          .map(({ token: tokenAddress }) => tokenAddress)
       })
 
       dispatch(

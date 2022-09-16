@@ -2,6 +2,7 @@ import {
   getLidoAPY as getLidoAPYSdk,
   LIDO_FEE_DECIMALS,
   PERCENTAGE_DECIMALS,
+  PERCENTAGE_FACTOR,
   toSignificant,
   WAD_DECIMALS_POW
 } from '@gearbox-protocol/sdk'
@@ -25,5 +26,7 @@ export async function getLidoAPY(...props: LidoAPYProps) {
     .mul(PERCENTAGE_DECIMALS)
     .div(LIDO_FEE_DECIMALS)
 
-  return Number(toSignificant(apyInPercent, WAD_DECIMALS_POW))
+  return Math.round(
+    Number(toSignificant(apyInPercent.mul(PERCENTAGE_FACTOR), WAD_DECIMALS_POW))
+  )
 }

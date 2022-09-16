@@ -1,7 +1,7 @@
 import {
   EVMTx,
   IDataCompressor,
-  IPathFinder,
+  PathFinder,
   IWETHGateway
 } from '@gearbox-protocol/sdk'
 import { BigNumberish, providers, Signer } from 'ethers'
@@ -18,7 +18,7 @@ export interface Web3State {
   gearTokenAddress?: string
   wethGateway?: IWETHGateway
   wethTokenAddress?: string
-  pathFinder?: IPathFinder
+  pathFinder?: PathFinder
 
   status: Web3Status
   error?: Web3Error

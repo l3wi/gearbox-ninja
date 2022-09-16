@@ -56,8 +56,7 @@ const Form = () => {
       ? balances[asset.address]
           .div(BigNumber.from('10').pow(BigNumber.from(asset.decimals)))
           .toString()
-      : null
-
+      : '0'
   const max = () => {
     // const value = balance
     //   .div(BigNumber.from('10').pow(BigNumber.from(token?.decimals)))
@@ -169,7 +168,7 @@ const Form = () => {
             disabled={disableSubmit()}
             onClick={() => handleSubmit()}
           >
-            Deposit
+            {disableSubmit() ? 'Insufficent Balance' : 'deposit'}
           </SubmitButton>
         </FormContainer>
         <span />

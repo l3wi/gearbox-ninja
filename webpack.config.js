@@ -1,5 +1,6 @@
 const path = require('path')
 const fs = require('fs')
+require('dotenv').config()
 
 const ReactRefreshPlugin = require('@pmmmwh/react-refresh-webpack-plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin')

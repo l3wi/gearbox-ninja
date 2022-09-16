@@ -1,7 +1,4 @@
-import {
-  CreditAccountData,
-  CreditAccountDataExtended
-} from '@gearbox-protocol/sdk'
+import { CreditAccountData } from '@gearbox-protocol/sdk'
 import { OperationActions } from '../operations'
 import { ThunkAction } from 'redux-thunk'
 
@@ -19,7 +16,7 @@ export type CreditAccountsAction =
     }
   | {
       type: 'CREDIT_ACCOUNT_DETAILS_SUCCESS'
-      payload: { address: string; ca: CreditAccountDataExtended }
+      payload: { address: string; ca: CreditAccountData }
     }
   | {
       type: 'CREDIT_ACCOUNT_DETAILS_FAILURE'

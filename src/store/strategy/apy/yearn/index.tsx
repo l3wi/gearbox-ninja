@@ -2,6 +2,7 @@ import {
   getYearnAPY as getYearnAPYSdk,
   objectEntries,
   PERCENTAGE_DECIMALS,
+  PERCENTAGE_FACTOR,
   toSignificant,
   WAD_DECIMALS_POW,
   YearnAPYResult
@@ -15,7 +16,11 @@ export async function getYearnAPY(): Promise<YearnApy> {
   const yearnMap = objectEntries(yearn).reduce<YearnApy>(
     (acc, [yearnSymbol, apy]) => {
       const apyInPercent = apy.mul(PERCENTAGE_DECIMALS)
-      acc[yearnSymbol] = Number(toSignificant(apyInPercent, WAD_DECIMALS_POW))
+      acc[yearnSymbol] = Math.round(
+        Number(
+          toSignificant(apyInPercent.mul(PERCENTAGE_FACTOR), WAD_DECIMALS_POW)
+        )
+      )
       return acc
     },
     {} as YearnApy

@@ -8,12 +8,12 @@ import {
   ICreditManager__factory,
   IDataCompressor,
   IDataCompressor__factory,
-  IPathFinder__factory,
   IPoolService__factory,
   IWETHGateway__factory,
   MultiCallContract,
   PoolData,
-  PoolDataPayload
+  PoolDataPayload,
+  PathFinder
 } from '@gearbox-protocol/sdk'
 import { providers } from 'ethers'
 
@@ -22,6 +22,7 @@ import {
   ADDRESS_PROVIDER,
   CHAIN_ID,
   JSON_RPC_PROVIDER,
+  CHAIN_TYPE,
   PATHFINDER
 } from '../../config'
 import { captureException } from '../../utils/errors'
@@ -72,6 +73,7 @@ export const updateProvider =
         wethGateWayAddress,
         gearTokenAddress,
         wethTokenAddress
+        // pathfinder
       ] = await callRepeater(() =>
         addressProviderMultiCall.call([
           {
@@ -86,6 +88,9 @@ export const updateProvider =
           {
             method: 'getWethToken()'
           }
+          // {
+          //   method: 'getLeveragedActions()'
+          // }
         ])
       )
 
@@ -107,7 +112,7 @@ export const updateProvider =
           gearTokenAddress,
           wethGateway,
           wethTokenAddress,
-          pathFinder: IPathFinder__factory.connect(PATHFINDER, provider)
+          pathFinder: new PathFinder(PATHFINDER, provider, CHAIN_TYPE)
         }
       })
     } catch (e: any) {
@@ -179,7 +184,7 @@ export const connectSigner =
           }
         ])
       )
-
+      console.log('here')
       const isListenersConnected = getState().web3.listeners[account]
       dispatch({ type: 'LISTENERS_ADDED', payload: account })
 

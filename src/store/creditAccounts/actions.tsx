@@ -1,8 +1,6 @@
 import {
   callRepeater,
   CreditAccountData,
-  CreditAccountDataExtended,
-  CreditAccountDataExtendedPayload,
   CreditAccountDataPayload,
   NetworkError,
   UserHasNotAccountError
@@ -63,12 +61,12 @@ export const getByCreditManager =
         })
         return
       }
-      const creditAccountPayload: CreditAccountDataExtendedPayload =
-        await callRepeater(() =>
+      const creditAccountPayload: CreditAccountDataPayload = await callRepeater(
+        () =>
           dataCompressor.getCreditAccountData(creditManagerAddressLC, account)
-        )
+      )
 
-      const ca = new CreditAccountDataExtended(creditAccountPayload)
+      const ca = new CreditAccountData(creditAccountPayload)
 
       dispatch({
         type: 'CREDIT_ACCOUNT_DETAILS_SUCCESS',

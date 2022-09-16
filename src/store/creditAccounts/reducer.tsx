@@ -1,15 +1,12 @@
 /* eslint-disable default-param-last, @typescript-eslint/default-param-last */
-import {
-  CreditAccountData,
-  CreditAccountDataExtended
-} from '@gearbox-protocol/sdk'
+import { CreditAccountData } from '@gearbox-protocol/sdk'
 
 import type { CreditAccountsAction } from '.'
 
 export interface CreditAccountsState {
   list: Record<string, CreditAccountData> | null
   listError: Error | undefined
-  details: Record<string, CreditAccountDataExtended | Error>
+  details: Record<string, CreditAccountData | Error>
   openInProgress: Record<string, boolean>
   deleteInProgress: Record<string, boolean>
 }

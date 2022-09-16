@@ -1,15 +1,14 @@
-
 import { BigNumberish, ethers, Signer } from 'ethers'
 import { ThunkAction } from 'redux-thunk'
 import {
   EVMTx,
   IDataCompressor,
-  IPathFinder,
+  PathFinder,
   IWETHGateway
 } from '@gearbox-protocol/sdk'
 
-import { CreditAccountsAction } from "../creditAccounts";
-import { TokenAction } from "../tokens";
+import { CreditAccountsAction } from '../creditAccounts'
+import { TokenAction } from '../tokens'
 import { RootState } from '../index'
 import { Wallets } from '../../config/connectors'
 
@@ -33,7 +32,7 @@ export type Web3Actions =
         dataCompressor: IDataCompressor
         gearTokenAddress: string
         wethTokenAddress: string
-        pathFinder: IPathFinder
+        pathFinder: PathFinder
       }
     }
   | {
@@ -71,7 +70,12 @@ export type Web3Actions =
       payload: { account: string; txs: Array<EVMTx> }
     }
 
-export type ThunkWeb3Action = ThunkAction<void, RootState, unknown, Web3Actions | CreditAccountsAction | TokenAction>
+export type ThunkWeb3Action = ThunkAction<
+  void,
+  RootState,
+  unknown,
+  Web3Actions | CreditAccountsAction | TokenAction
+>
 
 export function getSignerOrThrow(getState: () => RootState): Signer {
   const { signer } = getState().web3

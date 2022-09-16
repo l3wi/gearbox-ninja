@@ -7,13 +7,15 @@ import { StrategyAction, StrategyPath } from './index'
 export interface StrategyState {
   apyList: LpTokensAPY | undefined
   strategies: Record<string, Strategy>
-  strategyPath: null | StrategyPath
+  strategyPath: null | undefined | StrategyPath
+  openId: string
 }
 
 const initialState: StrategyState = {
   apyList: undefined,
   strategies: DEFAULT_STRATEGIES,
-  strategyPath: null
+  strategyPath: null,
+  openId: ''
 }
 
 export function strategyReducer(
@@ -31,11 +33,31 @@ export function strategyReducer(
         ...state,
         strategies: action.payload
       }
-    case 'SET_STRATEGY_PATH':
+
+    case 'CLEAR_STRATEGY_OPEN_PATH':
       return {
         ...state,
-        strategyPath: action.payload
+        strategyPath: null
       }
+    case 'UPDATE_STRATEGY_OPEN_ID':
+      return {
+        ...state,
+        openId: action.payload
+      }
+    case 'SET_STRATEGY_OPEN_PATH':
+      return action.payload.openId === state.openId
+        ? {
+            ...state,
+            strategyPath: action.payload.strategyPath
+          }
+        : state
+    case 'STRATEGY_OPEN_PATH_NOT_FOUND':
+      return action.payload === state.openId
+        ? {
+            ...state,
+            strategyPath: undefined
+          }
+        : state
     default:
       return state
   }

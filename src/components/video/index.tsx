@@ -6,8 +6,8 @@ const Video = () => {
   const videoRef: any = React.createRef()
 
   const hide = () => {
-    videoRef.current.pause()
     setVisible(false)
+    videoRef.current.pause()
   }
 
   return (
@@ -63,7 +63,7 @@ const Container = styled.div<{ visible: boolean }>`
   height: 100vh;
   overflow: hidden;
   visibility: ${(props) => (props.visible ? 'visible' : 'hidden')};
-  animation: ${(props) => !props.visible && fadeOut} 0.5s ease-out;
+  animation: ${(props) => !props.visible && fadeOut} 1s ease-out;
   transition: visibility 1s linear;
   background: black;
 `

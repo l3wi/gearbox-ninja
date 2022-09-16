@@ -3,6 +3,7 @@ import {
   getCurveAPY as getCurveAPYSdk,
   objectEntries,
   PERCENTAGE_DECIMALS,
+  PERCENTAGE_FACTOR,
   toSignificant,
   WAD_DECIMALS_POW
 } from '@gearbox-protocol/sdk'
@@ -15,7 +16,11 @@ export async function getCurveAPY(): Promise<[CurveApy, CurveAPYResult]> {
   const crvMap = objectEntries(crv).reduce<CurveApy>(
     (acc, [crvSymbol, apy]) => {
       const apyInPercent = apy.mul(PERCENTAGE_DECIMALS)
-      acc[crvSymbol] = Number(toSignificant(apyInPercent, WAD_DECIMALS_POW))
+      acc[crvSymbol] = Math.round(
+        Number(
+          toSignificant(apyInPercent.mul(PERCENTAGE_FACTOR), WAD_DECIMALS_POW)
+        )
+      )
       return acc
     },
     {} as CurveApy

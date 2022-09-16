@@ -3,6 +3,7 @@ import {
   getConvexAPY as getConvexAPYSdk,
   GetConvexAPYProps,
   PERCENTAGE_DECIMALS,
+  PERCENTAGE_FACTOR,
   toSignificant,
   WAD_DECIMALS_POW
 } from '@gearbox-protocol/sdk'
@@ -34,7 +35,11 @@ export async function getConvexAPY(
         ? res.value.mul(PERCENTAGE_DECIMALS)
         : BigNumber.from(0)
 
-    acc[poolName] = Number(toSignificant(apyInPercent, WAD_DECIMALS_POW))
+    acc[poolName] = Math.round(
+      Number(
+        toSignificant(apyInPercent.mul(PERCENTAGE_FACTOR), WAD_DECIMALS_POW)
+      )
+    )
     return acc
   }, {} as ConvexAPY)
 

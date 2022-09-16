@@ -1,142 +1,86 @@
 import {
-  AdapterInterface,
   BaseAdapter,
-  ContractParams,
   contractParams,
   contractsByAddress,
+  CreditAccountData,
   CreditManagerData,
-  IPathFinder,
-  IPathFinder__factory,
-  SwapType,
-  Trade
+  ICreditFacade,
+  ICreditFacade__factory,
+  isSupportedContract,
+  PathFinder,
+  SupportedContract,
+  SwapOperation,
+  Trade,
+  TxParser
 } from '@gearbox-protocol/sdk'
-import { SwapTaskStruct } from '@gearbox-protocol/sdk/lib/types/contracts/pathfinder/interfaces/IPathFinder'
+import { MultiCall } from '@gearbox-protocol/sdk/lib/pathfinder/core'
 import { BigNumber, Signer } from 'ethers'
 
-import { CurveAdapter } from './adapter/curve'
-import { UniswapV2Adapter } from './adapter/uniswapV2'
-import { UniswapV3Adapter } from './adapter/uniswapV3'
-// import { YearnAdapter } from './adapter/yearn'
-import { connectorTokenAddresses } from './tokens/tokenLists'
+import { captureException } from '../utils/errors'
+import { currentContractsData } from './contracts'
 
 interface AdapterManagerProps {
   creditManager: CreditManagerData
-  adapters: Array<BaseAdapter>
-  wethToken: string
   signer: Signer
-  pathFinder: string
-  connectors: Array<string>
+  pathFinder: PathFinder
 }
 
-interface GetPathsProps {
-  swapType: SwapType
+export interface GetOneTokenPathProps {
   from: string
   to: string
   amount: BigNumber
-  creditAccount: string
+  creditAccount: CreditAccountData
   slippage: number
+}
+
+export interface GetPathsProps extends GetOneTokenPathProps {
+  swapType: SwapOperation
 }
 
 export class AdapterManager {
   readonly id: string
-
-  readonly pathFinder: IPathFinder
-
+  readonly pathFinder: PathFinder
+  readonly creditFacade: ICreditFacade
   readonly adapters: Record<string, BaseAdapter>
-
-  readonly connectors: Array<string>
-
   readonly creditManager: CreditManagerData
+  constructor({ creditManager, signer, pathFinder }: AdapterManagerProps) {
+    const { creditFacade: creditFacadeAddress, adapters } = creditManager
 
-  readonly tokens: Record<string, true>
-
-  readonly wethToken: string
-
-  readonly signer: Signer
-
-  protected constructor({
-    creditManager,
-    adapters,
-    wethToken,
-    signer,
-    pathFinder,
-    connectors
-  }: AdapterManagerProps) {
     this.id = creditManager.id.toLowerCase()
-    this.adapters = adapters.reduce<Record<string, BaseAdapter>>((acc, a) => {
-      acc[a.contractAddress.toLowerCase()] = a
+    this.creditManager = creditManager
+
+    this.adapters = Object.entries(adapters).reduce<
+      Record<string, BaseAdapter>
+    >((acc, [contractAddress, adapterAddress]) => {
+      const contractSymbol = contractsByAddress[contractAddress]
+      if (!contractSymbol) {
+        console.error('Contract not found', contractAddress)
+        return acc
+      }
+
+      const params = contractParams[contractSymbol]
+      if (!params) {
+        console.error('Contract params not found', contractSymbol)
+        return acc
+      }
+
+      acc[contractAddress] = new BaseAdapter({
+        name: params.name,
+        adapterInterface: params.type,
+        contractAddress,
+        adapterAddress,
+        contractSymbol,
+        creditManager: creditManager.address
+      })
+
       return acc
     }, {})
-    this.connectors = connectors
-    this.creditManager = creditManager
-    this.wethToken = wethToken.toLowerCase()
-    this.tokens = creditManager.allowedTokens.reduce<Record<string, true>>(
-      (acc, t) => {
-        acc[t.toLowerCase()] = true
-        return acc
-      },
-      {}
+
+    this.creditFacade = ICreditFacade__factory.connect(
+      creditFacadeAddress,
+      signer
     )
-    this.signer = signer
-    this.pathFinder = IPathFinder__factory.connect(pathFinder, signer)
-  }
-
-  static async connectAdapterManager({
-    creditManager,
-    pathFinder,
-    signer,
-    wethToken,
-    connectors
-  }: {
-    creditManager: CreditManagerData
-    pathFinder: string
-    signer: Signer
-    wethToken: string
-    connectors: Array<string>
-  }): Promise<AdapterManager> {
-    const { adapters: cmAdapters } = creditManager
-
-    const adaptersList = await Promise.all(
-      Object.entries(cmAdapters).reduce<Array<Promise<BaseAdapter>>>(
-        (acc, [contractAddr, adapterAddr]) => {
-          const contractName = contractsByAddress[contractAddr]
-          if (!contractName) {
-            console.warn('Contract not found', contractAddr)
-            return acc
-          }
-
-          const params = contractParams[contractName]
-          if (!params) {
-            console.warn('Contract params not found', contractName)
-            return acc
-          }
-
-          const adapter = connectAdapter(
-            contractAddr,
-            adapterAddr,
-            pathFinder,
-            wethToken,
-            params,
-            creditManager,
-            signer
-          )
-
-          if (adapter) acc.push(adapter)
-
-          return acc
-        },
-        []
-      )
-    )
-
-    return new AdapterManager({
-      creditManager,
-      adapters: adaptersList,
-      wethToken,
-      signer,
-      pathFinder,
-      connectors
-    })
+    this.pathFinder = pathFinder
   }
 
   async findAllSwaps({
@@ -147,96 +91,154 @@ export class AdapterManager {
     creditAccount,
     slippage
   }: GetPathsProps): Promise<Array<Trade>> {
-    const started = Date.now()
+    try {
+      const results = await this.pathFinder.findAllSwaps(
+        creditAccount,
+        swapType,
+        from,
+        to,
+        amount,
+        slippage
+      )
 
-    const struct: SwapTaskStruct = {
-      swapOperation: swapType,
-      creditAccount,
-      tokenIn: from,
-      tokenOut: to,
-      connectors: connectorTokenAddresses,
-      amount,
-      slippage,
-      externalSlippage: false
+      const trades = results.reduce<Array<Trade>>((acc, tradePath) => {
+        const { calls } = tradePath
+        const callAdapters = getCallAdapters(
+          calls,
+          this.adapters,
+          this.creditManager
+        )
+
+        const trade = new Trade({
+          tradePath,
+          creditFacade: this.creditFacade,
+          adapter: callAdapters[0],
+          swapType: SwapOperation.EXACT_INPUT,
+          sourceAmount: amount,
+          expectedAmount: tradePath.amount,
+          tokenFrom: from,
+          tokenTo: to,
+          operationName: Trade.getOperationName(from, to)
+        })
+
+        acc.push(trade)
+
+        return acc
+      }, [])
+
+      return sortTrades(trades, '')
+    } catch (e: any) {
+      captureException(
+        'adapterManager/findOneTokenPath',
+        'Cant get single trade path',
+        e
+      )
+      return []
     }
+  }
 
-    console.debug('TRADE PARAMS', struct)
+  async findOneTokenPath({
+    from,
+    to,
+    amount,
+    creditAccount,
+    slippage
+  }: GetOneTokenPathProps): Promise<Trade | undefined> {
+    try {
+      const tradePath = await this.pathFinder.findOneTokenPath(
+        creditAccount,
+        from,
+        to,
+        amount,
+        slippage
+      )
 
-    const results = await this.pathFinder.callStatic.findAllSwaps(struct)
+      const callAdapters = getCallAdapters(
+        tradePath.calls,
+        this.adapters,
+        this.creditManager
+      )
 
-    console.debug('findAllSwaps', results)
+      const trade = new Trade({
+        tradePath,
+        creditFacade: this.creditFacade,
+        adapter: callAdapters[0],
+        swapType: SwapOperation.EXACT_INPUT,
+        sourceAmount: amount,
+        expectedAmount: tradePath.amount,
+        tokenFrom: from,
+        tokenTo: to,
+        operationName: Trade.getOperationName(from, to)
+      })
 
-    const trades = results.reduce<Array<Trade>>((acc, tp) => {
-      const { calls } = tp
-      const adapterAddress = calls[0].target.toLowerCase()
-      const adapter = this.adapters[adapterAddress]
-
-      if (!adapter) console.debug('ADAPTER NOT FOUND', adapterAddress)
-
-      if (adapter) acc.push(Trade.connect({ tradePath: tp, adapter }))
-
-      return acc
-    }, [])
-
-    console.debug(`PATH FINDER: ${Date.now() - started}ms`)
-
-    return trades
+      return trade
+    } catch (e: any) {
+      captureException(
+        'adapterManager/findOneTokenPath',
+        'Cant get single trade path',
+        e
+      )
+      return undefined
+    }
   }
 }
 
-function connectAdapter(
-  contractAddr: string,
-  adapterAddr: string,
-  pathFinder: string,
-  wethToken: string,
-  cParams: ContractParams,
-  creditManager: CreditManagerData,
-  signer: Signer
+function getCallAdapters(
+  calls: Array<MultiCall>,
+  adapters: Record<string, BaseAdapter>,
+  cm: CreditManagerData
 ) {
-  const { name } = cParams
-  const { address: cmAddress } = creditManager
+  const callAdapters = calls.reduce<Array<BaseAdapter>>((acc, call) => {
+    const { contract: contractSymbol } = TxParser.getParseData(call.target)
+    if (!isSupportedContract(contractSymbol)) return acc
 
-  switch (cParams.type) {
-    case AdapterInterface.UNISWAP_V2_ROUTER:
-      return UniswapV2Adapter.connectAdapter(
-        name,
-        contractAddr,
-        adapterAddr,
-        pathFinder,
-        signer,
-        cmAddress,
-        wethToken
-      )
-    case AdapterInterface.UNISWAP_V3_ROUTER:
-      if (!cParams.quoter) throw new Error('incorrect quoter')
-      return UniswapV3Adapter.connectAdapter(
-        name,
-        contractAddr,
-        adapterAddr,
-        cParams.quoter,
-        pathFinder,
-        signer,
-        cmAddress,
-        wethToken
-      )
-    case AdapterInterface.CURVE_V1_3ASSETS:
-      return CurveAdapter.connectAdapter(
-        name,
-        contractAddr,
-        adapterAddr,
-        cParams.tokens,
-        signer,
-        cmAddress
-      )
-    // case AdapterInterface.YEARN_V2:
-    //   return YearnAdapter.connectAdapter(
-    //     name,
-    //     contractAddr,
-    //     adapterAddr,
-    //     signer,
-    //     cmAddress
-    //   )
-    default:
-      return null
-  }
+    const contractAddress = currentContractsData[contractSymbol]
+    const adapter =
+      adapters[contractAddress] || connectAdapter(contractSymbol, cm)
+
+    acc.push(adapter)
+
+    return acc
+  }, [])
+
+  return callAdapters
+}
+
+function connectAdapter(
+  contractSymbol: SupportedContract,
+  cm: CreditManagerData
+) {
+  const { name, type } = contractParams[contractSymbol]
+  const contractAddress = currentContractsData[contractSymbol]
+
+  return new BaseAdapter({
+    name,
+    adapterInterface: type,
+    adapterAddress: '',
+    contractAddress,
+    contractSymbol,
+    creditManager: cm.address
+  })
+}
+
+function sortTrades(trades: Array<Trade>, swapStrategy: string) {
+  if (trades.length === 0) return []
+
+  const { swapType } = trades[0]
+
+  const sorted = trades.sort((a, b) => {
+    const aSelected =
+      a.getName().toLowerCase().search(swapStrategy.toLowerCase()) >= 0
+    const bSelected =
+      b.getName().toLowerCase().search(swapStrategy.toLowerCase()) >= 0
+
+    if ((aSelected && bSelected) || (!aSelected && !bSelected)) {
+      const sign = a.expectedAmount.gt(b.expectedAmount) ? -1 : 1
+      return swapType === SwapOperation.EXACT_INPUT ? sign : -sign
+    }
+
+    return aSelected ? -1 : 1
+  })
+
+  return sorted
 }

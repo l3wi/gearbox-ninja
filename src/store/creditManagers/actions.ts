@@ -5,7 +5,9 @@ import {
   CreditManagerDataPayload,
   ICreditFacade__factory,
   NetworkError,
+  PathFinderCloseResult,
   TxAddCollateral,
+  TxCloseAccount,
   TxIncreaseBorrowAmount,
   TxOpenMultitokenAccount,
   TxRepayAccount
@@ -15,8 +17,6 @@ import { BigNumber, ethers, Signer } from 'ethers'
 
 import { CHAIN_ID, PATHFINDER } from '../../config'
 import { AdapterManager } from '../../config/adapterManager'
-import { TradePath } from '../../config/closeTradePath'
-import { connectorTokenAddresses } from '../../config/tokens/tokenLists'
 import { captureException } from '../../utils/errors'
 import {
   deleteByCreditManager,
@@ -36,8 +36,9 @@ export const getList =
   (provider: Signer | ethers.providers.Provider): CreditManagerThunkAction =>
   async (dispatch, getState) => {
     try {
-      const { dataCompressor, wethTokenAddress } = getState().web3
+      const { dataCompressor, pathFinder } = getState().web3
       if (!dataCompressor) throw new Error('dataCompressor is undefined')
+      if (!pathFinder) throw new Error('pathFinder is undefined')
 
       const creditManagersPayload: Array<CreditManagerDataPayload> =
         await callRepeater(() => dataCompressor.getCreditManagersList())
@@ -52,12 +53,10 @@ export const getList =
       const adaptersRes = await Promise.all(
         creditManagersPayload.map((payload) =>
           Signer.isSigner(provider)
-            ? AdapterManager.connectAdapterManager({
+            ? new AdapterManager({
                 creditManager: creditManagers[payload.addr.toLowerCase()],
-                pathFinder: PATHFINDER,
                 signer: provider,
-                wethToken: wethTokenAddress!,
-                connectors: connectorTokenAddresses
+                pathFinder: pathFinder
               })
             : null
         )
@@ -235,57 +234,64 @@ export const repayAccount =
       )
     }
   }
-
-interface CloseCreditAccountProps {
-  creditManager: string
-  paths: Array<TradePath>
+export interface CloseCreditAccountProps {
+  account: string
+  creditManager: CreditManagerData
+  closePath: PathFinderCloseResult
   opHash: string
   chainId?: number
 }
 
 export const closeCreditAccount =
   ({
+    account,
     creditManager,
-    paths,
+    closePath,
     opHash = '0',
     chainId = CHAIN_ID
   }: CloseCreditAccountProps): CreditManagerThunkAction =>
   async (dispatch, getState) => {
-    // try {
-    //   dispatch(updateStatus(opHash, "STATUS.WAITING"));
-    //   const signer = getSignerOrThrow(getState);
-    //   const cm = getCreditManagerOrThrow(getState, creditManager);
-    //   const gasLimit = await cm
-    //     .getContractETH(signer)
-    //     .estimateGas.closeCreditAccount(await signer.getAddress(), paths);
-    //   const receipt = await cm
-    //     .getContractETH(signer)
-    //     .closeCreditAccount(await signer.getAddress(), paths, {
-    //       gasLimit: gasLimit.mul(12).div(10),
-    //     });
-    //   dispatch(deleteInProgressByCreditManager(creditManager));
-    //   const evmTx = new TxCloseAccount({
-    //     txHash: receipt.hash,
-    //     creditManager,
-    //     timestamp: 0,
-    //   });
-    //   dispatch(
-    //     addPendingTransaction({
-    //       chainId,
-    //       tx: evmTx,
-    //       callback: () => dispatch(deleteByCreditManager(creditManager)),
-    //     }),
-    //   );
-    //   dispatch(updateStatus(opHash, "STATUS.SUCCESS"));
-    // } catch (e: any) {
-    //   dispatch(updateStatus(opHash, "STATUS.FAILURE", getError(e)));
-    //   captureException(
-    //     "store/creditManagers/actions",
-    //     "Cant closeCreditAccount",
-    //     creditManager,
-    //     e,
-    //   );
-    // }
+    const { address: creditManagerAddress, creditFacade: creditFacadeAddress } =
+      creditManager
+    try {
+      dispatch(updateStatus(opHash, 'STATUS.WAITING'))
+
+      const signer = getSignerOrThrow(getState)
+      const creditFacade = ICreditFacade__factory.connect(
+        creditFacadeAddress,
+        signer
+      )
+      const receipt = await creditFacade.closeCreditAccount(
+        account,
+        0,
+        false,
+        closePath.calls
+      )
+
+      dispatch(deleteInProgressByCreditManager(creditManagerAddress))
+
+      const evmTx = new TxCloseAccount({
+        txHash: receipt.hash,
+        creditManager: creditManagerAddress,
+        timestamp: 0
+      })
+      dispatch(
+        addPendingTransaction({
+          chainId,
+          tx: evmTx,
+          callback: () => dispatch(deleteByCreditManager(creditManagerAddress))
+        })
+      )
+      dispatch(updateStatus(opHash, 'STATUS.SUCCESS'))
+    } catch (e: any) {
+      dispatch(updateStatus(opHash, 'STATUS.FAILURE', getError(e)))
+      captureException(
+        'store/creditManagers/actions',
+        'Cant closeCreditAccount',
+        creditManagerAddress,
+        e
+      )
+    }
   }
 
 interface IncreaseBorrowProps {

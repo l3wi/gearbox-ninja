@@ -1,14 +1,13 @@
-import { Asset, LpTokensAPY, Strategy } from '@gearbox-protocol/sdk'
+import { Asset, LpTokensAPY, Strategy, MultiCall } from '@gearbox-protocol/sdk'
 import { OperationActions } from '../operations'
 import { ThunkAction } from 'redux-thunk'
 
-import { TradePath } from '../../config/closeTradePath'
 import { CreditAccountsAction } from '../creditAccounts'
 import type { RootState } from '../index'
 
 export interface StrategyPath {
   balances: Array<Asset>
-  path: TradePath
+  calls: Array<MultiCall>
 }
 
 export type StrategyAction =
@@ -20,9 +19,15 @@ export type StrategyAction =
       type: 'SET_APY_BULK'
       payload: LpTokensAPY
     }
+  | { type: 'CLEAR_STRATEGY_OPEN_PATH' }
+  | { type: 'STRATEGY_OPEN_PATH_NOT_FOUND'; payload: string }
+  | { type: 'UPDATE_STRATEGY_OPEN_ID'; payload: string }
   | {
-      type: 'SET_STRATEGY_PATH'
-      payload: null | StrategyPath
+      type: 'SET_STRATEGY_OPEN_PATH'
+      payload: {
+        strategyPath: StrategyPath
+        openId: string
+      }
     }
 
 export type StrategyThunkAction = ThunkAction<
