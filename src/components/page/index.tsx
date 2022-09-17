@@ -11,15 +11,35 @@ import StrategyFrom from '../strategy'
 import Notification from '../notification'
 import Video from '../video'
 import { BLOCK_UPDATE_DELAY } from '../../config'
+import useLocalStorage from '../../hooks/useLocalStorage'
+import { activate, declare } from '../../utils/web3'
 
 const Page = () => {
+  const [windowProvider, setWindowProvider] = useLocalStorage(
+    'winProvider',
+    null
+  )
+  const [declared, setDeclared] = useLocalStorage('declared', null)
+
   const isPaused = useSelector((state: RootState) => state.game.isPaused)
   const form = useSelector((state: RootState) => state.form)
   const provider = useSelector((state: RootState) => state.web3.provider)
 
+  useEffect(() => {
+    if (!windowProvider && provider) setWindowProvider('metamask')
+    //@ts-ignore
+    if (windowProvider && provider) activate(windowProvider)
+
+    if (declared && provider) {
+      dispatch({
+        type: 'SIGNED_MESSAGE',
+        payload: { isIllegal: false }
+      })
+    }
+  }, [windowProvider, declared, provider])
+
   const dispatch = useDispatch()
   const [cron, setCron] = useState<number | undefined>()
-
   useEffect(() => {
     if (provider) {
       if (cron) window.clearInterval(cron)

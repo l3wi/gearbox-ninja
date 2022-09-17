@@ -52,8 +52,10 @@ const Form = () => {
   )
 
   const readableBalance = balance
-    .div(BigNumber.from('10').pow(BigNumber.from(token?.decimals)))
-    .toNumber()
+    ? balance
+        .div(BigNumber.from('10').pow(BigNumber.from(token?.decimals)))
+        .toNumber()
+    : 0
 
   const updateValue = (input: string) => {
     if (!input || input.match(/^\d{1,}(\.\d{0,4})?$/)) {

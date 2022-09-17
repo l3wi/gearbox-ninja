@@ -24,12 +24,15 @@ export interface Web3State {
   error?: Web3Error
   listeners: Record<string, boolean>
   transactions: Record<string, Array<EVMTx>>
+
+  slippage: number
 }
 
 const initialState: Web3State = {
   status: 'WEB3_STARTUP',
   listeners: {},
-  transactions: {}
+  transactions: {},
+  slippage: 50
 }
 
 export function web3Reducer(

@@ -110,19 +110,10 @@ export const activate = async (w: Wallets) => {
   }
 }
 
-export const activateAndDeclare = async (w: Wallets) => {
-  try {
-    const { account } = store.getState().web3
-    if (!account) await activate(w)
-    await declare()
-  } catch (e: any) {
-    console.error('Broken' + e)
-  }
-}
-
 export const declare = async () => {
   try {
     await store.dispatch(actions.game.signDeclaration())
+    localStorage.setItem('declared', 'true')
   } catch (e: any) {
     console.error('Call Gary we have rulebreaker' + e)
   }

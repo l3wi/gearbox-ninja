@@ -286,6 +286,9 @@ export const connectSigner =
       })
 
       dispatch(actions.pools.getList())
+      dispatch(actions.creditManagers.getList(signer.provider))
+      dispatch(actions.creditAccounts.getList())
+
       dispatch(restoreTransactions({ account, chainId, provider: library }))
       dispatch(actions.game.AddNotification('wallet connected', 3000))
     } catch (e: any) {

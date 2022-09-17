@@ -1,6 +1,6 @@
 import { BigNumber } from 'ethers'
 import styled from 'styled-components'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 
 import { STRATEGY_UPDATE_DELAY } from '../../config'
@@ -9,28 +9,155 @@ import actions from '../../store/actions'
 import { RootState } from '../../store/reducer'
 import { generateNewHash } from '../../utils/opHash'
 import { lpTokenDataList } from '../../config/tokens'
-import { TokenData } from '@gearbox-protocol/sdk'
+import { wethToETH } from '../../config/tokens'
+import { TokenData, LEVERAGE_DECIMALS } from '@gearbox-protocol/sdk'
 import Slider from './slider'
+import {
+  useStrategy,
+  useMaxLeverage,
+  useStrategyCreditManagers,
+  useStrategyList,
+  useOpenStrategy
+} from '../../hooks/useStrategy'
+import {
+  useTokenBalances,
+  useTokensDataList,
+  useTokensDataListWithETH
+} from '../../hooks/useTokens'
+import { usePrices } from '../../hooks/usePrices'
+import {
+  useAllowedTokensWithETH,
+  useCreditManagers
+} from '../../hooks/useCreditManagers'
+import { canSelect, useTokenSelect } from '../../hooks/useTokenSelect'
+import {
+  useAssets,
+  useSingleAsset,
+  useSumAssets,
+  useWrapETH
+} from '../../hooks/useAssets'
+import {
+  useLeveragedAmount,
+  useTotalAmountInTarget
+} from '../../hooks/useOpenAccount'
 
 const getStrategy = (state: RootState) => {
   const { symbol } = state.form
   const strategy = Object.values(state.strategy.strategies).find((strat) =>
     strat.name.toLowerCase().includes(symbol)
   )
-  return { symbol, strategy }
+  return strategy
 }
+export type OpenStrategyModel = 'openStrategy' | 'selectToken' | 'selectPool'
 
 const Form = () => {
   const dispatch = useDispatch()
-  const state = useSelector((state: RootState) => state)
-  const { prices } = useSelector((state: RootState) => state.price)
-  const { balances, allowances } = useSelector(
-    (state: RootState) => state.tokens
-  )
-  const { provider } = useSelector((state: RootState) => state.web3)
-  const { symbol, strategy } = getStrategy(state)
+  const {
+    mode,
+    indexToChange,
+    handlers: { handleSetAnotherMode, handleSetModeSelect }
+  } = useTokenSelect<OpenStrategyModel>('openStrategy')
+  const [strategies, creditManagers] = useStrategyList()
+  const tokensList = useTokensDataList()
 
-  const inputs = strategy.baseAssets.map((addr) => {
+  const state = useSelector((state: RootState) => state)
+  const { provider } = useSelector((state: RootState) => state.web3)
+  const { tokens, form } = state
+  const { balances, allowances } = tokens
+  const { symbol } = form
+
+  const strategy = getStrategy(state)
+  const strategyCms = useStrategyCreditManagers(strategy, creditManagers)
+  const [, balancesWithETH] = useTokenBalances()
+  const tokensListWithETH = useTokensDataListWithETH()
+  const prices = usePrices()
+
+  const availablePools = useMemo(() => Object.keys(strategyCms), [strategyCms])
+  const [selectedPool, setSelectedPool] = useState(availablePools[0])
+  const creditManager = creditManagers[selectedPool]
+  const { underlyingToken: cmUnderlyingToken } = creditManager || {}
+  const allowedTokens = useAllowedTokensWithETH(creditManager)
+
+  const collateralAssetsState = useAssets([
+    {
+      balance: BigNumber.from(0),
+      balanceView: '',
+      token: wethToETH(cmUnderlyingToken || '')
+    }
+  ])
+  const maxLeverage =
+    useMaxLeverage(strategy.lpToken.toLowerCase(), strategyCms) +
+    LEVERAGE_DECIMALS
+
+  const handleTokenSelect = (address: string) => {
+    const selected = canSelect(address, collateralAssetsState.assets, balances)
+
+    if (selected && indexToChange !== null)
+      collateralAssetsState.handlers.handleChangeToken(indexToChange)(address)
+    // if (selected) handleSetModeOpen()
+  }
+
+  const handleChangePool = (address: string) => {
+    setSelectedPool(address)
+    // handleSetModeOpen()
+  }
+
+  const isLoading = !creditManager
+
+  /// OPEN STRAT DIALOG
+  const {
+    address: cmAddress,
+    borrowRate,
+    minAmount,
+    maxAmount,
+    underlyingToken: underlyingTokenAddress,
+    liquidationThresholds
+  } = creditManager
+  const { lpToken: lpTokenAddress, apy, baseAssets } = strategy
+  const underlyingToken = tokensList[underlyingTokenAddress]
+  const { symbol: underlyingSymbol } = underlyingToken || {}
+
+  const lpToken = tokensList[lpTokenAddress]
+  const { symbol: lpSymbol = '' } = lpToken || {}
+
+  const {
+    assets: unwrappedCollateral,
+    handlers: { handleAdd, handleChangeAmount, handleRemove }
+  } = collateralAssetsState
+  const [wrappedCollateral, ethAmount] = useWrapETH(unwrappedCollateral)
+
+  const maxLeverageFactor = useMaxLeverage(lpTokenAddress, creditManager)
+  const [leverage, setLeverage] = useState(
+    maxLeverageFactor + LEVERAGE_DECIMALS
+  )
+
+  const totalAmount = useTotalAmountInTarget({
+    assets: wrappedCollateral,
+    prices,
+    targetToken: underlyingToken,
+    tokensList
+  })
+
+  const [amountOnAccount, borrowedAmount] = useLeveragedAmount(
+    totalAmount,
+    leverage
+  )
+
+  const borrowedAsset = useSingleAsset(underlyingTokenAddress, borrowedAmount)
+  const collateralAndBorrow = useSumAssets(wrappedCollateral, borrowedAsset)
+  console.log(borrowedAsset, collateralAndBorrow)
+  const strategyPath = useOpenStrategy(
+    creditManager,
+    collateralAndBorrow,
+    lpTokenAddress
+  )
+  console.log(strategyPath)
+
+  // const totalAmountFormatted = tokenTemplate(totalAmount, underlyingToken);
+  const allAssetsSelected = allowedTokens.length === wrappedCollateral.length
+
+  ///// OLD
+  const inputs = strategy?.baseAssets.map((addr) => {
     return Object.values(state.tokens.details).find(
       (item: TokenData) => item.address === addr
     )
@@ -42,7 +169,7 @@ const Form = () => {
   const [value, setValue] = useState('100')
   const [isMax, setMax] = useState(false)
   const [asset, setAsset] = useState<TokenData | null>(inputs[0])
-  const [leverage, setLeverage] = useState(5)
+
   const [approved, setApproved] = useState(false)
 
   const updateValue = (input: string) => {
@@ -57,12 +184,10 @@ const Form = () => {
           .div(BigNumber.from('10').pow(BigNumber.from(asset.decimals)))
           .toString()
       : '0'
+
   const max = () => {
-    // const value = balance
-    //   .div(BigNumber.from('10').pow(BigNumber.from(token?.decimals)))
-    //   .toString()
-    // updateValue(value)
-    // setMax(true)
+    updateValue(readableBalance)
+    setMax(true)
   }
 
   const disableSubmit = () => {
@@ -71,6 +196,12 @@ const Form = () => {
   }
 
   const handleSubmit = () => {}
+  // const handleOpenClick: OpenStrategyManagerProps["onOpenClick"] = props => {
+  //   const opHash = generateNewHash("OAS-ACT-");
+  //   dispatch(actions.strategy.openStrategy({ ...props, opHash }));
+  // };
+
+  // const maxLeverage = useMaxLeverage(lpToken, strategyCms) + LEVERAGE_DECIMALS;
 
   const exit = () => {
     store.dispatch(actions.form.toggleForm('', ''))
