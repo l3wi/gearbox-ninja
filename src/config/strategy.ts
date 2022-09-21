@@ -89,7 +89,7 @@ const yearnStETHCrvPayload: StrategyPayload = {
   ],
 
   pools: [currentTokenData.WETH],
-  baseAssets: [currentTokenData.WETH]
+  baseAssets: [currentTokenData.WETH, currentTokenData.STETH]
 }
 
 const yearnFrax3CrvPayload: StrategyPayload = {
@@ -132,7 +132,7 @@ const curveStETHCrvPayload: StrategyPayload = {
   ],
 
   pools: [currentTokenData.WETH],
-  baseAssets: [currentTokenData.WETH]
+  baseAssets: [currentTokenData.WETH, currentTokenData.STETH]
 }
 
 const curveFrax3CrvPayload: StrategyPayload = {
@@ -259,7 +259,7 @@ const convexStETHCrvPayload: StrategyPayload = {
   ],
 
   pools: [currentTokenData.WETH],
-  baseAssets: [currentTokenData.WETH]
+  baseAssets: [currentTokenData.WETH, currentTokenData.STETH]
 }
 
 const convexFrax3CrvPayload: StrategyPayload = {

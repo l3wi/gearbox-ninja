@@ -22,8 +22,7 @@ import {
   ADDRESS_PROVIDER,
   CHAIN_ID,
   JSON_RPC_PROVIDER,
-  CHAIN_TYPE,
-  PATHFINDER
+  CHAIN_TYPE
 } from '../../config'
 import { captureException } from '../../utils/errors'
 
@@ -72,8 +71,8 @@ export const updateProvider =
         dataCompressorAddress,
         wethGateWayAddress,
         gearTokenAddress,
-        wethTokenAddress
-        // pathfinder
+        wethTokenAddress,
+        pathfinder
       ] = await callRepeater(() =>
         addressProviderMultiCall.call([
           {
@@ -87,10 +86,10 @@ export const updateProvider =
           },
           {
             method: 'getWethToken()'
+          },
+          {
+            method: 'getLeveragedActions()'
           }
-          // {
-          //   method: 'getLeveragedActions()'
-          // }
         ])
       )
 
@@ -112,7 +111,7 @@ export const updateProvider =
           gearTokenAddress,
           wethGateway,
           wethTokenAddress,
-          pathFinder: new PathFinder(PATHFINDER, provider, CHAIN_TYPE)
+          pathFinder: new PathFinder(pathfinder, provider, CHAIN_TYPE)
         }
       })
     } catch (e: any) {

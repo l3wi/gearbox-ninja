@@ -179,7 +179,7 @@ export const getOpenStrategyPath =
         }
       })
     } catch (e: any) {
-      captureException('store/strategy/actions', 'Cant getStrategies', e)
+      captureException('store/strategy/actions', 'Cant getOpenStrategyPath', e)
       dispatch({
         type: 'STRATEGY_OPEN_PATH_NOT_FOUND',
         payload: openId

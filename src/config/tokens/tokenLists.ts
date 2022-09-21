@@ -15,7 +15,7 @@ export const tokenDataList = objectEntries(currentTokenData).reduce<
   const data = supportedTokens[tokenSymbol]
 
   if (addr) {
-    acc[addr] = new TokenData({ ...data, addr })
+    acc[addr.toLowerCase()] = new TokenData({ ...data, addr })
   }
   delete acc['TODO: DEPLOY ME'] // Remove GEAR token placehodler
 
