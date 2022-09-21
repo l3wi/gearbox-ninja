@@ -64,6 +64,7 @@ const Form = () => {
   }
 
   const max = () => {
+    if (readableBalance === 0) return
     const value = balance
       .div(BigNumber.from('10').pow(BigNumber.from(token?.decimals)))
       .toString()

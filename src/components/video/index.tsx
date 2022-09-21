@@ -39,7 +39,7 @@ const Skip = styled.button`
   font-style: normal;
   position: fixed;
   z-index: 30;
-  bottom: 20px;
+  bottom: 60px;
   right: 20px;
   color: white;
   background: none;

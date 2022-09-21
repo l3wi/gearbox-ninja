@@ -17,7 +17,8 @@ import {
   useMaxLeverage,
   useStrategyCreditManagers,
   useStrategyList,
-  useOpenStrategy
+  useOpenStrategy,
+  useAPYList
 } from '../../hooks/useStrategy'
 import {
   useTokenBalances,
@@ -40,6 +41,12 @@ import {
   useLeveragedAmount,
   useTotalAmountInTarget
 } from '../../hooks/useOpenAccount'
+import { EMPTY_ARRAY } from '../../config/constants'
+import { useHF } from '../../hooks/useHF'
+// import { useValidateOpenStrategy } from '../../hooks/useValidate'
+import { useOverallAPY } from '../../hooks/useCreditAccounts'
+import Picker from './picker'
+import { AssetWithView } from '../../config/asset'
 
 const getStrategy = (state: RootState) => {
   const { symbol } = state.form
@@ -51,6 +58,8 @@ const getStrategy = (state: RootState) => {
 export type OpenStrategyModel = 'openStrategy' | 'selectToken' | 'selectPool'
 
 const Form = () => {
+  const [picker, setPicker] = useState(false)
+
   const dispatch = useDispatch()
   const {
     mode,
@@ -66,18 +75,19 @@ const Form = () => {
   const { balances, allowances } = tokens
   const { symbol } = form
 
-  const strategy = getStrategy(state)
-  const strategyCms = useStrategyCreditManagers(strategy, creditManagers)
   const [, balancesWithETH] = useTokenBalances()
   const tokensListWithETH = useTokensDataListWithETH()
   const prices = usePrices()
 
+  const strategy = getStrategy(state)
+  const strategyCms = useStrategyCreditManagers(strategy, creditManagers)
+
   const availablePools = useMemo(() => Object.keys(strategyCms), [strategyCms])
   const [selectedPool, setSelectedPool] = useState(availablePools[0])
+
   const creditManager = creditManagers[selectedPool]
   const { underlyingToken: cmUnderlyingToken } = creditManager || {}
   const allowedTokens = useAllowedTokensWithETH(creditManager)
-
   const collateralAssetsState = useAssets([
     {
       balance: BigNumber.from(0),
@@ -85,6 +95,7 @@ const Form = () => {
       token: wethToETH(cmUnderlyingToken || '')
     }
   ])
+
   const maxLeverage =
     useMaxLeverage(strategy.lpToken.toLowerCase(), strategyCms) +
     LEVERAGE_DECIMALS
@@ -94,12 +105,10 @@ const Form = () => {
 
     if (selected && indexToChange !== null)
       collateralAssetsState.handlers.handleChangeToken(indexToChange)(address)
-    // if (selected) handleSetModeOpen()
   }
 
   const handleChangePool = (address: string) => {
     setSelectedPool(address)
-    // handleSetModeOpen()
   }
 
   const isLoading = !creditManager
@@ -130,7 +139,6 @@ const Form = () => {
   const [leverage, setLeverage] = useState(
     maxLeverageFactor + LEVERAGE_DECIMALS
   )
-
   const totalAmount = useTotalAmountInTarget({
     assets: wrappedCollateral,
     prices,
@@ -145,13 +153,73 @@ const Form = () => {
 
   const borrowedAsset = useSingleAsset(underlyingTokenAddress, borrowedAmount)
   const collateralAndBorrow = useSumAssets(wrappedCollateral, borrowedAsset)
-  console.log(borrowedAsset, collateralAndBorrow)
+
   const strategyPath = useOpenStrategy(
     creditManager,
     collateralAndBorrow,
     lpTokenAddress
   )
-  console.log(strategyPath)
+  const assetsAfterOpen = strategyPath?.balances || EMPTY_ARRAY
+
+  const hfFrom =
+    useHF({
+      assets: assetsAfterOpen,
+      prices,
+      liquidationThresholds,
+      underlyingToken: underlyingTokenAddress,
+      borrowed: borrowedAmount
+    }) || 0
+
+  // const errString = useValidateOpenStrategy({
+  //   balances,
+  //   assets: unwrappedCollateral,
+  //   tokensList,
+  //   cm: creditManager,
+  //   amount: totalAmount,
+  //   debt: borrowedAmount,
+
+  //   strategyPath,
+
+  //   hf: hfFrom
+  // })
+
+  const apyList = useAPYList()
+  const overallAPYFrom =
+    useOverallAPY({
+      caAssets: assetsAfterOpen,
+      lpAPY: apyList,
+      prices,
+
+      totalValue: amountOnAccount,
+      debt: borrowedAmount,
+      borrowRate,
+      underlyingToken: underlyingTokenAddress
+    }) || 0
+
+  const lpAmount = useMemo(() => {
+    return (
+      assetsAfterOpen.find(({ token }) => token === lpTokenAddress)?.balance ||
+      BigNumber.from(0)
+    )
+  }, [lpTokenAddress, assetsAfterOpen])
+
+  const liquidationPrice = strategy.liquidationPrice({
+    assets: wrappedCollateral,
+    prices,
+    liquidationThresholds,
+
+    borrowed: borrowedAmount,
+    underlyingToken: underlyingTokenAddress,
+
+    lpAmount,
+    lpToken: lpTokenAddress
+  })
+
+  const liquidationAssets = useLiquidationAssets(
+    baseAssets,
+    underlyingTokenAddress,
+    tokensList
+  )
 
   // const totalAmountFormatted = tokenTemplate(totalAmount, underlyingToken);
   const allAssetsSelected = allowedTokens.length === wrappedCollateral.length
@@ -166,17 +234,16 @@ const Form = () => {
     (item: TokenData) => item.address === strategy.leveragableCollateral[0]
   )
 
-  const [value, setValue] = useState('100')
   const [isMax, setMax] = useState(false)
   const [asset, setAsset] = useState<TokenData | null>(inputs[0])
 
   const [approved, setApproved] = useState(false)
 
-  const updateValue = (input: string) => {
-    if (!input || input.match(/^\d{1,}(\.\d{0,4})?$/)) {
-      setValue(input)
-    }
-  }
+  // const updateValue = (input: string) => {
+  //   if (!input || input.match(/^\d{1,}(\.\d{0,4})?$/)) {
+  //     setValue(input)
+  //   }
+  // }
 
   const readableBalance =
     asset && balances[asset.address]
@@ -188,11 +255,6 @@ const Form = () => {
   const max = () => {
     updateValue(readableBalance)
     setMax(true)
-  }
-
-  const disableSubmit = () => {
-    if (parseFloat(value) > parseFloat(readableBalance)) return true
-    return false
   }
 
   const handleSubmit = () => {}
@@ -240,6 +302,18 @@ const Form = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [provider, prices])
 
+  // index 0
+  const updateValue = (input: string) => {
+    const func = handleChangeAmount(0)
+    const token = tokensList[unwrappedCollateral[0].token]
+    if (!input || input.match(/^\d{1,}(\.\d{0,4})?$/)) {
+      const bn = BigNumber.from(input).mul(
+        BigNumber.from('10').pow(BigNumber.from(token.decimals))
+      )
+      func(bn, input.toString())
+    }
+  }
+
   return (
     <FormBg>
       <Underground>
@@ -266,40 +340,65 @@ const Form = () => {
           </InputSuper>
           <InputGroup>
             <Input
-              value={value}
+              value={unwrappedCollateral[0].balanceView}
               onChange={(e) => updateValue(e.target.value)}
             />
-            <Dropdown asset={asset} list={inputs} func={setAsset} />
+            <Dropdown
+              asset={tokensList[unwrappedCollateral[0].token]}
+              list={unwrappedCollateral}
+              tokens={tokensList}
+              func={setAsset}
+            />
             <MaxButton onClick={() => max()}>max</MaxButton>
           </InputGroup>
+          {/* <Group>
+            <>
+              <button onClick={() => setPicker(true)}>add asset</button>
+              {picker && (
+                <Picker
+                  tokensList={tokensList}
+                  balances={balancesWithETH}
+                  allowedTokens={allowedTokens}
+                />
+              )}
+            </>
+          </Group> */}
           <Group>
             <span>Borrowed Asset: </span>
             <Asset>
               <img
                 width={20}
-                src={`https://static.gearbox.fi/tokens/${collateral.symbol.toLowerCase()}.svg`}
+                src={`https://static.gearbox.fi/tokens/${underlyingToken.symbol.toLowerCase()}.svg`}
               />
-              <span>{collateral.symbol.toUpperCase()}</span>
+              <span>{underlyingToken.symbol.toUpperCase()}</span>
             </Asset>
           </Group>
           <Group>
-            <Slider min={0} max={9} value={leverage} func={setLeverage} />
+            <Slider
+              amount={totalAmount}
+              minAmount={minAmount}
+              maxAmount={maxAmount}
+              leverage={leverage}
+              maxLeverage={maxLeverageFactor}
+              setLeverage={setLeverage}
+            />
           </Group>
           <Group>
             <span>You'll recieve</span>
             <span>{`${
-              parseFloat(value) * leverage
-            } ${collateral.symbol.toUpperCase()}`}</span>
+              (parseFloat(assetsAfterOpen.toString()) * leverage) /
+              LEVERAGE_DECIMALS
+            } ${lpSymbol.toUpperCase()}`}</span>
           </Group>
           <Group>
             <span>Strategy APY</span>
-            <span>{100}%</span>
+            <span>{overallAPYFrom}%</span>
           </Group>
           <SubmitButton
-            disabled={disableSubmit()}
+            // disabled={disableSubmit()}
             onClick={() => handleSubmit()}
           >
-            {disableSubmit() ? 'Insufficent Balance' : 'deposit'}
+            {true ? 'Insufficent Balance' : 'deposit'}
           </SubmitButton>
         </FormContainer>
         <span />
@@ -308,11 +407,32 @@ const Form = () => {
   )
 }
 
+function useLiquidationAssets(
+  assets: Array<string>,
+  underlyingToken: string,
+  tokensList: Record<string, TokenData>
+): Array<string> {
+  const liquidationAssets = useMemo(
+    () =>
+      assets
+        .filter((address) => address !== underlyingToken)
+        .map((address) => {
+          const { symbol } = tokensList[address] || {}
+
+          return symbol
+        })
+        .filter((symbol) => symbol),
+    [assets, underlyingToken, tokensList]
+  )
+  return liquidationAssets
+}
+
 const Dropdown: React.FC<{
   asset: TokenData
-  list: Array<TokenData>
+  list: AssetWithView[]
+  tokens: Record<string, TokenData>
   func: any
-}> = ({ asset, list, func }) => {
+}> = ({ asset, list, func, tokens }) => {
   const [isOpen, setOpen] = useState(false)
 
   const select = (item: TokenData) => {
@@ -339,12 +459,17 @@ const Dropdown: React.FC<{
       <Col>
         {isOpen &&
           list.map((item) => (
-            <Asset key={item.address} onClick={() => select(item)}>
+            <Asset
+              key={tokens[item.token].address}
+              onClick={() => select(tokens[item.token])}
+            >
               <img
                 width={20}
-                src={`https://static.gearbox.fi/tokens/${item.symbol.toLowerCase()}.svg`}
+                src={`https://static.gearbox.fi/tokens/${tokens[
+                  item.token
+                ].symbol.toLowerCase()}.svg`}
               />
-              <span>{item.symbol.toUpperCase()}</span>
+              <span>{tokens[item.token].symbol.toUpperCase()}</span>
             </Asset>
           ))}
       </Col>
