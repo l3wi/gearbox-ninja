@@ -183,7 +183,7 @@ export const connectSigner =
           }
         ])
       )
-      console.log('here')
+
       const isListenersConnected = getState().web3.listeners[account]
       dispatch({ type: 'LISTENERS_ADDED', payload: account })
 
@@ -285,8 +285,8 @@ export const connectSigner =
       })
 
       dispatch(actions.pools.getList())
-      dispatch(actions.creditManagers.getList(signer.provider))
       dispatch(actions.creditAccounts.getList())
+      dispatch(actions.creditManagers.getList(signer.provider))
 
       dispatch(restoreTransactions({ account, chainId, provider: library }))
       dispatch(actions.game.AddNotification('wallet connected', 3000))
