@@ -1584,10 +1584,10 @@
     intl-messageformat "10.1.4"
     tslib "2.4.0"
 
-"@gearbox-protocol/sdk@^1.6.4":
-  version "1.6.4"
-  resolved "https://registry.yarnpkg.com/@gearbox-protocol/sdk/-/sdk-1.6.4.tgz#89c8a12beee1ee98bbd06e4802115291a45df32f"
-  integrity sha512-BXYOKIFA0tuhHSOzxi18u+kYl395JSTUuY2nGkpgZxYu4/R4QBKScZAErJkqbXZfWJpAIJ5eR3f6GI+j/8ExSg==
+"@gearbox-protocol/sdk@^1.7.12":
+  version "1.7.12"
+  resolved "https://registry.yarnpkg.com/@gearbox-protocol/sdk/-/sdk-1.7.12.tgz#ae12ce9087efb4635670835db82e6cb57e2a76d4"
+  integrity sha512-XlJNCtB3XojuZXqgShYefjT5FV5MAVrrfZOVuBTKpiEsUpjQu1QVsiwJln2atR0Ex6rd1TbFW41AL1iSs7jMuw==
   dependencies:
     "@types/deep-eql" "^4.0.0"
     decimal.js-light "^2.5.1"
