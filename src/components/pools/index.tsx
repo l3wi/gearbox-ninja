@@ -7,6 +7,10 @@ import actions from '../../store/actions'
 import { RootState } from '../../store/reducer'
 import { generateNewHash } from '../../utils/opHash'
 import { PoolData, TokenData } from '@gearbox-protocol/sdk'
+import { nFormatter } from '../../utils/format'
+import { ApproveButton } from '../approvalButton'
+import { useAssets, useWrapETH } from '../../hooks/useAssets'
+import { wethToETH } from '../../config/tokens'
 
 const depositLPDescription = `Deposit your assets to Gearbox 
 protocol to earn yield. These assets will be lent out to Gearbox's 
@@ -15,7 +19,7 @@ and become a ninja today!`
 
 const poolData = (symbol: string, state: RootState) => {
   const { pools, tokens } = state
-  let token: any
+  let token: TokenData
   if (symbol === 'eth') {
     token = Object.values(tokens.details).find(
       (item: TokenData) => item.symbol === 'WETH'
@@ -41,7 +45,10 @@ const Form = () => {
   const web3 = useSelector((state: RootState) => state.web3)
   const form = useSelector((state: RootState) => state.form)
 
-  const [value, setValue] = useState('0')
+  const [value, setValue] = useState({
+    bn: BigNumber.from(0),
+    string: '0.0'
+  })
   const [isMax, setMax] = useState(false)
   const [approved, setApproved] = useState(
     pool
@@ -51,29 +58,23 @@ const Form = () => {
       : false
   )
 
-  const readableBalance = balance
-    ? balance
-        .div(BigNumber.from('10').pow(BigNumber.from(token?.decimals)))
-        .toNumber()
-    : 0
-
-  const updateValue = (input: string) => {
-    if (!input || input.match(/^\d{1,}(\.\d{0,4})?$/)) {
-      setValue(input)
+  const collateralAssetsState = useAssets([
+    {
+      balance: BigNumber.from(0),
+      balanceView: '',
+      token: wethToETH(pool.underlyingToken || '')
     }
-  }
+  ])
 
-  const max = () => {
-    if (readableBalance === 0) return
-    const value = balance
-      .div(BigNumber.from('10').pow(BigNumber.from(token?.decimals)))
-      .toString()
-    updateValue(value)
-    setMax(true)
-  }
+  const {
+    assets: unwrappedCollateral,
+    handlers: { handleChangeAmount }
+  } = collateralAssetsState
+
+  const [wrappedCollateral] = useWrapETH(unwrappedCollateral)
 
   const disableSubmit = () => {
-    if (parseFloat(value) > readableBalance) return true
+    if (value.bn.gt(balance)) return true
     return false
   }
 
@@ -91,21 +92,25 @@ const Form = () => {
         })
       )
     } else {
-      let finalValue
-      if (isMax) {
-        finalValue = balance
-      } else {
-        finalValue = BigNumber.from(
-          (parseFloat(value) * Math.pow(10, token.decimals)).toString()
-        )
-      }
-      store.dispatch(actions.pools.addLiquidity(pool, finalValue))
+      store.dispatch(
+        actions.pools.addLiquidity(pool, isMax ? balance : value.bn)
+      )
     }
   }
 
   const exit = () => {
     store.dispatch(actions.form.toggleForm('', ''))
     store.dispatch(actions.game.ChangeStage('PLAY'))
+  }
+
+  const updateValue = (input: string) => {
+    const func = handleChangeAmount(0)
+    if (!input || input.match(/^\d{1,}(\.\d{0,4})?$/)) {
+      const bn = BigNumber.from(input).mul(
+        BigNumber.from('10').pow(BigNumber.from(token.decimals))
+      )
+      func(bn, input.toString())
+    }
   }
 
   useEffect(() => {
@@ -134,41 +139,33 @@ const Form = () => {
             <span>{`STAKE d${symbol.toUpperCase()}`}</span>
             <span>
               {`BALANCE: 
-              ${new Intl.NumberFormat('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 8
-              }).format(readableBalance)} 
+              ${nFormatter(balance, token.decimals, 3)} 
               ${symbol.toUpperCase()}`}
             </span>
           </InputSuper>
           <InputGroup>
             <Input
-              value={value}
+              value={unwrappedCollateral[0].balanceView}
               onChange={(e) => updateValue(e.target.value)}
             />
             <Asset>
-              <img
-                width={20}
-                src={`https://static.gearbox.fi/tokens/${symbol.toLowerCase()}.svg`}
-              />
-              <span>{symbol.toUpperCase()}</span>
+              <img width={20} src={token.icon} />
+              <span>{token.symbol.toUpperCase()}</span>
             </Asset>
-            <MaxButton onClick={() => max()}>max</MaxButton>
+            <MaxButton onClick={() => updateValue(balance.toString())}>
+              max
+            </MaxButton>
           </InputGroup>
           <APYGroup>
             <span>Deposit APY</span>
             <span>{pool?.depositAPY.toFixed(2)}%</span>
           </APYGroup>
-          <SubmitButton
-            disabled={disableSubmit()}
-            onClick={() => handleSubmit()}
-          >
-            {approved
-              ? disableSubmit()
-                ? 'not enough'
-                : 'deposit'
-              : 'approve'}
-          </SubmitButton>
+
+          <ApproveButton assets={wrappedCollateral} to={pool.address}>
+            <SubmitButton onClick={() => handleSubmit()}>
+              {disableSubmit() ? 'not enough' : 'deposit'}
+            </SubmitButton>
+          </ApproveButton>
         </FormContainer>
       </Underground>
     </FormBg>
