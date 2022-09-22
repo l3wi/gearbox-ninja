@@ -2,6 +2,7 @@ import { BigNumber } from 'ethers'
 import styled from 'styled-components'
 import React, { useEffect, useState, useMemo } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
+import type {} from 'redux-thunk/extend-redux'
 
 import { STRATEGY_UPDATE_DELAY } from '../../config'
 import { store } from '../../store'
@@ -10,7 +11,11 @@ import { RootState } from '../../store/reducer'
 import { generateNewHash } from '../../utils/opHash'
 import { lpTokenDataList } from '../../config/tokens'
 import { wethToETH } from '../../config/tokens'
-import { TokenData, LEVERAGE_DECIMALS } from '@gearbox-protocol/sdk'
+import {
+  TokenData,
+  LEVERAGE_DECIMALS,
+  formatLeverage
+} from '@gearbox-protocol/sdk'
 import Slider from './slider'
 import {
   useStrategy,
@@ -18,7 +23,8 @@ import {
   useStrategyCreditManagers,
   useStrategyList,
   useOpenStrategy,
-  useAPYList
+  useAPYList,
+  useAPYSync
 } from '../../hooks/useStrategy'
 import {
   useTokenBalances,
@@ -41,13 +47,14 @@ import {
   useLeveragedAmount,
   useTotalAmountInTarget
 } from '../../hooks/useOpenAccount'
-import { EMPTY_ARRAY } from '../../config/constants'
+import { EMPTY_ARRAY, EMPTY_OBJECT } from '../../config/constants'
 import { useHF } from '../../hooks/useHF'
 // import { useValidateOpenStrategy } from '../../hooks/useValidate'
 import { useOverallAPY } from '../../hooks/useCreditAccounts'
 import Picker from './picker'
 import { AssetWithView } from '../../config/asset'
 import { nFormatter } from '../../utils/format'
+import { ApproveButton } from './buttons'
 
 const getStrategy = (state: RootState) => {
   const { symbol } = state.form
@@ -67,6 +74,8 @@ const Form = () => {
     indexToChange,
     handlers: { handleSetAnotherMode, handleSetModeSelect }
   } = useTokenSelect<OpenStrategyModel>('openStrategy')
+
+  useAPYSync()
   const [strategies, creditManagers] = useStrategyList()
   const tokensList = useTokensDataList()
 
@@ -134,6 +143,7 @@ const Form = () => {
     assets: unwrappedCollateral,
     handlers: { handleAdd, handleChangeAmount, handleRemove }
   } = collateralAssetsState
+
   const [wrappedCollateral, ethAmount] = useWrapETH(unwrappedCollateral)
 
   const maxLeverageFactor = useMaxLeverage(lpTokenAddress, creditManager)
@@ -160,6 +170,7 @@ const Form = () => {
     collateralAndBorrow,
     lpTokenAddress
   )
+
   const assetsAfterOpen = strategyPath?.balances || EMPTY_ARRAY
   const hfFrom =
     useHF({
@@ -203,8 +214,6 @@ const Form = () => {
     )
   }, [lpTokenAddress, assetsAfterOpen])
 
-  console.log(lpAmount, hfFrom)
-
   const liquidationPrice = strategy.liquidationPrice({
     assets: wrappedCollateral,
     prices,
@@ -226,83 +235,24 @@ const Form = () => {
   // const totalAmountFormatted = tokenTemplate(totalAmount, underlyingToken);
   const allAssetsSelected = allowedTokens.length === wrappedCollateral.length
 
-  ///// OLD
-  const inputs = strategy?.baseAssets.map((addr) => {
-    return Object.values(state.tokens.details).find(
-      (item: TokenData) => item.address === addr
+  const handleSubmit = () => {
+    const opHash = generateNewHash('OAS-ACT-')
+    dispatch(
+      actions.strategy.openStrategy({
+        creditManager,
+        strategyPath,
+        wrappedCollateral,
+        borrowedAmount,
+        ethAmount,
+        opHash
+      })
     )
-  })
-  const collateral = Object.values(state.tokens.details).find(
-    (item: TokenData) => item.address === strategy.leveragableCollateral[0]
-  )
-
-  const [isMax, setMax] = useState(false)
-  const [asset, setAsset] = useState<TokenData | null>(inputs[0])
-
-  const [approved, setApproved] = useState(false)
-
-  // const updateValue = (input: string) => {
-  //   if (!input || input.match(/^\d{1,}(\.\d{0,4})?$/)) {
-  //     setValue(input)
-  //   }
-  // }
-
-  // const readableBalance =
-  //   asset && balances[asset.address]
-  //     ? balances[asset.address]
-  //         .div(BigNumber.from('10').pow(BigNumber.from(asset.decimals)))
-  //         .toString()
-  //     : '0'
-
-  // const max = () => {
-  //   updateValue(readableBalance)
-  //   setMax(true)
-  // }
-
-  const handleSubmit = () => {}
-  // const handleOpenClick: OpenStrategyManagerProps["onOpenClick"] = props => {
-  //   const opHash = generateNewHash("OAS-ACT-");
-  //   dispatch(actions.strategy.openStrategy({ ...props, opHash }));
-  // };
-
-  // const maxLeverage = useMaxLeverage(lpToken, strategyCms) + LEVERAGE_DECIMALS;
+  }
 
   const exit = () => {
     store.dispatch(actions.form.toggleForm('', ''))
     store.dispatch(actions.game.ChangeStage('PLAY'))
   }
-
-  useEffect(() => {
-    //need to fetch pool id
-    // if (
-    //   strategy &&
-    //   !allowances[strategy.underlyingToken + '@' + pool.address].eq(
-    //     BigNumber.from(0)
-    //   )
-    // ) {
-    //   setApproved(true)
-    // }
-  }, [allowances])
-
-  // Fetch APYs
-  useEffect(() => {
-    let timer: number | null = null
-
-    if (provider && Object.keys(prices).length > 0) {
-      const apyTask = () => {
-        //@ts-ignore
-        dispatch(actions.strategy.getApy(provider, prices, lpTokenDataList))
-      }
-
-      apyTask()
-      timer = window.setInterval(apyTask, STRATEGY_UPDATE_DELAY)
-    }
-
-    return function apyCleanup() {
-      if (timer) clearInterval(timer)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [provider, prices])
 
   // Reset Picker on select
   useEffect(() => {
@@ -336,6 +286,7 @@ const Form = () => {
           <FormContainer>
             <h3>Deposit Assets</h3>
             {unwrappedCollateral.map((collateral, i) => {
+              const rm = handleRemove(i)
               return (
                 <Section>
                   <InputSuper>
@@ -351,7 +302,9 @@ const Form = () => {
                           tokensList[collateral.token].symbol.toUpperCase()
                         }`}
                     </span>
-                    <span />
+                    {unwrappedCollateral.length != 1 && (
+                      <RmItem onClick={() => rm()}>x</RmItem>
+                    )}
                   </InputSuper>
                   <InputGroup>
                     <Input
@@ -385,9 +338,12 @@ const Form = () => {
 
             <Group>
               <>
-                <PickerButton onClick={() => setPicker(true)}>
-                  add asset
-                </PickerButton>
+                {!allAssetsSelected && (
+                  <PickerButton onClick={() => setPicker(true)}>
+                    add asset
+                  </PickerButton>
+                )}
+
                 {picker && (
                   <Picker
                     selected={unwrappedCollateral}
@@ -402,10 +358,7 @@ const Form = () => {
             <Group>
               <span>Borrowed Asset: </span>
               <Asset>
-                <img
-                  width={20}
-                  src={`https://static.gearbox.fi/tokens/${underlyingToken.symbol.toLowerCase()}.svg`}
-                />
+                <img width={25} src={underlyingToken.icon} />
                 <span>{underlyingToken.symbol.toUpperCase()}</span>
               </Asset>
             </Group>
@@ -420,6 +373,10 @@ const Form = () => {
                 maxLeverage={maxLeverageFactor}
                 setLeverage={setLeverage}
               />
+            </Group>
+            <Group>
+              <span>Health Factor</span>
+              <span>{hfFrom / 10000}</span>
             </Group>
             <Group>
               <span>You'll recieve</span>
@@ -438,16 +395,19 @@ const Form = () => {
               <span>Strategy APY</span>
               <span>{overallAPYFrom}%</span>
             </Group>
-            <Group>
-              <span>Health Factor</span>
-              <span>{hfFrom / 10000}</span>
-            </Group>
-            <SubmitButton
-              // disabled={disableSubmit()}
-              onClick={() => handleSubmit()}
+
+            <ApproveButton
+              assets={wrappedCollateral}
+              to={creditManager.address}
+              skipApprovalsFor={EMPTY_OBJECT}
             >
-              {true ? 'Insufficent Balance' : 'deposit'}
-            </SubmitButton>
+              <ExecuteButton onClick={() => handleSubmit()}>
+                <>{`Open a  ${formatLeverage(
+                  leverage,
+                  2
+                )}x position with ${lpSymbol}`}</>
+              </ExecuteButton>
+            </ApproveButton>
           </FormContainer>
         </Row>
       </Underground>
@@ -482,6 +442,15 @@ const Group = styled.div`
   margin: 10px 0px;
   font-size: 14px;
   width: 100%;
+`
+
+const RmItem = styled.button`
+  outline: none;
+  border: none;
+  background: none;
+  font-family: 'Press Start 2P';
+  color: white;
+  font-size: 15px;
 `
 
 const PickerButton = styled.button`
@@ -554,7 +523,7 @@ const FormContainer = styled.div`
   padding: 20px;
 `
 
-const SubmitButton = styled.button`
+const ExecuteButton = styled.button`
   width: 100%;
   background: gray;
   border: none;
@@ -563,7 +532,7 @@ const SubmitButton = styled.button`
   font-family: 'Courier New', Courier, monospace;
   font-weight: 800;
   text-transform: uppercase;
-  font-size: 20px;
+  font-size: 14px;
   margin: 0px;
   font-family: 'Press Start 2P';
 `
@@ -616,19 +585,9 @@ const Asset = styled.div`
   height: 45px;
   width: 70px;
 `
-const Down = styled.span`
-  margin-bottom: 0.5rem;
-`
 const Row = styled.span`
   display: flex;
   align-items: center;
-`
-const Col = styled.span`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  background-color: #070b13;
-  z-index: 200;
 `
 
 export default Form

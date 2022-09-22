@@ -5,6 +5,7 @@ import { BigNumber } from 'ethers'
 
 import type { RootState } from '../index'
 import type { Web3Actions } from '../web3'
+import { AnyAction } from 'redux'
 
 export type TokenAction =
   | {
@@ -39,7 +40,7 @@ export type ThunkTokenAction = ThunkAction<
   void,
   RootState,
   unknown,
-  TokenAction | Web3Actions | OperationActions
+  TokenAction | Web3Actions | OperationActions | AnyAction
 >
 
 export const tokenDataMapSelector = (state: RootState) => state.tokens.details

@@ -48,7 +48,6 @@ const Slider: React.FC<{
   useEffect(() => {
     handleLeverageChange(leverage)
   }, [amount, minAmount, maxAmount])
-  console.log(availableStart, availableEnd, maxLeverageFull)
   return (
     <Container>
       <Row>
