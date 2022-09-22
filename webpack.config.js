@@ -20,7 +20,6 @@ module.exports = {
   entry: {
     main: './src/index.tsx'
   },
-
   module: {
     rules: [
       {
@@ -95,10 +94,18 @@ module.exports = {
     symlinks: false
   },
   target: 'web',
-  // watch: false,
   devtool: 'inline-source-map',
   externals: {
     bufferutil: 'commonjs bufferutil',
     'utf-8-validate': 'commonjs utf-8-validate'
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+    filename: '[name].[contenthash].js'
+  },
+  optimization: {
+    splitChunks: {
+      chunks: 'all'
+    }
   }
 }
