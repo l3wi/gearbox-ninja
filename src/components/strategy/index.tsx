@@ -54,7 +54,7 @@ import { useOverallAPY } from '../../hooks/useCreditAccounts'
 import Picker from './picker'
 import { AssetWithView } from '../../config/asset'
 import { nFormatter } from '../../utils/format'
-import { ApproveButton } from './buttons'
+import { ApproveButton } from '../approvalButton'
 
 const getStrategy = (state: RootState) => {
   const { symbol } = state.form
@@ -294,7 +294,9 @@ const Form = () => {
                       {`BALANCE: 
                         ${nFormatter(
                           balances[collateral.token],
-                          tokensList[collateral.token].decimals,
+                          tokensList[collateral.token]
+                            ? tokensList[collateral.token].decimals
+                            : 18,
                           3
                         )} 
                         ${
