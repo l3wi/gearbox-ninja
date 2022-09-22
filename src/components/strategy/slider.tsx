@@ -1,5 +1,5 @@
 import { BigNumber } from 'ethers'
-import React, { RefObject, useState, useMemo } from 'react'
+import React, { RefObject, useState, useMemo, useEffect } from 'react'
 import styled, { keyframes } from 'styled-components'
 import { formatLeverage, LEVERAGE_DECIMALS } from '@gearbox-protocol/sdk'
 
@@ -38,25 +38,61 @@ const Slider: React.FC<{
   }, [amount, minAmount, maxAmount, maxLeverageFull])
 
   const handleLeverageChange = (l: number) => {
+    if (l >= availableEnd)
+      return setLeverage(defaultNextLeverage(availableEnd, maxLeverageFull))
+    if (availableStart >= l)
+      return setLeverage(defaultNextLeverage(availableStart, maxLeverageFull))
     setLeverage(defaultNextLeverage(l, maxLeverageFull))
   }
 
+  useEffect(() => {
+    handleLeverageChange(leverage)
+  }, [amount, minAmount, maxAmount])
+  console.log(availableStart, availableEnd, maxLeverageFull)
   return (
     <Container>
       <Row>
         <span>Leverage</span>
         <span> &nbsp;x{formatLeverage(leverage)}x</span>
       </Row>
-      <Input
-        type="range"
-        min={availableStart}
-        max={availableEnd}
-        value={leverage}
-        onChange={(e) => handleLeverageChange(parseInt(e.target.value))}
-      />
+      <LineBox
+        min={availableStart - MIN_LEVERAGE}
+        max={maxLeverageFull - availableEnd}
+      >
+        <Line />
+        <Input
+          type="range"
+          min={availableStart}
+          max={availableEnd}
+          value={leverage}
+          onChange={(e) => handleLeverageChange(parseInt(e.target.value))}
+        />
+      </LineBox>
     </Container>
   )
 }
+
+const Box = styled.div`
+  position: relative;
+`
+
+interface TitleProps {
+  readonly min: number
+  readonly max: number
+}
+
+const LineBox = styled.div<TitleProps>`
+  padding-left: ${(props) => props.min / 10 + '%'};
+  padding-right: ${(props) => props.max / 10 + '%'};
+`
+const Line = styled.div`
+  position: absolute;
+  background: white;
+  width: 100%;
+  height: 8px;
+  top: 19px;
+  left: 0px;
+`
 
 function defaultNextLeverage(l: number, maxLeverage: number) {
   return limitLeverage(maxLeverage)(l)
@@ -106,6 +142,8 @@ const Row = styled.span`
 `
 
 const Container = styled.div`
+  position: relative;
+  display: block;
   font-size: 14px;
   width: 100%;
 `
@@ -118,8 +156,8 @@ const Input = styled.input`
   &::-webkit-slider-runnable-track {
     width: 100%;
     height: 8px;
-    background: white;
-    border-radius: 2px;
+    background: green;
+    /* border-radius: 2px; */
   }
   &::-webkit-slider-thumb {
     position: relative;
