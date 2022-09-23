@@ -4,57 +4,17 @@ import React, { useEffect, useState, useMemo } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import type {} from 'redux-thunk/extend-redux'
 
-import { STRATEGY_UPDATE_DELAY } from '../../config'
 import { store } from '../../store'
 import actions from '../../store/actions'
 import { RootState } from '../../store/reducer'
-import { generateNewHash } from '../../utils/opHash'
-import { lpTokenDataList } from '../../config/tokens'
-import { wethToETH } from '../../config/tokens'
+import { TokenData } from '@gearbox-protocol/sdk'
 import {
-  TokenData,
-  LEVERAGE_DECIMALS,
-  formatLeverage
-} from '@gearbox-protocol/sdk'
-import Slider from './slider'
-import {
-  useStrategy,
-  useMaxLeverage,
   useStrategyCreditManagers,
   useStrategyList,
-  useOpenStrategy,
-  useAPYList,
   useAPYSync
 } from '../../hooks/useStrategy'
-import {
-  useTokenBalances,
-  useTokensDataList,
-  useTokensDataListWithETH
-} from '../../hooks/useTokens'
-import { usePrices } from '../../hooks/usePrices'
-import {
-  useAllowedTokensWithETH,
-  useCreditManagers
-} from '../../hooks/useCreditManagers'
-import { canSelect, useTokenSelect } from '../../hooks/useTokenSelect'
-import {
-  useAssets,
-  useSingleAsset,
-  useSumAssets,
-  useWrapETH
-} from '../../hooks/useAssets'
-import {
-  useLeveragedAmount,
-  useTotalAmountInTarget
-} from '../../hooks/useOpenAccount'
-import { EMPTY_ARRAY, EMPTY_OBJECT } from '../../config/constants'
-import { useHF } from '../../hooks/useHF'
-// import { useValidateOpenStrategy } from '../../hooks/useValidate'
-import { useOverallAPY } from '../../hooks/useCreditAccounts'
-import Picker from './picker'
-import { AssetWithView } from '../../config/asset'
-import { nFormatter } from '../../utils/format'
-import { ApproveButton } from '../approvalButton'
+
+import OpenStrategyDialog from './openStrategy'
 
 const getStrategy = (state: RootState) => {
   const { symbol } = state.form
@@ -66,28 +26,14 @@ const getStrategy = (state: RootState) => {
 export type OpenStrategyModel = 'openStrategy' | 'selectToken' | 'selectPool'
 
 const Form = () => {
-  const [picker, setPicker] = useState(false)
-
   const dispatch = useDispatch()
-  const {
-    mode,
-    indexToChange,
-    handlers: { handleSetAnotherMode, handleSetModeSelect }
-  } = useTokenSelect<OpenStrategyModel>('openStrategy')
 
   useAPYSync()
   const [strategies, creditManagers] = useStrategyList()
-  const tokensList = useTokensDataList()
 
   const state = useSelector((state: RootState) => state)
-  const { provider } = useSelector((state: RootState) => state.web3)
   const { tokens, form } = state
-  const { balances, allowances } = tokens
   const { symbol } = form
-
-  const [, balancesWithETH] = useTokenBalances()
-  const tokensListWithETH = useTokensDataListWithETH()
-  const prices = usePrices()
 
   const strategy = getStrategy(state)
   const strategyCms = useStrategyCreditManagers(strategy, creditManagers)
@@ -96,179 +42,16 @@ const Form = () => {
   const [selectedPool, setSelectedPool] = useState(availablePools[0])
 
   const creditManager = creditManagers[selectedPool]
-  const { underlyingToken: cmUnderlyingToken } = creditManager || {}
-  const allowedTokens = useAllowedTokensWithETH(creditManager)
-  const collateralAssetsState = useAssets([
-    {
-      balance: BigNumber.from(0),
-      balanceView: '',
-      token: wethToETH(cmUnderlyingToken || '')
-    }
-  ])
-
-  const maxLeverage =
-    useMaxLeverage(strategy.lpToken.toLowerCase(), strategyCms) +
-    LEVERAGE_DECIMALS
-
-  const handleTokenSelect = (address: string) => {
-    const selected = canSelect(address, collateralAssetsState.assets, balances)
-
-    if (selected && indexToChange !== null)
-      collateralAssetsState.handlers.handleChangeToken(indexToChange)(address)
-  }
+  console.log(creditManager)
 
   const handleChangePool = (address: string) => {
     setSelectedPool(address)
   }
 
   const isLoading = !creditManager
-
-  /// OPEN STRAT DIALOG
-  const {
-    address: cmAddress,
-    borrowRate,
-    minAmount,
-    maxAmount,
-    underlyingToken: underlyingTokenAddress,
-    liquidationThresholds
-  } = creditManager
-  const { lpToken: lpTokenAddress, apy, baseAssets } = strategy
-  const underlyingToken = tokensList[underlyingTokenAddress]
-  const { symbol: underlyingSymbol } = underlyingToken || {}
-
-  const lpToken = tokensList[lpTokenAddress]
-  const { symbol: lpSymbol = '' } = lpToken || {}
-
-  const {
-    assets: unwrappedCollateral,
-    handlers: { handleAdd, handleChangeAmount, handleRemove }
-  } = collateralAssetsState
-
-  const [wrappedCollateral, ethAmount] = useWrapETH(unwrappedCollateral)
-
-  const maxLeverageFactor = useMaxLeverage(lpTokenAddress, creditManager)
-  const [leverage, setLeverage] = useState(
-    maxLeverageFactor + LEVERAGE_DECIMALS
-  )
-  const totalAmount = useTotalAmountInTarget({
-    assets: wrappedCollateral,
-    prices,
-    targetToken: underlyingToken,
-    tokensList
-  })
-
-  const [amountOnAccount, borrowedAmount] = useLeveragedAmount(
-    totalAmount,
-    leverage
-  )
-
-  const borrowedAsset = useSingleAsset(underlyingTokenAddress, borrowedAmount)
-  const collateralAndBorrow = useSumAssets(wrappedCollateral, borrowedAsset)
-
-  const strategyPath = useOpenStrategy(
-    creditManager,
-    collateralAndBorrow,
-    lpTokenAddress
-  )
-
-  const assetsAfterOpen = strategyPath?.balances || EMPTY_ARRAY
-  const hfFrom =
-    useHF({
-      assets: assetsAfterOpen,
-      prices,
-      liquidationThresholds,
-      underlyingToken: underlyingTokenAddress,
-      borrowed: borrowedAmount
-    }) || 0
-
-  // const errString = useValidateOpenStrategy({
-  //   balances,
-  //   assets: unwrappedCollateral,
-  //   tokensList,
-  //   cm: creditManager,
-  //   amount: totalAmount,
-  //   debt: borrowedAmount,
-
-  //   strategyPath,
-
-  //   hf: hfFrom
-  // })
-
-  const apyList = useAPYList()
-  const overallAPYFrom =
-    useOverallAPY({
-      caAssets: assetsAfterOpen,
-      lpAPY: apyList,
-      prices,
-
-      totalValue: amountOnAccount,
-      debt: borrowedAmount,
-      borrowRate,
-      underlyingToken: underlyingTokenAddress
-    }) || 0
-
-  const lpAmount = useMemo(() => {
-    return (
-      assetsAfterOpen.find(({ token }) => token === lpTokenAddress)?.balance ||
-      BigNumber.from(0)
-    )
-  }, [lpTokenAddress, assetsAfterOpen])
-
-  const liquidationPrice = strategy.liquidationPrice({
-    assets: wrappedCollateral,
-    prices,
-    liquidationThresholds,
-
-    borrowed: borrowedAmount,
-    underlyingToken: underlyingTokenAddress,
-
-    lpAmount,
-    lpToken: lpTokenAddress
-  })
-
-  const liquidationAssets = useLiquidationAssets(
-    baseAssets,
-    underlyingTokenAddress,
-    tokensList
-  )
-
-  // const totalAmountFormatted = tokenTemplate(totalAmount, underlyingToken);
-  const allAssetsSelected = allowedTokens.length === wrappedCollateral.length
-
-  const handleSubmit = () => {
-    const opHash = generateNewHash('OAS-ACT-')
-    dispatch(
-      actions.strategy.openStrategy({
-        creditManager,
-        strategyPath,
-        wrappedCollateral,
-        borrowedAmount,
-        ethAmount,
-        opHash
-      })
-    )
-  }
-
   const exit = () => {
     store.dispatch(actions.form.toggleForm('', ''))
     store.dispatch(actions.game.ChangeStage('PLAY'))
-  }
-
-  // Reset Picker on select
-  useEffect(() => {
-    setPicker(false)
-  }, [unwrappedCollateral])
-
-  // index 0
-  const updateValue = (index: number, input: string) => {
-    const func = handleChangeAmount(index)
-    const token = tokensList[unwrappedCollateral[0].token]
-    if (!input || input.match(/^\d{1,}(\.\d{0,4})?$/)) {
-      const bn = BigNumber.from(input).mul(
-        BigNumber.from('10').pow(BigNumber.from(token.decimals))
-      )
-      func(bn, input.toString())
-    }
   }
 
   return (
@@ -282,136 +65,12 @@ const Form = () => {
             src={`https://static.gearbox.fi/tokens/${symbol.toLowerCase()}.svg`}
           />
         </h1>
-        <Row>
-          <FormContainer>
-            <h3>Deposit Assets</h3>
-            {unwrappedCollateral.map((collateral, i) => {
-              const rm = handleRemove(i)
-              return (
-                <Section>
-                  <InputSuper>
-                    <span>
-                      {`BALANCE: 
-                        ${nFormatter(
-                          balances[collateral.token],
-                          tokensList[collateral.token]
-                            ? tokensList[collateral.token].decimals
-                            : 18,
-                          3
-                        )} 
-                        ${
-                          tokensList[collateral.token] &&
-                          tokensList[collateral.token].symbol.toUpperCase()
-                        }`}
-                    </span>
-                    {unwrappedCollateral.length != 1 && (
-                      <RmItem onClick={() => rm()}>x</RmItem>
-                    )}
-                  </InputSuper>
-                  <InputGroup>
-                    <Input
-                      placeholder="0.0"
-                      value={collateral.balanceView}
-                      onChange={(e) => updateValue(i, e.target.value)}
-                    />
-
-                    <Asset>
-                      <>
-                        <img
-                          width={20}
-                          src={tokensList[collateral.token].icon}
-                        />
-                        <span>
-                          {tokensList[collateral.token].symbol.toUpperCase()}
-                        </span>
-                      </>
-                    </Asset>
-                    <MaxButton
-                      onClick={() =>
-                        updateValue(i, balances[collateral.token].toString())
-                      }
-                    >
-                      max
-                    </MaxButton>
-                  </InputGroup>
-                </Section>
-              )
-            })}
-
-            <Group>
-              <>
-                {!allAssetsSelected && (
-                  <PickerButton onClick={() => setPicker(true)}>
-                    add asset
-                  </PickerButton>
-                )}
-
-                {picker && (
-                  <Picker
-                    selected={unwrappedCollateral}
-                    tokensList={tokensList}
-                    balances={balancesWithETH}
-                    allowedTokens={allowedTokens}
-                    addAsset={handleAdd}
-                  />
-                )}
-              </>
-            </Group>
-            <Group>
-              <span>Borrowed Asset: </span>
-              <Asset>
-                <img width={25} src={underlyingToken.icon} />
-                <span>{underlyingToken.symbol.toUpperCase()}</span>
-              </Asset>
-            </Group>
-          </FormContainer>
-          <FormContainer>
-            <Group>
-              <Slider
-                amount={totalAmount}
-                minAmount={minAmount}
-                maxAmount={maxAmount}
-                leverage={leverage}
-                maxLeverage={maxLeverageFactor}
-                setLeverage={setLeverage}
-              />
-            </Group>
-            <Group>
-              <span>Health Factor</span>
-              <span>{hfFrom / 10000}</span>
-            </Group>
-            <Group>
-              <span>You'll recieve</span>
-              <span>{`${new Intl.NumberFormat('en-US', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 8
-              }).format(
-                parseFloat(
-                  lpAmount
-                    .div(BigNumber.from('10').pow(BigNumber.from(18)))
-                    .toString()
-                )
-              )} ${lpSymbol.toUpperCase()}`}</span>
-            </Group>
-            <Group>
-              <span>Strategy APY</span>
-              <span>{overallAPYFrom}%</span>
-            </Group>
-
-            <ApproveButton
-              assets={wrappedCollateral}
-              to={creditManager.address}
-              skipApprovalsFor={EMPTY_OBJECT}
-            >
-              <ExecuteButton onClick={() => handleSubmit()}>
-                <>{`Open a  ${formatLeverage(
-                  leverage,
-                  2
-                )}x position with ${lpSymbol}`}</>
-              </ExecuteButton>
-            </ApproveButton>
-          </FormContainer>
-        </Row>
+        {!isLoading && (
+          <OpenStrategyDialog
+            strategy={strategy}
+            creditManager={creditManager}
+          />
+        )}
       </Underground>
     </FormBg>
   )
