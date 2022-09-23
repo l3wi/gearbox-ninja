@@ -51,11 +51,9 @@ const OpenStrategyDialog: React.FC<Props> = ({ strategy, creditManager }) => {
   const dispatch = useDispatch()
   const [picker, setPicker] = useState(false)
   const prices = usePrices()
-  //   const tokensList = useTokensDataList()
 
   const [, balancesWithETHAndWETH] = useTokenBalances()
   const tokensList = useTokensDataListWithETH()
-  console.log(balancesWithETHAndWETH, balancesWithETHAndWETH[ETH_ADDRESS])
 
   const { underlyingToken: cmUnderlyingToken } = creditManager || {}
   const allowedTokens = useAllowedTokensWithETH(creditManager)

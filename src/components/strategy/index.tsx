@@ -42,7 +42,6 @@ const Form = () => {
   const [selectedPool, setSelectedPool] = useState(availablePools[0])
 
   const creditManager = creditManagers[selectedPool]
-  console.log(creditManager)
 
   const handleChangePool = (address: string) => {
     setSelectedPool(address)
@@ -58,18 +57,26 @@ const Form = () => {
     <FormBg>
       <Underground>
         <ExitButton onClick={() => exit()}>✕</ExitButton>
-        <h1>
-          {`Invest in ${symbol.toUpperCase()} `}
-          <img
-            width={30}
-            src={`https://static.gearbox.fi/tokens/${symbol.toLowerCase()}.svg`}
-          />
-        </h1>
-        {!isLoading && (
-          <OpenStrategyDialog
-            strategy={strategy}
-            creditManager={creditManager}
-          />
+
+        {!isLoading ? (
+          <>
+            <h1>
+              {`Invest in ${symbol.toUpperCase()} `}
+              <img
+                width={30}
+                src={`https://static.gearbox.fi/tokens/${symbol.toLowerCase()}.svg`}
+              />
+            </h1>
+            <OpenStrategyDialog
+              strategy={strategy}
+              creditManager={creditManager}
+            />
+          </>
+        ) : (
+          <>
+            <h1>{`You've used all avilable Credit Accounts!`}</h1>
+            <h3>Go to the main Gearbox dApp to manage them.</h3>
+          </>
         )}
       </Underground>
     </FormBg>
