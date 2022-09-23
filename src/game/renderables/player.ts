@@ -200,12 +200,17 @@ class PlayerEntity extends Sprite {
             try {
               this.debounce = true
               store.dispatch(actions.game.PauseGame('Connecting Wallet'))
-              activate('metamask').then(() => {
+              if (!state.web3.account) {
+                activate('metamask').then(() => {
+                  this.debounce = false
+                  store.dispatch(actions.game.PauseGame())
+                })
+              } else if (state.game.isIllegal) {
                 declare().then(() => {
                   this.debounce = false
                   store.dispatch(actions.game.PauseGame())
                 })
-              })
+              }
             } catch (e: any) {
               this.debounce = false
               console.error(e)

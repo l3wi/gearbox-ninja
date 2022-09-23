@@ -83,6 +83,14 @@ export const activate = async (w: Wallets) => {
       })
     }
 
+    const isDelared = window.localStorage.getItem('declared')
+    if (isDelared) {
+      store.dispatch({
+        type: 'SIGNED_MESSAGE',
+        payload: { isIllegal: false }
+      })
+    }
+
     // Set Wallet type
     await store.dispatch(actions.web3.setWalletType(w))
   } catch (eo: any) {
