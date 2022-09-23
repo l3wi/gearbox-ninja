@@ -27,9 +27,12 @@ const Video = () => {
 
 const VideoContainer = styled.video`
   position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  top: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 `
 
 const Skip = styled.button`
