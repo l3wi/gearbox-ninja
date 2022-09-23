@@ -8,13 +8,13 @@ import {
   TxRemoveLiquidity
 } from '@gearbox-protocol/sdk'
 
-import { CHAIN_ID } from "../../config";
+import { CHAIN_ID } from '../../config'
 import { getSignerOrThrow, getWETHGatewayOrThrow } from '../web3'
 import { ThunkTokenAction } from '../tokens'
 import { getError } from '../operations'
 import actions from '../actions'
 
-import { addPendingTransaction } from "../web3/transactions";
+import { addPendingTransaction } from '../web3/transactions'
 import { PoolThunkAction } from '.'
 
 export const getList = (): PoolThunkAction => async (dispatch, getState) => {
@@ -35,7 +35,11 @@ export const getList = (): PoolThunkAction => async (dispatch, getState) => {
       result[p.addr.toLowerCase()] = new PoolData(p)
       if (account)
         dispatch(
-          actions.tokens.getTokenAllowance({ tokenAddress: p.underlying, to: p.addr, account})
+          actions.tokens.getTokenAllowance({
+            tokenAddress: p.underlying,
+            to: p.addr,
+            account
+          })
         )
     }
 
@@ -53,7 +57,11 @@ export const getList = (): PoolThunkAction => async (dispatch, getState) => {
 }
 
 export const addLiquidity =
-  (pool: PoolData, amount: BigNumber, opHash?: string, chainId = CHAIN_ID
+  (
+    pool: PoolData,
+    amount: BigNumber,
+    opHash?: string,
+    chainId = CHAIN_ID
   ): ThunkTokenAction =>
   async (dispatch, getState) => {
     try {
@@ -86,21 +94,24 @@ export const addLiquidity =
         dispatch(actions.operations.updateStatus(opHash, 'STATUS.LOADING'))
 
         // Add transaction to wait list
-      dispatch(
-        addPendingTransaction({
-          chainId,
-          tx: new TxAddLiquidity({
-            txHash: receipt.hash,
-            amount,
-            underlyingToken: pool.underlyingToken,
-            pool: pool.address,
-            timestamp: 0,
-          }),
-          callback: () => dispatch(getList()),
-        }))
+        dispatch(
+          addPendingTransaction({
+            chainId,
+            tx: new TxAddLiquidity({
+              txHash: receipt.hash,
+              amount,
+              underlyingToken: pool.underlyingToken,
+              pool: pool.address,
+              timestamp: 0
+            }),
+            callback: () => dispatch(getList())
+          })
+        )
+        await receipt.wait()
+
+        dispatch(actions.game.AddNotification('Deposit successful!'))
+        dispatch(actions.operations.updateStatus(opHash, 'STATUS.SUCCESS'))
       }
-      dispatch(actions.game.AddNotification('Deposit successful!'))
-      dispatch(actions.operations.updateStatus(opHash, 'STATUS.SUCCESS'))
     } catch (e: any) {
       dispatch(
         actions.operations.updateStatus(opHash, 'STATUS.FAILURE', getError(e))
@@ -118,7 +129,12 @@ export const addLiquidity =
   }
 
 export const removeLiquidity =
-  (pool: PoolData, amount: BigNumber, opHash?: string, chainId = CHAIN_ID): ThunkTokenAction =>
+  (
+    pool: PoolData,
+    amount: BigNumber,
+    opHash?: string,
+    chainId = CHAIN_ID
+  ): ThunkTokenAction =>
   async (dispatch, getState) => {
     try {
       dispatch(actions.operations.updateStatus(opHash, 'STATUS.WAITING'))
@@ -143,18 +159,19 @@ export const removeLiquidity =
         dispatch(actions.operations.updateStatus(opHash, 'STATUS.LOADING'))
 
         // Add transaction to wait list
-      dispatch(
-        addPendingTransaction({
-          chainId,
-          tx: new TxAddLiquidity({
-            txHash: receipt.hash,
-            amount,
-            underlyingToken: pool.underlyingToken,
-            pool: pool.address,
-            timestamp: 0,
-          }),
-          callback: () => dispatch(getList()),
-        }))
+        dispatch(
+          addPendingTransaction({
+            chainId,
+            tx: new TxAddLiquidity({
+              txHash: receipt.hash,
+              amount,
+              underlyingToken: pool.underlyingToken,
+              pool: pool.address,
+              timestamp: 0
+            }),
+            callback: () => dispatch(getList())
+          })
+        )
       }
       dispatch(actions.operations.updateStatus(opHash, 'STATUS.SUCCESS'))
     } catch (e: any) {
