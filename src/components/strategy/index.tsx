@@ -36,6 +36,7 @@ const Form = () => {
   const { symbol } = form
 
   const strategy = getStrategy(state)
+  console.log(strategy)
   const strategyCms = useStrategyCreditManagers(strategy, creditManagers)
 
   const availablePools = useMemo(() => Object.keys(strategyCms), [strategyCms])
@@ -74,8 +75,11 @@ const Form = () => {
           </>
         ) : (
           <>
-            <h1>{`You've used all avilable Credit Accounts!`}</h1>
-            <h3>Go to the main Gearbox dApp to manage them.</h3>
+            <h1>{`Congratulations! You're a Leverage Ninja!`}</h1>
+            <h3>
+              To manage this Credit Account go to{' '}
+              <a href={`https://app.gearbox.fi/accounts/`}>Gearbox.fi →</a>
+            </h3>
           </>
         )}
       </Underground>
@@ -213,6 +217,8 @@ const ExitButton = styled.button`
   background: none;
   color: white;
   font-size: x-large;
+  text-transform: uppercase;
+  font-family: 'Press Start 2P';
 `
 // BG
 
@@ -242,19 +248,6 @@ const FormBg = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
-`
-const Asset = styled.div`
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  margin: 0px 6px;
-  min-width: 70px;
-  height: 45px;
-  width: 70px;
-`
-const Row = styled.span`
-  display: flex;
   align-items: center;
 `
 
