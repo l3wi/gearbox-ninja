@@ -13,6 +13,7 @@ import Video from '../video'
 import { BLOCK_UPDATE_DELAY } from '../../config'
 import useLocalStorage from '../../hooks/useLocalStorage'
 import { activate, declare } from '../../utils/web3'
+import Lives from '../lives'
 
 const Page = () => {
   const isPaused = useSelector((state: RootState) => state.game.isPaused)
@@ -54,6 +55,7 @@ const Page = () => {
 
       {/* Notification */}
       {isPaused && <Pause />}
+      <Lives />
       <Notification />
       <Video />
     </Layout>
