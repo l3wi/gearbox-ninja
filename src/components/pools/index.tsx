@@ -128,45 +128,46 @@ const Form = () => {
     <FormBg>
       <Underground>
         <ExitButton onClick={() => exit()}>✕</ExitButton>
+        <Row>
+          <Content>
+            <h2>{`Deposit ${symbol.toUpperCase()} to Gearbox`}</h2>
+            <p>{depositLPDescription}</p>
+          </Content>
 
-        <Content>
-          <h2>{`Stake ${symbol.toUpperCase()} to Gearbox`}</h2>
-          <p>{depositLPDescription}</p>
-        </Content>
-
-        <FormContainer>
-          <InputSuper>
-            <span>{`STAKE d${symbol.toUpperCase()}`}</span>
-            <span>
-              {`BALANCE: 
+          <FormContainer>
+            <InputSuper>
+              <span>{`DEPOSIT`}</span>
+              <span>
+                {`BALANCE: 
               ${nFormatter(balance, token.decimals, 3)} 
               ${symbol.toUpperCase()}`}
-            </span>
-          </InputSuper>
-          <InputGroup>
-            <Input
-              value={unwrappedCollateral[0].balanceView}
-              onChange={(e) => updateValue(e.target.value)}
-            />
-            <Asset>
-              <img width={20} src={token.icon} />
-              <span>{token.symbol.toUpperCase()}</span>
-            </Asset>
-            <MaxButton onClick={() => updateValue(balance.toString())}>
-              max
-            </MaxButton>
-          </InputGroup>
-          <APYGroup>
-            <span>Deposit APY</span>
-            <span>{pool?.depositAPY.toFixed(2)}%</span>
-          </APYGroup>
+              </span>
+            </InputSuper>
+            <InputGroup>
+              <Input
+                value={unwrappedCollateral[0].balanceView}
+                onChange={(e) => updateValue(e.target.value)}
+              />
+              <Asset>
+                <img width={20} src={token.icon} />
+                <span>{token.symbol.toUpperCase()}</span>
+              </Asset>
+              <MaxButton onClick={() => updateValue(balance.toString())}>
+                max
+              </MaxButton>
+            </InputGroup>
+            <APYGroup>
+              <span>Deposit APY</span>
+              <span>{pool?.depositAPY.toFixed(2)}%</span>
+            </APYGroup>
 
-          <ApproveButton assets={wrappedCollateral} to={pool.address}>
-            <SubmitButton onClick={() => handleSubmit()}>
-              {disableSubmit() ? 'not enough' : 'deposit'}
-            </SubmitButton>
-          </ApproveButton>
-        </FormContainer>
+            <ApproveButton assets={wrappedCollateral} to={pool.address}>
+              <SubmitButton onClick={() => handleSubmit()}>
+                {disableSubmit() ? 'not enough' : 'deposit'}
+              </SubmitButton>
+            </ApproveButton>
+          </FormContainer>
+        </Row>
       </Underground>
     </FormBg>
   )
@@ -233,7 +234,7 @@ const MaxButton = styled.div`
 `
 
 const FormContainer = styled.div`
-  margin-top: 65px;
+  margin-top: 0px;
   font-size: 18px;
   width: 100%;
   max-width: 300px;
@@ -268,7 +269,9 @@ const ExitButton = styled.button`
 const Underground = styled.div`
   position: relative;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  padding-top: 25%;
+  /* justify-content: center; */
   align-items: center;
   min-width: 1023px;
   min-height: 512px;
@@ -291,6 +294,9 @@ const FormBg = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
+`
+const Row = styled.div`
+  display: flex;
 `
 
 export default Form
