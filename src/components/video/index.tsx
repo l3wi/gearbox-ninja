@@ -18,7 +18,7 @@ const Video = () => {
         ref={videoRef}
         onEnded={() => hide()}
       >
-        <source src="/data/intro.webm" type="video/webm" />
+        <source src="/data/intro.mp4" type="video/mp4" />
       </VideoContainer>
       <Skip onClick={() => hide()}>Skip</Skip>
     </Container>
