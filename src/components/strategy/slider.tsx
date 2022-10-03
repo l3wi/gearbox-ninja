@@ -88,8 +88,8 @@ const Line = styled.div`
   position: absolute;
   background: white;
   width: 100%;
-  height: 8px;
-  top: 19px;
+  height: 7px;
+  top: 25px;
   left: 0px;
 `
 
@@ -156,6 +156,7 @@ const Input = styled.input`
     width: 100%;
     height: 8px;
     background: green;
+    position: absolute;
     /* border-radius: 2px; */
   }
   &::-webkit-slider-thumb {
