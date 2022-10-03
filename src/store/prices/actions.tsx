@@ -1,7 +1,15 @@
 import {
+  AwaitedRes,
+  callRepeater,
   IAddressProvider__factory,
-  IPriceOracleV2__factory
+  IPriceOracleV2__factory,
+  MCall,
+  multicall
 } from '@gearbox-protocol/sdk'
+import {
+  IPriceOracleV2,
+  IPriceOracleV2Interface
+} from '@gearbox-protocol/sdk/lib/types/contracts/interfaces/IPriceOracle.sol/IPriceOracleV2'
 import { BigNumber, ethers } from 'ethers'
 
 import { ADDRESS_PROVIDER } from '../../config'
@@ -43,30 +51,25 @@ export const getPrices =
         ADDRESS_PROVIDER,
         provider
       )
+      const priceOracleAddress = await addressProvider.getPriceOracle()
 
-      const priceOracle = IPriceOracleV2__factory.connect(
-        await addressProvider.getPriceOracle(),
-        provider
+      const calls: Array<MCall<IPriceOracleV2Interface>> = tokens.map(
+        (token) => ({
+          address: priceOracleAddress,
+          interface: IPriceOracleV2__factory.createInterface(),
+          method: 'getPrice(address)',
+          params: [token]
+        })
       )
 
-      const resp = await Promise.allSettled(
-        tokens.map((token) => priceOracle.getPrice(token))
+      const pricesResp = await callRepeater(() =>
+        multicall<Array<AwaitedRes<IPriceOracleV2['getPrice']>>>(
+          calls,
+          provider
+        )
       )
 
-      console.debug(
-        'missing price responses',
-        resp
-          .map((r, index) =>
-            r.status === 'rejected' ? tokens[index] : undefined
-          )
-          .filter((r) => r)
-      )
-
-      const pricesArr = resp.map((p) =>
-        p.status === 'fulfilled' ? p.value : BigNumber.from(0)
-      )
-
-      dispatch(parsePricesPayload(pricesArr, tokens))
+      dispatch(parsePricesPayload(pricesResp, tokens))
     } catch (e: any) {
       captureException('store/pice/actions', 'Cant getPricesV2', e)
     }

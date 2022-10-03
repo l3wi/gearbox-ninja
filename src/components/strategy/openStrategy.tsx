@@ -10,7 +10,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import styled from 'styled-components'
 import { EMPTY_ARRAY, EMPTY_OBJECT } from '../../config/constants'
-import { ETH_ADDRESS, wethToETH } from '../../config/tokens'
+import { ETH_ADDRESS, unwrapTokenAddress } from '../../config/tokens'
 import {
   useAssets,
   useSingleAsset,
@@ -61,7 +61,7 @@ const OpenStrategyDialog: React.FC<Props> = ({ strategy, creditManager }) => {
     {
       balance: BigNumber.from(0),
       balanceView: '',
-      token: wethToETH(cmUnderlyingToken || '')
+      token: unwrapTokenAddress(cmUnderlyingToken)
     }
   ])
 

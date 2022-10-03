@@ -1,4 +1,4 @@
-import { CreditAccountData } from '@gearbox-protocol/sdk'
+import { CreditAccountData, Rewards } from '@gearbox-protocol/sdk'
 import { OperationActions } from '../operations'
 import { ThunkAction } from 'redux-thunk'
 
@@ -44,6 +44,13 @@ export type CreditAccountsAction =
     }
   | {
       type: 'CREDIT_ACCOUNT_CLEAR'
+    }
+  | {
+      type: 'SET_REWARD'
+      payload: {
+        creditAccount: string
+        reward: Array<Rewards> | undefined | null
+      }
     }
 
 export type CreditAccountsThunkAction = ThunkAction<

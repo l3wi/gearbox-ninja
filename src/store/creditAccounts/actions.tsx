@@ -3,8 +3,14 @@ import {
   CreditAccountData,
   CreditAccountDataPayload,
   NetworkError,
-  UserHasNotAccountError
+  UserHasNotAccountError,
+  NetworkType,
+  RewardClaimer,
+  Trade,
+  TxClaimReward,
+  CreditManagerData
 } from '@gearbox-protocol/sdk'
+import { CHAIN_ID, CHAIN_TYPE } from '../../config'
 
 import { captureException } from '../../utils/errors'
 import { CreditAccountsAction, CreditAccountsThunkAction } from './index'
@@ -123,4 +129,24 @@ export const deleteByCreditManager = (
 
 export const clearCreditAccounts = (): CreditAccountsAction => ({
   type: 'CREDIT_ACCOUNT_CLEAR'
+})
+
+export const setRewardLoading = (
+  creditAccount: string
+): CreditAccountsAction => ({
+  type: 'SET_REWARD',
+  payload: {
+    creditAccount,
+    reward: undefined
+  }
+})
+
+export const setRewardNotFound = (
+  creditAccount: string
+): CreditAccountsAction => ({
+  type: 'SET_REWARD',
+  payload: {
+    creditAccount,
+    reward: null
+  }
 })

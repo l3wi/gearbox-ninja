@@ -58,20 +58,20 @@ const yearnWETHPayload: StrategyPayload = {
   baseAssets: [currentTokenData.WETH]
 }
 
-const yearnWBTCPayload: StrategyPayload = {
-  name: 'Yearn WBTC',
-  lpToken: currentTokenData.yvWBTC,
+// const yearnWBTCPayload: StrategyPayload = {
+//   name: "Yearn WBTC",
+//   lpToken: currentTokenData.yvWBTC,
 
-  unleveragableCollateral: [
-    currentTokenData.WETH,
-    currentTokenData.USDC,
-    currentTokenData.DAI
-  ],
-  leveragableCollateral: [currentTokenData.WBTC],
+//   unleveragableCollateral: [
+//     currentTokenData.WETH,
+//     currentTokenData.USDC,
+//     currentTokenData.DAI,
+//   ],
+//   leveragableCollateral: [currentTokenData.WBTC],
 
-  pools: [currentTokenData.WBTC],
-  baseAssets: [currentTokenData.WBTC]
-}
+//   pools: [currentTokenData.WBTC],
+//   baseAssets: [currentTokenData.WBTC],
+// };
 
 const yearnStETHCrvPayload: StrategyPayload = {
   name: 'Yearn stETHCrv',
@@ -255,7 +255,7 @@ const convexStETHCrvPayload: StrategyPayload = {
   leveragableCollateral: [
     currentTokenData.STETH,
     currentTokenData.WETH,
-    currentTokenData.stkcvxsteCRV
+    currentTokenData.steCRV
   ],
 
   pools: [currentTokenData.WETH],
@@ -380,7 +380,6 @@ export const strategiesPayload = [
 
   yearnDAIPayload,
   yearnWETHPayload,
-  yearnWBTCPayload,
   yearnFrax3CrvPayload,
   curveStETHCrvPayload,
   curveFrax3CrvPayload,

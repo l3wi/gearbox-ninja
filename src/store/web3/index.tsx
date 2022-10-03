@@ -4,7 +4,8 @@ import {
   EVMTx,
   IDataCompressor,
   PathFinder,
-  IWETHGateway
+  IWETHGateway,
+  IwstETHGateWay
 } from '@gearbox-protocol/sdk'
 
 import { CreditAccountsAction } from '../creditAccounts'
@@ -40,9 +41,8 @@ export type Web3Actions =
       payload: {
         account: string
         signer: Signer
-
-        // leveragedActions: LeveragedActions,
         wethGateway: IWETHGateway
+        wstethGateway: IwstETHGateWay
       }
     }
   | {

@@ -1,5 +1,5 @@
 /* eslint-disable default-param-last, @typescript-eslint/default-param-last */
-import { CreditAccountData } from '@gearbox-protocol/sdk'
+import { CreditAccountData, Rewards } from '@gearbox-protocol/sdk'
 
 import type { CreditAccountsAction } from '.'
 
@@ -9,6 +9,7 @@ export interface CreditAccountsState {
   details: Record<string, CreditAccountData | Error>
   openInProgress: Record<string, boolean>
   deleteInProgress: Record<string, boolean>
+  rewards: Record<string, Array<Rewards> | null | undefined>
 }
 
 const initialState: CreditAccountsState = {
@@ -16,7 +17,8 @@ const initialState: CreditAccountsState = {
   listError: undefined,
   details: {},
   openInProgress: {},
-  deleteInProgress: {}
+  deleteInProgress: {},
+  rewards: {}
 }
 
 export function creditAccountsReducer(
@@ -104,6 +106,12 @@ export function creditAccountsReducer(
         ...state,
         details: {},
         list: {}
+      }
+
+    case 'SET_REWARD':
+      return {
+        ...state,
+        rewards: { [action.payload.creditAccount]: action.payload.reward }
       }
 
     default:

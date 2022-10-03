@@ -1,4 +1,5 @@
 import {
+  decimals,
   LPTokenDataI,
   lpTokens,
   objectEntries,
@@ -6,8 +7,22 @@ import {
   TokenData
 } from '@gearbox-protocol/sdk'
 
-import { currentTokenData, ETH_ADDRESS, WETH_ADDRESS } from './constants'
+import {
+  currentTokenData,
+  DWETH_ADDRESS,
+  ETH_ADDRESS,
+  WETH_ADDRESS
+} from './constants'
 import { isTokenToSkip } from './helpers'
+
+const dstwethData = new TokenData(
+  {
+    symbol: supportedTokens.wstETH.symbol,
+    addr: currentTokenData.dwstETH.toLowerCase(),
+    decimals: decimals.dwstETH
+  },
+  { [supportedTokens.wstETH.symbol]: supportedTokens.dwstETH.symbol }
+)
 
 export const tokenDataList = objectEntries(currentTokenData).reduce<
   Record<string, TokenData>
@@ -15,11 +30,17 @@ export const tokenDataList = objectEntries(currentTokenData).reduce<
   const data = supportedTokens[tokenSymbol]
 
   if (addr) {
-    acc[addr.toLowerCase()] = new TokenData({ ...data, addr })
+    acc[addr] = new TokenData({
+      ...data,
+      addr,
+      decimals: decimals[tokenSymbol]
+    })
   }
-  delete acc['TODO: DEPLOY ME'] // Remove GEAR token placehodler
 
-  return acc
+  return {
+    ...acc,
+    [dstwethData.address]: dstwethData
+  }
 }, {})
 
 export const priceTokenAddresses = objectEntries(currentTokenData).reduce<
@@ -30,12 +51,22 @@ export const priceTokenAddresses = objectEntries(currentTokenData).reduce<
 }, [])
 
 export const ethData = new TokenData(
-  { ...supportedTokens.WETH, addr: ETH_ADDRESS, symbol: 'ETH' },
+  {
+    ...supportedTokens.WETH,
+    addr: ETH_ADDRESS,
+    symbol: 'ETH',
+    decimals: decimals.WETH
+  },
   {}
 )
 
 export const wethData = new TokenData(
-  { ...supportedTokens.WETH, addr: WETH_ADDRESS },
+  { ...supportedTokens.WETH, addr: WETH_ADDRESS, decimals: decimals.WETH },
+  {}
+)
+
+export const dwethData = new TokenData(
+  { ...supportedTokens.dWETH, addr: DWETH_ADDRESS, decimals: decimals.dWETH },
   {}
 )
 

@@ -1,9 +1,9 @@
 import {
   Asset,
-  calcMaxIncreaseBorrow,
   calcOverallAPY,
   CalcOverallAPYProps,
   CreditAccountData,
+  CreditManagerData,
   isLPToken,
   TokenData
 } from '@gearbox-protocol/sdk'
@@ -41,7 +41,6 @@ export function useCreditAccounts(): [CAListOutput, CAListOutput] {
 
   useEffect(() => {
     if (account && dataCompressor) {
-      //@ts-ignore
       dispatch(actions.creditAccounts.getList())
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -181,6 +180,23 @@ export function useCreditAccountAssets(
   return assets
 }
 
+export function useCountCreditAccountAssets(
+  assets: Array<Asset>,
+  maxAmount: number
+) {
+  const count = useMemo(
+    () =>
+      assets.reduce((sum, { balance }) => {
+        return balance.gte(2) ? sum + 1 : sum
+      }, 0),
+    [assets]
+  )
+
+  const closeToMax = maxAmount - 1
+  const max = closeToMax > 0 ? closeToMax : 0
+  return [count >= max, count]
+}
+
 export function useOverallAPY({
   caAssets,
   lpAPY,
@@ -221,29 +237,79 @@ export function useOverallAPY({
 interface UseMaxBorrowProps {
   hf: number
   debt: BigNumber
-  cmMaxAmount: BigNumber
-  maxLeverageFactor: number
+  cm: CreditManagerData
 }
 
 export function useMaxBorrowAmount({
   hf,
   debt,
-  cmMaxAmount,
-  maxLeverageFactor
+  cm
 }: UseMaxBorrowProps): BigNumber {
   const amount = useMemo(() => {
-    const maxAmountCalculated = calcMaxIncreaseBorrow(
+    const underlyingTokenLT = cm.liquidationDiscount - cm.feeLiquidation
+
+    const maxAmountCalculated = CreditAccountData.calcMaxIncreaseBorrow(
       hf,
       debt,
-      maxLeverageFactor
+      cm.maxLeverageFactor,
+      underlyingTokenLT
     )
 
-    const maxAmount = maxAmountCalculated.add(debt).gt(cmMaxAmount)
-      ? cmMaxAmount.sub(debt)
+    const maxAmount = maxAmountCalculated.add(debt).gt(cm.maxAmount)
+      ? cm.maxAmount.sub(debt)
       : maxAmountCalculated
 
     return maxAmount
-  }, [hf, debt, maxLeverageFactor, cmMaxAmount])
+  }, [hf, debt, cm])
 
   return amount
 }
+
+// interface UseRewardProps {
+//   creditAccount: CreditAccountData
+//   creditManager: CreditManagerData
+//   prices: Record<string, BigNumber>
+//   tokensList: Record<string, TokenData>
+// }
+
+// export function useReward({
+//   creditAccount,
+//   creditManager,
+//   prices,
+//   tokensList
+// }: UseRewardProps): [Array<RewardWithAsset> | null | undefined, BigNumber] {
+//   const dispatch = useDispatch()
+//   const rewardsList = useSelector(creditAccountReward(creditAccount.addr))
+//   const { provider } = useSelector((state: RootState) => state.web3)
+
+//   useEffect(() => {
+//     if (provider) {
+//       dispatch(
+//         actions.creditAccounts.getRewards({
+//           creditAccount,
+//           creditManager
+//         })
+//       )
+//     }
+//   }, [creditAccount, creditManager, provider, dispatch])
+
+//   const rewardWithAssets = useRewardToAssets({
+//     rewardsList: rewardsList || EMPTY_ARRAY,
+
+//     targetToken: creditAccount.underlyingToken,
+//     prices,
+//     tokensList
+//   })
+
+//   const totalReward = useMemo(() => {
+//     return rewardWithAssets.reduce((sum, rewardPool) => {
+//       const poolTotal = rewardPool.rewards.reduce((sum, asset) => {
+//         return sum.add(asset.amountInTarget)
+//       }, BigNumber.from(0))
+
+//       return sum.add(poolTotal)
+//     }, BigNumber.from(0))
+//   }, [rewardWithAssets])
+
+//   return [!rewardsList ? rewardsList : rewardWithAssets, totalReward]
+// }

@@ -10,7 +10,7 @@ import { PoolData, TokenData } from '@gearbox-protocol/sdk'
 import { nFormatter } from '../../utils/format'
 import { ApproveButton } from '../approvalButton'
 import { useAssets, useWrapETH } from '../../hooks/useAssets'
-import { wethToETH } from '../../config/tokens'
+import { unwrapTokenAddress } from '../../config/tokens'
 
 const depositLPDescription = `Deposit your assets to Gearbox 
 protocol to earn yield. These assets will be lent out to Gearbox's 
@@ -62,7 +62,7 @@ const Form = () => {
     {
       balance: BigNumber.from(0),
       balanceView: '',
-      token: wethToETH(pool.underlyingToken || '')
+      token: unwrapTokenAddress(pool.underlyingToken)
     }
   ])
 

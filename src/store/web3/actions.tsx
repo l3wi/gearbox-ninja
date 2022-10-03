@@ -13,7 +13,9 @@ import {
   MultiCallContract,
   PoolData,
   PoolDataPayload,
-  PathFinder
+  PathFinder,
+  IwstETHGateWay__factory,
+  stEthPoolWrapper
 } from '@gearbox-protocol/sdk'
 import { providers } from 'ethers'
 
@@ -154,12 +156,18 @@ export const connectSigner =
         signer
       )
 
+      const wstethGateway = IwstETHGateWay__factory.connect(
+        stEthPoolWrapper[CHAIN_TYPE],
+        signer
+      )
+
       dispatch({
         type: 'WEB3_CONNECTED',
         payload: {
           account,
           signer,
-          wethGateway
+          wethGateway,
+          wstethGateway
         }
       })
 

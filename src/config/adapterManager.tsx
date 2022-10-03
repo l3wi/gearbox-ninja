@@ -59,10 +59,6 @@ export class AdapterManager {
       }
 
       const params = contractParams[contractSymbol]
-      if (!params) {
-        console.error('Contract params not found', contractSymbol)
-        return acc
-      }
 
       acc[contractAddress] = new BaseAdapter({
         name: params.name,
