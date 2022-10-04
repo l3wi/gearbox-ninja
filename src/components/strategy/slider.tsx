@@ -51,7 +51,8 @@ const Slider: React.FC<{
   return (
     <Container>
       <Row>
-        <span>Leverage</span>
+        {/* <span>Leverage</span> */}
+        <span />
         <span> &nbsp;x{formatLeverage(leverage)}x</span>
       </Row>
       <LineBox

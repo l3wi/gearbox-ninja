@@ -217,7 +217,6 @@ const OpenStrategyDialog: React.FC<Props> = ({ strategy, creditManager }) => {
         <h3>Deposit Assets</h3>
         {unwrappedCollateral.map((collateral, i) => {
           const rm = handleRemove(i)
-          console.log(collateral)
           return (
             <Section>
               <InputSuper>
@@ -297,6 +296,7 @@ const OpenStrategyDialog: React.FC<Props> = ({ strategy, creditManager }) => {
         </Group>
       </FormContainer>
       <FormContainer>
+        <h3>Leverage</h3>
         <Group>
           <Slider
             amount={totalAmount}
@@ -329,22 +329,28 @@ const OpenStrategyDialog: React.FC<Props> = ({ strategy, creditManager }) => {
           <span>{overallAPYFrom}%</span>
         </Group>
 
-        <ApproveButton
-          assets={wrappedCollateral}
-          to={creditManager.address}
-          skipApprovalsFor={EMPTY_OBJECT}
-        >
-          <ExecuteButton onClick={() => handleSubmit()}>
-            <>{`Open a  ${formatLeverage(
-              leverage,
-              2
-            )}x position with ${lpSymbol}`}</>
-          </ExecuteButton>
-        </ApproveButton>
+        <ButtonGroup>
+          <ApproveButton
+            assets={wrappedCollateral}
+            to={creditManager.address}
+            skipApprovalsFor={EMPTY_OBJECT}
+          >
+            <ExecuteButton onClick={() => handleSubmit()}>
+              <>{`Open a  ${formatLeverage(
+                leverage,
+                2
+              )}x position with ${lpSymbol}`}</>
+            </ExecuteButton>
+          </ApproveButton>
+        </ButtonGroup>
       </FormContainer>
     </Row>
   )
 }
+
+const ButtonGroup = styled.div`
+  padding: 10px 0px;
+`
 
 const Group = styled.div`
   display: flex;
@@ -430,6 +436,7 @@ const MaxButton = styled.div`
 const FormContainer = styled.div`
   font-size: 18px;
   width: 100%;
+  min-width: 350px;
   max-width: 350px;
   padding: 20px;
 `
@@ -459,7 +466,7 @@ const Asset = styled.div`
 `
 const Row = styled.span`
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 `
 
 export default OpenStrategyDialog
