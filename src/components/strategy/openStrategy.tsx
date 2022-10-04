@@ -438,7 +438,7 @@ const FormContainer = styled.div`
   width: 100%;
   min-width: 350px;
   max-width: 350px;
-  padding: 20px;
+  padding: 10px 20px;
 `
 
 const ExecuteButton = styled.button`
@@ -467,6 +467,7 @@ const Asset = styled.div`
 const Row = styled.span`
   display: flex;
   align-items: flex-start;
+  background: rgba(0, 0, 0, 0.4);
 `
 
 export default OpenStrategyDialog

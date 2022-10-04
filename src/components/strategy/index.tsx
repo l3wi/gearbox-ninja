@@ -60,7 +60,7 @@ const Form = () => {
 
         {!isLoading ? (
           <>
-            <h1>
+            <h1 style={{ fontSize: '52px' }}>
               {`Invest in ${symbol.toUpperCase()} `}
               <img
                 width={30}
