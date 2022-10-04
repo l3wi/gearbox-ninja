@@ -19,9 +19,14 @@ const DataManifest = [
     src: 'data/img/map/tiles.png'
   },
   {
-    name: 'ninja',
+    name: 'pagoda',
     type: 'image',
-    src: 'data/img/sprite/ninja.png'
+    src: 'data/img/pagoda.png'
+  },
+  {
+    name: 'underground',
+    type: 'image',
+    src: 'data/img/underground.png'
   },
   {
     name: 'ninja-smol',
