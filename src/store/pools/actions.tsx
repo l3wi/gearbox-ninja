@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers'
+import { BigNumber, ContractTransaction } from 'ethers'
 import {
   callRepeater,
   NetworkError,
@@ -9,13 +9,18 @@ import {
 } from '@gearbox-protocol/sdk'
 
 import { CHAIN_ID } from '../../config'
-import { getSignerOrThrow, getWETHGatewayOrThrow } from '../web3'
+import {
+  getSignerOrThrow,
+  getWETHGatewayOrThrow,
+  getWSTETHGatewayOrThrow
+} from '../web3'
 import { ThunkTokenAction } from '../tokens'
-import { getError } from '../operations'
+import { getError, updateStatus } from '../operations'
 import actions from '../actions'
 
 import { addPendingTransaction } from '../web3/transactions'
 import { PoolThunkAction } from '.'
+import { WSTETH_ADDRESS } from '../../config/tokens'
 
 export const getList = (): PoolThunkAction => async (dispatch, getState) => {
   try {
@@ -56,62 +61,72 @@ export const getList = (): PoolThunkAction => async (dispatch, getState) => {
   }
 }
 
+export interface AddLiquidityProps {
+  pool: PoolData
+  ethAmount: BigNumber
+  amount: BigNumber
+  opHash?: string
+  chainId?: number
+}
+
 export const addLiquidity =
-  (
-    pool: PoolData,
-    amount: BigNumber,
-    opHash?: string,
+  ({
+    pool,
+    amount,
+    ethAmount,
+    opHash,
     chainId = CHAIN_ID
-  ): ThunkTokenAction =>
+  }: AddLiquidityProps): ThunkTokenAction =>
   async (dispatch, getState) => {
     try {
-      dispatch(actions.operations.updateStatus(opHash, 'STATUS.WAITING'))
+      dispatch(updateStatus(opHash, 'STATUS.WAITING'))
       const signer = getSignerOrThrow(getState)
       const signerAddress = await signer.getAddress()
 
+      let receipt: ContractTransaction
       dispatch(actions.game.AddNotification('Waiting for user'))
-      if (pool.isWETH) {
-        const wethGateway = getWETHGatewayOrThrow(getState)
 
-        const signerAddress = await signer.getAddress()
-        const receipt = await wethGateway
+      if (pool.isWETH && ethAmount.gt(0)) {
+        const wethGateway = getWETHGatewayOrThrow(getState)
+        receipt = await wethGateway
           .connect(signer)
           .addLiquidityETH(pool.address, signerAddress, 0, {
-            value: amount
+            value: ethAmount
           })
         dispatch(actions.operations.updateStatus(opHash, 'STATUS.LOADING'))
         dispatch(actions.game.AddNotification('Deposit Pending', 0))
-
-        await receipt.wait()
+      } else if (pool.underlyingToken === WSTETH_ADDRESS) {
+        const wstethGateway = getWSTETHGatewayOrThrow(getState)
+        receipt = await wstethGateway
+          .connect(signer)
+          .addLiquidity(amount, signerAddress, 0)
+        dispatch(updateStatus(opHash, 'STATUS.LOADING'))
       } else {
         const tx = await pool
           .getContractETH(signer)
           .populateTransaction.addLiquidity(amount, signerAddress, 0)
 
-        const receipt = await signer.sendTransaction(tx)
-
-        dispatch(actions.game.AddNotification('Deposit Pending', 0))
-        dispatch(actions.operations.updateStatus(opHash, 'STATUS.LOADING'))
-
-        // Add transaction to wait list
-        dispatch(
-          addPendingTransaction({
-            chainId,
-            tx: new TxAddLiquidity({
-              txHash: receipt.hash,
-              amount,
-              underlyingToken: pool.underlyingToken,
-              pool: pool.address,
-              timestamp: 0
-            }),
-            callback: () => dispatch(getList())
-          })
-        )
-        await receipt.wait()
-
-        dispatch(actions.game.AddNotification('Deposit successful!'))
-        dispatch(actions.operations.updateStatus(opHash, 'STATUS.SUCCESS'))
+        dispatch(updateStatus(opHash, 'STATUS.LOADING'))
+        receipt = await signer.sendTransaction(tx)
       }
+
+      dispatch(
+        addPendingTransaction({
+          chainId,
+          tx: new TxAddLiquidity({
+            txHash: receipt.hash,
+            amount,
+            underlyingToken: pool.underlyingToken,
+            pool: pool.address,
+            timestamp: 0
+          }),
+          callback: () => dispatch(getList())
+        })
+      )
+      await receipt.wait()
+
+      dispatch(actions.game.AddNotification('Deposit successful!'))
+      dispatch(updateStatus(opHash, 'STATUS.SUCCESS'))
     } catch (e: any) {
       dispatch(
         actions.operations.updateStatus(opHash, 'STATUS.FAILURE', getError(e))

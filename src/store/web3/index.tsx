@@ -92,3 +92,18 @@ export function getWETHGatewayOrThrow(getState: () => RootState): IWETHGateway {
   }
   return wethGateway
 }
+
+export function getWSTETHGatewayOrThrow(
+  getState: () => RootState
+): IwstETHGateWay {
+  const { wstethGateway } = getState().web3
+  if (!wstethGateway) {
+    throw new Error('Cant get WSTETH Gateway')
+  }
+  return wstethGateway
+}
+
+export const transactionsSelector =
+  (account = '') =>
+  (state: RootState) =>
+    state.web3.transactions[account]
