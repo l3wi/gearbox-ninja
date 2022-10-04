@@ -1,7 +1,7 @@
 import {
   Stage,
   level,
-  game,
+  event,
   input,
   pool,
   Vector2d
@@ -24,6 +24,14 @@ class PlayScreen extends Stage {
     input.bindKey(input.KEY.SPACE, 'jump', true)
     input.bindKey(input.KEY.DOWN, 'down', true)
     input.bindKey(input.KEY.S, 'down', true)
+
+    // Cancel out of screen
+    input.bindKey(input.KEY.ESC, 'esc', true)
+    event.on(event.KEYDOWN, function (action: string) {
+      if (action === 'esc') {
+        store.dispatch(actions.game.PauseGame())
+      }
+    })
 
     // load a level
     level.load('app')
