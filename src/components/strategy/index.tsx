@@ -36,7 +36,6 @@ const Form = () => {
   const { symbol } = form
 
   const strategy = getStrategy(state)
-  console.log(strategy)
   const strategyCms = useStrategyCreditManagers(strategy, creditManagers)
 
   const availablePools = useMemo(() => Object.keys(strategyCms), [strategyCms])
@@ -232,7 +231,7 @@ const Underground = styled.div`
   min-height: 512px;
   width: 100%;
   height: 100%;
-  background-image: url('/data/img/form_bg.png');
+  background-image: url('/data/img/pagoda.png');
   background-repeat: no-repeat;
   background-position: center;
   -webkit-background-size: contain;
@@ -244,7 +243,7 @@ const Underground = styled.div`
 const FormBg = styled.div`
   height: 100%;
   width: 100%;
-  background: #070b13;
+  background: #8ea1c6;
   display: flex;
   flex-direction: column;
   justify-content: center;

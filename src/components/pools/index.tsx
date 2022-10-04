@@ -277,7 +277,7 @@ const Underground = styled.div`
   min-height: 512px;
   width: 100%;
   height: 100%;
-  background-image: url('/data/img/form_bg.png');
+  background-image: url('/data/img/underground.png');
   background-repeat: no-repeat;
   background-position: center;
   -webkit-background-size: contain;
