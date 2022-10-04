@@ -2,12 +2,18 @@ import React, { RefObject, useState } from 'react'
 import styled, { keyframes } from 'styled-components'
 
 const Video = () => {
+  const [mute, setMute] = useState(true)
+
   const [visible, setVisible] = useState(true)
   const videoRef: any = React.createRef()
 
+  const unmute = () => {
+    setMute(!mute)
+  }
+
   const hide = () => {
-    setVisible(false)
     videoRef.current.pause()
+    setVisible(false)
   }
 
   return (
@@ -15,12 +21,16 @@ const Video = () => {
       <VideoContainer
         playsInline
         autoPlay
+        muted={mute}
         ref={videoRef}
         onEnded={() => hide()}
       >
         <source src="/data/intro.mp4" type="video/mp4" />
       </VideoContainer>
-      <Skip onClick={() => hide()}>Skip</Skip>
+      <ButtonContainer>
+        {mute && <Mute onClick={() => unmute()}>Unmute</Mute>}
+        <Button onClick={() => hide()}>Skip</Button>
+      </ButtonContainer>
     </Container>
   )
 }
@@ -35,15 +45,29 @@ const VideoContainer = styled.video`
   object-fit: contain;
 `
 
-const Skip = styled.button`
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  position: fixed;
+  z-index: 30;
+  bottom: 20px;
+  width: 100%;
+  right: 0px;
+`
+const Mute = styled.button`
   font-family: 'Press Start 2P';
   font-weight: 500;
   font-size: 2rem;
   font-style: normal;
-  position: fixed;
-  z-index: 30;
-  bottom: 60px;
-  right: 20px;
+  color: rgba(255, 255, 255, 0.5);
+  background: none;
+  border: none;
+`
+const Button = styled.button`
+  font-family: 'Press Start 2P';
+  font-weight: 500;
+  font-size: 2rem;
+  font-style: normal;
   color: white;
   background: none;
   border: none;
@@ -65,6 +89,7 @@ const Container = styled.div<{ visible: boolean }>`
   width: 100vw;
   height: 100vh;
   overflow: hidden;
+  opacity: 1;
   visibility: ${(props) => (props.visible ? 'visible' : 'hidden')};
   animation: ${(props) => !props.visible && fadeOut} 1s ease-out;
   transition: visibility 1s linear;
