@@ -452,6 +452,7 @@ const ExecuteButton = styled.button`
   text-transform: uppercase;
   font-size: 14px;
   margin: 0px;
+  line-height: 20px;
   font-family: 'Press Start 2P';
 `
 

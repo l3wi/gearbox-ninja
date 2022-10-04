@@ -56,7 +56,7 @@ const Form = () => {
   return (
     <FormBg>
       <Underground>
-        <ExitButton onClick={() => exit()}>✕</ExitButton>
+        <ExitButton onClick={() => exit()}>X</ExitButton>
 
         {!isLoading ? (
           <>
