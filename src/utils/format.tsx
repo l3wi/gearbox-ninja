@@ -51,3 +51,14 @@ export function isNumeric(str: string) {
     !isNaN(parseFloat(str))
   ) // ...and ensure strings of whitespace fail
 }
+
+export function isLongString(str: string, maxLength: number): boolean {
+  return str.length > maxLength
+}
+
+export function shortenString(str: string, maxLength: number): string {
+  if (isLongString(str, maxLength)) {
+    return `${str.slice(0, maxLength - 3)}...`
+  }
+  return str
+}

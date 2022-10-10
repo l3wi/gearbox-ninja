@@ -1,3 +1,6 @@
+import { isMetamaskError } from '@gearbox-protocol/sdk'
+import { BigNumber } from 'ethers'
+
 export type OpenAccountBalanceErrorTypes =
   | 'unknownToken'
   | 'insufficientFunds'
@@ -89,7 +92,35 @@ export class HfError extends Error {
     this.payload = { tokenSymbol }
   }
 
-  static isCloseError(e: unknown): e is HfError {
+  static isHfError(e: unknown): e is HfError {
     return e instanceof HfError
   }
+}
+
+export type BorrowMoreErrorTypes =
+  | 'amountGreaterMax'
+  | 'insufficientPoolLiquidity'
+  | 'amountLessMin'
+
+export class BorrowMoreError extends Error {
+  message: BorrowMoreErrorTypes
+
+  payload: { amount: BigNumber }
+
+  constructor(errorType: BorrowMoreErrorTypes, amount: BigNumber) {
+    super()
+    this.message = errorType
+    this.payload = { amount }
+  }
+
+  static isBorrowMoreErrorError(e: unknown): e is BorrowMoreError {
+    return e instanceof BorrowMoreError
+  }
+}
+
+export const isCancelledByUser = (e: any) => {
+  if ((isMetamaskError(e) && e.code === 4001) || e.code === 'ACTION_REJECTED') {
+    return true
+  }
+  return false
 }

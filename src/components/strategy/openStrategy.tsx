@@ -5,12 +5,12 @@ import {
   Strategy,
   TokenData
 } from '@gearbox-protocol/sdk'
-import { BigNumber, BigNumberish } from 'ethers'
+import { BigNumber, BigNumberish, utils } from 'ethers'
 import { useEffect, useMemo, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import styled from 'styled-components'
 import { EMPTY_ARRAY, EMPTY_OBJECT } from '../../config/constants'
-import { ETH_ADDRESS, unwrapTokenAddress } from '../../config/tokens'
+import { unwrapTokenAddress } from '../../config/tokens'
 import {
   useAssets,
   useSingleAsset,
@@ -32,27 +32,33 @@ import {
 } from '../../hooks/useStrategy'
 import {
   useTokenBalances,
-  useTokensDataList,
   useTokensDataListWithETH
 } from '../../hooks/useTokens'
+import { useValidateOpenStrategy } from '../../hooks/useValidate'
 import actions from '../../store/actions'
-import { nFormatter } from '../../utils/format'
+import { isNumeric, nFormatter } from '../../utils/format'
 import { generateNewHash } from '../../utils/opHash'
 import { ApproveButton } from '../approvalButton'
+
 import Picker from './picker'
 import Slider from './slider'
 
 interface Props {
   strategy: Strategy
   creditManager: CreditManagerData
+  balances: Record<string, BigNumber>
 }
 
-const OpenStrategyDialog: React.FC<Props> = ({ strategy, creditManager }) => {
+const OpenStrategyDialog: React.FC<Props> = ({
+  strategy,
+  creditManager,
+  balances
+}) => {
   const dispatch = useDispatch()
   const [picker, setPicker] = useState(false)
   const prices = usePrices()
 
-  const [, balancesWithETHAndWETH] = useTokenBalances()
+  const [, balancesWithETH] = useTokenBalances()
   const tokensList = useTokensDataListWithETH()
 
   const { underlyingToken: cmUnderlyingToken } = creditManager || {}
@@ -126,18 +132,18 @@ const OpenStrategyDialog: React.FC<Props> = ({ strategy, creditManager }) => {
       borrowed: borrowedAmount
     }) || 0
 
-  // const errString = useValidateOpenStrategy({
-  //   balances,
-  //   assets: unwrappedCollateral,
-  //   tokensList,
-  //   cm: creditManager,
-  //   amount: totalAmount,
-  //   debt: borrowedAmount,
+  const errString = useValidateOpenStrategy({
+    balances,
+    assets: unwrappedCollateral,
+    tokensList,
+    cm: creditManager,
+    amount: totalAmount,
+    debt: borrowedAmount,
 
-  //   strategyPath,
+    strategyPath,
 
-  //   hf: hfFrom
-  // })
+    hf: hfFrom
+  })
 
   const apyList = useAPYList()
   const overallAPYFrom =
@@ -203,12 +209,11 @@ const OpenStrategyDialog: React.FC<Props> = ({ strategy, creditManager }) => {
   const updateValue = (index: number, input: string) => {
     const func = handleChangeAmount(index)
     const token = tokensList[unwrappedCollateral[0].token]
-    if (!input || input.match(/^\d{1,}(\.\d{0,4})?$/)) {
-      const bn = BigNumber.from(input).mul(
-        BigNumber.from('10').pow(BigNumber.from(token.decimals))
-      )
-      func(bn, input.toString())
+    if (isNumeric(input)) {
+      const bn = utils.parseUnits(input, token.decimals)
+      return func(bn, input.toString())
     }
+    func(unwrappedCollateral[index].balance, input.toString())
   }
 
   return (
@@ -223,7 +228,7 @@ const OpenStrategyDialog: React.FC<Props> = ({ strategy, creditManager }) => {
                 <span>
                   {`BALANCE: 
                         ${nFormatter(
-                          balancesWithETHAndWETH[collateral.token],
+                          balancesWithETH[collateral.token],
                           tokensList[collateral.token]
                             ? tokensList[collateral.token].decimals
                             : 18,
@@ -255,10 +260,7 @@ const OpenStrategyDialog: React.FC<Props> = ({ strategy, creditManager }) => {
                 </Asset>
                 <MaxButton
                   onClick={() =>
-                    updateValue(
-                      i,
-                      balancesWithETHAndWETH[collateral.token].toString()
-                    )
+                    updateValue(i, balancesWithETH[collateral.token].toString())
                   }
                 >
                   max
@@ -280,7 +282,7 @@ const OpenStrategyDialog: React.FC<Props> = ({ strategy, creditManager }) => {
               <Picker
                 selected={unwrappedCollateral}
                 tokensList={tokensList}
-                balances={balancesWithETHAndWETH}
+                balances={balancesWithETH}
                 allowedTokens={allowedTokens}
                 addAsset={handleAdd}
               />

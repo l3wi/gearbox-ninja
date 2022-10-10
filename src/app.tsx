@@ -1,8 +1,10 @@
 import Page from './components/page'
 import { Provider } from 'react-redux'
 import { store } from './store'
+import EnglishLocale from './locale/en'
 
 import { createGlobalStyle } from 'styled-components'
+import { IntlProvider } from 'react-intl'
 const GlobalStyle = createGlobalStyle`
   @font-face { 
     font-family: "Press Start 2P";
@@ -42,11 +44,15 @@ body {
 `
 
 const App = () => {
+  const locale = 'en'
+
   return (
-    <Provider store={store}>
-      <GlobalStyle />
-      <Page />
-    </Provider>
+    <IntlProvider locale={locale} messages={EnglishLocale}>
+      <Provider store={store}>
+        <GlobalStyle />
+        <Page />
+      </Provider>
+    </IntlProvider>
   )
 }
 

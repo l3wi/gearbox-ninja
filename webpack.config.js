@@ -52,7 +52,7 @@ module.exports = {
             var map = /\.(tmx|tsx)$/
             var audio =
               /\.(wav|mp3|mpeg|opus|ogg|oga|wav|aac|caf|m4a|m4b|mp4|weba|webm|dolby|flac)$/
-            var misc = /\.(xml|bin|glsl|ym|json|js)$/
+            var misc = /\.(xml|bin|glsl|ym|json|js|md)$/
 
             // only copy production files
             var ret =

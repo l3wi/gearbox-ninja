@@ -56,13 +56,16 @@
     "build": "NODE_ENV=production webpack"
   },
   "dependencies": {
+    "@gearbox-protocol/interface": "^1.4.4",
     "@gearbox-protocol/sdk": "^1.11.8",
+    "@gearbox-protocol/static": "^0.0.5",
     "@walletconnect/web3-provider": "^1.8.0",
     "axios": "^0.27.2",
     "ethers": "^5.6.9",
     "melonjs": "^13.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-feather": "^2.0.10",
     "react-redux": "^8.0.2",
     "redux": "^4.2.0",
     "redux-thunk": "^2.4.1",

@@ -70,6 +70,7 @@ const Form = () => {
             <OpenStrategyDialog
               strategy={strategy}
               creditManager={creditManager}
+              balances={tokens.balances}
             />
           </>
         ) : (
