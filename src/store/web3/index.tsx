@@ -77,6 +77,9 @@ export type Web3Actions =
       type: 'NFT_BALANCE_SUCCESS'
       payload: number
     }
+  | {
+      type: 'NO_NFT_WHITELIST'
+    }
 
 export type ThunkWeb3Action = ThunkAction<
   void,

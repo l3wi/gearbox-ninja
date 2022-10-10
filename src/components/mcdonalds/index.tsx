@@ -11,9 +11,24 @@ const McDonalds = () => {
   const { game, web3 } = useSelector((state: RootState) => state)
 
   const handleClick = async () => {
+    if (web3.noWhitelist)
+      return store.dispatch(
+        actions.game.AddNotification('You are incapable of ninja-dom!')
+      )
+    if (web3.nftClaimed)
+      return store.dispatch(
+        actions.game.AddNotification('You are already a ninja!')
+      )
     if (!web3.account) await activate('metamask')
     if (game.isIllegal) await declare()
     store.dispatch(actions.web3.mintNFT())
+  }
+
+  const toMcDonalds = () => {
+    window.open(
+      'https://www.mcdonalds.com/us/en-us/mcdonalds-careers.html',
+      '_blank'
+    )
   }
 
   const exit = () => {
@@ -26,7 +41,7 @@ const McDonalds = () => {
       <Underground>
         <ExitButton onClick={() => exit()}>X</ExitButton>
         <Row>
-          <Button></Button>
+          <Button onClick={() => toMcDonalds()}></Button>
           <Button onClick={() => handleClick()}></Button>
         </Row>
       </Underground>
@@ -51,6 +66,7 @@ const Button = styled.button`
   height: 50.5%;
   margin-right: 4%;
   background: transparent;
+  border: none;
 `
 
 const ExitButton = styled.button`

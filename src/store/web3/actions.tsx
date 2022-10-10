@@ -342,6 +342,9 @@ export const isNFTClaimed =
           const signer = getSignerOrThrow(getState)
           const signerAddress = await signer.getAddress()
 
+          if (!claims[signerAddress])
+            return dispatch({ type: 'NO_NFT_WHITELIST' })
+
           const nftDistributor = IDegenDistributor__factory.connect(
             DEGEN_DISTRIBUTOR,
             signer

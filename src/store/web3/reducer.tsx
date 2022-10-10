@@ -13,6 +13,7 @@ export interface Web3State {
   provider?: providers.JsonRpcProvider
   signer?: Signer
   account?: string
+  noWhitelist?: boolean
   nftClaimed?: boolean
   nftBalance?: number
 
@@ -78,6 +79,12 @@ export function web3Reducer(
       return {
         ...state,
         nftBalance: action.payload
+      }
+
+    case 'NO_NFT_WHITELIST':
+      return {
+        ...state,
+        noWhitelist: true
       }
 
     case 'NFT_CLAIMED_SUCCESS':
