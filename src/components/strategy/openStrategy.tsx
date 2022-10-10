@@ -7,7 +7,7 @@ import {
 } from '@gearbox-protocol/sdk'
 import { BigNumber, BigNumberish, utils } from 'ethers'
 import { useEffect, useMemo, useState } from 'react'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import styled from 'styled-components'
 import { EMPTY_ARRAY, EMPTY_OBJECT } from '../../config/constants'
 import { unwrapTokenAddress } from '../../config/tokens'
@@ -35,10 +35,12 @@ import {
   useTokensDataListWithETH
 } from '../../hooks/useTokens'
 import { useValidateOpenStrategy } from '../../hooks/useValidate'
+import { RootState } from '../../store'
 import actions from '../../store/actions'
 import { isNumeric, nFormatter } from '../../utils/format'
 import { generateNewHash } from '../../utils/opHash'
 import { ApproveButton } from '../approvalButton'
+import { ErrorButtonGuard } from '../errorButton'
 
 import Picker from './picker'
 import Slider from './slider'
@@ -55,6 +57,7 @@ const OpenStrategyDialog: React.FC<Props> = ({
   balances
 }) => {
   const dispatch = useDispatch()
+  const { balance } = useSelector((state: RootState) => state.web3)
   const [picker, setPicker] = useState(false)
   const prices = usePrices()
 
@@ -133,7 +136,7 @@ const OpenStrategyDialog: React.FC<Props> = ({
     }) || 0
 
   const errString = useValidateOpenStrategy({
-    balances,
+    balances: { ...balances, '0x0': BigNumber.from(balance) },
     assets: unwrappedCollateral,
     tokensList,
     cm: creditManager,
@@ -332,18 +335,20 @@ const OpenStrategyDialog: React.FC<Props> = ({
         </Group>
 
         <ButtonGroup>
-          <ApproveButton
-            assets={wrappedCollateral}
-            to={creditManager.address}
-            skipApprovalsFor={EMPTY_OBJECT}
-          >
-            <ExecuteButton onClick={() => handleSubmit()}>
-              <>{`Open a  ${formatLeverage(
-                leverage,
-                2
-              )}x position with ${lpSymbol}`}</>
-            </ExecuteButton>
-          </ApproveButton>
+          <ErrorButtonGuard errorString={errString}>
+            <ApproveButton
+              assets={wrappedCollateral}
+              to={creditManager.address}
+              skipApprovalsFor={EMPTY_OBJECT}
+            >
+              <ExecuteButton onClick={() => handleSubmit()}>
+                <>{`Open a  ${formatLeverage(
+                  leverage,
+                  2
+                )}x position with ${lpSymbol}`}</>
+              </ExecuteButton>
+            </ApproveButton>
+          </ErrorButtonGuard>
         </ButtonGroup>
       </FormContainer>
     </Row>
