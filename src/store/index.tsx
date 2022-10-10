@@ -1,8 +1,4 @@
-import {
-  applyMiddleware,
-  Middleware,
-  createStore,
-} from 'redux'
+import { applyMiddleware, Middleware, createStore, Store } from 'redux'
 import reducer from './reducer'
 import thunk from 'redux-thunk'
 
@@ -24,8 +20,7 @@ function configureStore() {
   return createStore(reducer, applyMiddleware(thunk, logger))
 }
 
-export let store: any
-
+export let store: Store<RootState>
 export const init = () => {
   store = configureStore()
 }

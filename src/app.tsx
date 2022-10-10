@@ -1,15 +1,9 @@
-import * as React from 'react'
-import * as ReactDOM from 'react-dom/client'
-import { useAPYSync, useStrategiesSync } from './hooks/useStrategy'
-
-import { store } from './store'
 import Page from './components/page'
 import { Provider } from 'react-redux'
+import { store } from './store'
 
 import { createGlobalStyle } from 'styled-components'
-
 const GlobalStyle = createGlobalStyle`
-
   @font-face { 
     font-family: "Press Start 2P";
     font-weight: 100 900;

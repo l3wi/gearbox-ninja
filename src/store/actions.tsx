@@ -9,9 +9,9 @@ import * as strategy from './strategy/actions'
 import * as price from './prices/actions'
 import * as creditAccounts from './creditAccounts/actions'
 import * as creditManagers from './creditManagers/actions'
+import { Web3Actions } from './web3'
 
-// eslint-disable-next-line import/no-anonymous-default-export
-export default {
+const actions = {
   web3,
   game,
   form,
@@ -24,3 +24,5 @@ export default {
   creditAccounts,
   creditManagers
 }
+
+export default actions

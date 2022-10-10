@@ -1,10 +1,8 @@
-import * as React from 'react'
 import * as ReactDOM from 'react-dom/client'
-import redux, { store } from './store'
-import actions from './store/actions'
-
 import App from './app'
 
+import { init, store } from './store'
+import actions from './store/actions'
 // @ts-ignore
 if (module.hot) module.hot.accept()
 
@@ -17,11 +15,12 @@ const begin = async () => {
 
   /// Startup ////
   /// Init redux
-  redux.init()
-
+  init()
   // Init game
   const { game } = store.getState()
+  //@ts-ignore
   if (!game.isInit) store.dispatch(actions.game.InitGame(w, h))
+  //@ts-ignore
   store.dispatch(actions.web3.connectProvider())
 
   // Setup React app
