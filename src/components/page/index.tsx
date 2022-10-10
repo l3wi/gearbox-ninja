@@ -14,6 +14,7 @@ import { BLOCK_UPDATE_DELAY } from '../../config'
 import useLocalStorage from '../../hooks/useLocalStorage'
 import { activate, declare } from '../../utils/web3'
 import Lives from '../lives'
+import McDonalds from '../mcdonalds'
 
 const Page = () => {
   const isPaused = useSelector((state: RootState) => state.game.isPaused)
@@ -52,7 +53,7 @@ const Page = () => {
       {/* Forms */}
       {!form.isHidden && form.type === 'tube' ? <PoolForm /> : null}
       {!form.isHidden && form.type === 'entrance' ? <StrategyFrom /> : null}
-
+      {!form.isHidden && form.type === 'mcdonalds' ? <McDonalds /> : null}
       {/* Notification */}
       {isPaused && <Pause />}
       <Lives />
