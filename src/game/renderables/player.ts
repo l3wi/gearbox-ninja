@@ -130,11 +130,11 @@ class PlayerEntity extends Sprite {
     switch (response.b.body.collisionType) {
       case collision.types.WORLD_SHAPE:
         const state = store.getState()
-        // TUBE COLLISION + ACTIVATE
         if (
           typeof other.type === 'string' &&
           other.type.indexOf('tube') != -1
         ) {
+          // TUBE COLLISION + ACTIVATE
           // last time we hit an entrance
           this.isEntrance = Date.now()
           if (this.isEntrance > Date.now() - 50) {
@@ -230,6 +230,8 @@ class PlayerEntity extends Sprite {
               actions.game.AddNotification('Press UP to enter', 100)
             )
           }
+
+          // Activate
           if (input.isKeyPressed('jump') && !this.debounce) {
             // @ts-ignore
             game.world.getChildByName('foreground')[0].setOpacity(1)
@@ -244,7 +246,12 @@ class PlayerEntity extends Sprite {
             setTimeout(() => {
               const type = other.type.split('-')[0]
               const symbol = other.type.split('-')[1]
-              store.dispatch(actions.form.toggleForm(symbol, type))
+
+              if (symbol === 'mcdonalds') {
+                store.dispatch(actions.form.toggleForm('', 'mcdonalds'))
+              } else {
+                store.dispatch(actions.form.toggleForm(symbol, type))
+              }
             }, 500)
           }
 

@@ -1,4 +1,4 @@
-import { ethers } from 'ethers'
+import { BigNumber, ContractTransaction, ethers } from 'ethers'
 import { updateStatus } from '../operations'
 import {
   callRepeater,
@@ -15,7 +15,9 @@ import {
   PoolDataPayload,
   PathFinder,
   IwstETHGateWay__factory,
-  stEthPoolWrapper
+  stEthPoolWrapper,
+  IDegenNFT__factory,
+  IDegenDistributor__factory
 } from '@gearbox-protocol/sdk'
 import { providers } from 'ethers'
 
@@ -24,7 +26,8 @@ import {
   ADDRESS_PROVIDER,
   CHAIN_ID,
   JSON_RPC_PROVIDER,
-  CHAIN_TYPE
+  CHAIN_TYPE,
+  DEGEN_DISTRIBUTOR
 } from '../../config'
 import { captureException } from '../../utils/errors'
 
@@ -39,7 +42,7 @@ import { getList as cmGetList } from '../creditManagers/actions'
 import { getList as poolGetList } from '../pools/actions'
 import { updateCreditManagerEvents, updatePoolEvents } from '../sync/actions'
 import { clearBalancesAllowances } from '../tokens/actions'
-import { ThunkWeb3Action, Web3Actions } from './index'
+import { getSignerOrThrow, ThunkWeb3Action, Web3Actions } from './index'
 import { removeTransactionFromList, restoreTransactions } from './transactions'
 
 export const connectProvider =
@@ -295,9 +298,10 @@ export const connectSigner =
       dispatch(actions.pools.getList())
       dispatch(actions.creditAccounts.getList())
       dispatch(actions.creditManagers.getList(signer.provider))
+      dispatch(isNFTClaimed())
 
       dispatch(restoreTransactions({ account, chainId, provider: library }))
-      dispatch(actions.game.AddNotification('wallet connected', 3000))
+      dispatch(actions.game.AddNotification('Wallet connected', 3000))
     } catch (e: any) {
       dispatch(disconnectSigner())
       console.error('store/web3/actions' + 'Cant connectSigner' + e)
@@ -315,6 +319,81 @@ export function disconnectSigner(): ThunkWeb3Action {
       captureException('store/web3/actions', 'Cant disconnectSigner', e)
     }
   }
+}
+
+interface MerkleDistributorInfo {
+  merkleRoot: string
+  tokenTotal: string
+  claims: {
+    [account: string]: {
+      index: number
+      amount: string
+      proof: ethers.utils.BytesLike[]
+    }
+  }
+}
+
+export const isNFTClaimed =
+  (): ThunkWeb3Action => async (dispatch, getState) => {
+    import('../../config/merkle.json').then(
+      async (merkle: MerkleDistributorInfo) => {
+        try {
+          const { claims } = merkle
+          const signer = getSignerOrThrow(getState)
+          const signerAddress = await signer.getAddress()
+
+          const nftDistributor = IDegenDistributor__factory.connect(
+            DEGEN_DISTRIBUTOR,
+            signer
+          )
+
+          const { index } = claims[signerAddress]
+          const claimed = await nftDistributor.isClaimed(index)
+          dispatch({ type: 'NFT_CLAIMED_SUCCESS', payload: claimed })
+        } catch (e) {
+          console.error('store/web3/actions', 'Cant check if NFT is claimed', e)
+        }
+      }
+    )
+  }
+
+export const mintNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
+  import('../../config/merkle.json').then(
+    async (merkle: MerkleDistributorInfo) => {
+      try {
+        const signer = getSignerOrThrow(getState)
+        const signerAddress = await signer.getAddress()
+
+        const nftDistributor = IDegenDistributor__factory.connect(
+          DEGEN_DISTRIBUTOR,
+          signer
+        )
+        updateStatus('0', 'STATUS.WAITING')
+        dispatch(actions.game.AddNotification('Waiting for user'))
+
+        const { index, amount, proof } = merkle.claims[signerAddress]
+        const receipt = await nftDistributor.claim(
+          index,
+          signerAddress,
+          amount,
+          proof
+        )
+
+        updateStatus('0', 'STATUS.LOADING')
+        const amnt = BigNumber.from(amount).toNumber()
+        dispatch(actions.game.AddNotification(`Minting ${amnt}x NFTs`, 0))
+        await receipt.wait()
+
+        dispatch(actions.game.AddNotification('Mint successful!'))
+        updateStatus('0', 'STATUS.SUCCESS')
+        return true
+      } catch (e) {
+        updateStatus('0', 'STATUS.FAILURE', e)
+        console.error('store/web3/actions', 'Cant  mintNFT', e)
+        return false
+      }
+    }
+  )
 }
 
 export const getEthBalance =

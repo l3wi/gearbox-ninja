@@ -69,6 +69,14 @@ export type Web3Actions =
       type: 'UPDATE_ALL_TX'
       payload: { account: string; txs: Array<EVMTx> }
     }
+  | {
+      type: 'NFT_CLAIMED_SUCCESS'
+      payload: boolean
+    }
+  | {
+      type: 'NFT_BALANCE_SUCCESS'
+      payload: number
+    }
 
 export type ThunkWeb3Action = ThunkAction<
   void,

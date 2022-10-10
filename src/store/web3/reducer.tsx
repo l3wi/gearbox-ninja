@@ -13,6 +13,8 @@ export interface Web3State {
   provider?: providers.JsonRpcProvider
   signer?: Signer
   account?: string
+  nftClaimed?: boolean
+  nftBalance?: number
 
   dataCompressor?: IDataCompressor
   balance?: BigNumberish
@@ -72,6 +74,17 @@ export function web3Reducer(
         balance: action.payload
       }
 
+    case 'NFT_BALANCE_SUCCESS':
+      return {
+        ...state,
+        nftBalance: action.payload
+      }
+
+    case 'NFT_CLAIMED_SUCCESS':
+      return {
+        ...state,
+        nftClaimed: action.payload
+      }
     case 'LISTENERS_ADDED':
       return {
         ...state,

@@ -52,6 +52,8 @@ export const getAuthUrl = (url: string) => `${AUTH_ADDR}${url}`
 export const PATHFINDER = process.env.REACT_APP_PATHFINDER || ''
 export const ADDRESS_PROVIDER = process.env.REACT_APP_ADDRESS_PROVIDER || ''
 export const MULTICALL_ADDRESS = '0x5ba1e12693dc8f9c48aad8770482f4739beed696'
+export const DEGEN_NFT = process.env.REACT_APP_DEGEN_NFT
+export const DEGEN_DISTRIBUTOR = process.env.REACT_APP_DEGEN_DISTRIBUTOR
 export const multiCallConfig = {
   preset: IS_TEST_NETWORK ? 'goerli' : 'mainnet'
 }
