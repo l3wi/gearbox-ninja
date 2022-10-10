@@ -21,10 +21,9 @@ class Web3Screen extends Stage {
 
     // Cancel out of screen
     input.bindKey(input.KEY.ESC, 'esc', true)
-    event.once(event.KEYDOWN, function (action: string) {
+    event.on(event.KEYDOWN, function (action: string) {
       if (action === 'esc') {
-        store.dispatch(actions.form.toggleForm('', ''))
-        store.dispatch(actions.game.ChangeStage('PLAY'))
+        store.dispatch(actions.game.PauseGame())
       }
     })
   }
