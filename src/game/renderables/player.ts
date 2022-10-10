@@ -110,13 +110,11 @@ class PlayerEntity extends Sprite {
       this.body.vel.y -= this.body.maxVel.y * 1.6
       game.world.removeChild(this)
       game.viewport.fadeIn('#000000', 500, function () {
-        store.dispatch(
-          actions.game.ChangeStage('PLAY', {
-            x: 1926,
-            y: 340
-          })
-        )
+        store.dispatch(actions.game.ChangeStage('PLAY', { x: 2175, y: 0 }))
         store.dispatch(actions.game.BeginStage())
+        store.dispatch(
+          actions.game.AddNotification('Only true ninjas can make jump!')
+        )
       })
     }
 
@@ -170,6 +168,12 @@ class PlayerEntity extends Sprite {
             ~~this.body.vel.y >= ~~response.overlapV.y
           ) {
             response.overlapV.x = 0
+            return true
+          }
+          return false
+          // Check if NINJA
+        } else if (other.type === 'degen') {
+          if (!state.web3.nftClaimed) {
             return true
           }
           return false
