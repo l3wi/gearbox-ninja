@@ -6,11 +6,9 @@ import {
   loader,
   state,
   video,
-  Color,
   game,
   pool,
-  Vector2d,
-  BitmapText
+  Vector2d
 } from 'melonjs/dist/melonjs.module.js'
 
 import TitleScreen from '../../game/stage/title'
@@ -164,34 +162,33 @@ export const AddNotification =
     }
   }
 
-
 export const signDeclaration =
-(): GameThunkAction => async (dispatch, getState) => {
-  try {
-    const { account, signer } = getState().web3
-    if (!account || !signer) throw new Error('No account selected')
+  (): GameThunkAction => async (dispatch, getState) => {
+    try {
+      const { account, signer } = getState().web3
+      if (!account || !signer) throw new Error('No account selected')
 
-    const agreement =
-      'I hereby further represent and warrant that:\n' +
-      '- I’m not a resident of or located in the United States of America (including its territories: American Samoa, Guam, Puerto Rico, the Northern Mariana Islands and the U.S. Virgin Islands) or any other Restricted Jurisdiction (as defined in the Terms of Service).\n' +
-      '- I’m not a Prohibited Person (as defined in the Terms of Service) nor acting on behalf of a Prohibited Person.\n' +
-      '- I understand that if I fail to maintain sufficient collateral when using the Gearbox Protocol, my credit account(s) may be liquidated, in which case a penalty may be charged by the protocol.\n' +
-      '- I acknowledge that Gearbox App and related software are experimental, and that the use of experimental software may result in complete loss of my funds.'
+      const agreement =
+        'I hereby further represent and warrant that:\n' +
+        '- I’m not a resident of or located in the United States of America (including its territories: American Samoa, Guam, Puerto Rico, the Northern Mariana Islands and the U.S. Virgin Islands) or any other Restricted Jurisdiction (as defined in the Terms of Service).\n' +
+        '- I’m not a Prohibited Person (as defined in the Terms of Service) nor acting on behalf of a Prohibited Person.\n' +
+        '- I understand that if I fail to maintain sufficient collateral when using the Gearbox Protocol, my credit account(s) may be liquidated, in which case a penalty may be charged by the protocol.\n' +
+        '- I acknowledge that Gearbox App and related software are experimental, and that the use of experimental software may result in complete loss of my funds.'
 
-    // @ts-ignore
-    const signature = await signer.signMessage(agreement)
-    dispatch(actions.game.AddNotification('Signed Declaration'))
+      // @ts-ignore
+      const signature = await signer.signMessage(agreement)
+      dispatch(actions.game.AddNotification('Signed Declaration'))
 
-    dispatch({
-      type: 'SIGNED_MESSAGE',
-      payload: { isIllegal: false }
-    })
-  } catch (e: any) {
-    dispatch(actions.game.AddNotification('Signature Error'))
-    dispatch({
-      type: 'SIGNED_MESSAGE',
-      payload: { isIllegal: true, signRejected: true }
-    })
-    console.error('Cant signup: ' + e)
+      dispatch({
+        type: 'SIGNED_MESSAGE',
+        payload: { isIllegal: false }
+      })
+    } catch (e: any) {
+      dispatch(actions.game.AddNotification('Signature Error'))
+      dispatch({
+        type: 'SIGNED_MESSAGE',
+        payload: { isIllegal: true, signRejected: true }
+      })
+      console.error('Cant signup: ' + e)
+    }
   }
-}
