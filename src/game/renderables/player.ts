@@ -190,36 +190,29 @@ class PlayerEntity extends Sprite {
           }
           return false
           // DECLARATION BARRIER COLLISION
-        } else if (other.type === 'declare') {
+        } else if (
+          typeof other.type === 'string' &&
+          other.type.indexOf('declare') != -1
+        ) {
+          const side = other.type.split('-')[1]
           // If declared wall is passable
           if (!state.game.isIllegal) {
             return false
             // If running into & no declaration, prompt user
           } else if (
-            (!this.debounce &&
-              state.game.isIllegal &&
-              input.isKeyPressed('left')) ||
+            !this.debounce &&
+            state.game.isIllegal &&
+            side === 'left' &&
+            input.isKeyPressed('left')
+          ) {
+            store.dispatch(actions.game.PauseGame('Connect Wallet'))
+          } else if (
+            !this.debounce &&
+            state.game.isIllegal &&
+            side === 'right' &&
             input.isKeyPressed('right')
           ) {
-            try {
-              this.debounce = true
-              store.dispatch(actions.game.PauseGame('Connect Wallet'))
-              // if (!state.web3.account) {
-              //   activate('metamask').then(() => {
-              //     this.debounce = false
-              //     store.dispatch(actions.game.PauseGame())
-              //   })
-              // } else if (state.game.isIllegal) {
-              //   declare().then(() => {
-              //     this.debounce = false
-              //     store.dispatch(actions.game.PauseGame())
-              //   })
-              // }
-            } catch (e: any) {
-              this.debounce = false
-              console.error(e)
-              store.dispatch(actions.game.PauseGame())
-            }
+            store.dispatch(actions.game.PauseGame('Connect Wallet'))
           }
           return true
           // Building Entrance
@@ -237,7 +230,7 @@ class PlayerEntity extends Sprite {
 
           // Activate
           if (input.isKeyPressed('jump') && !this.debounce) {
-            // @ts-ignore
+            console.log('Firing')
             game.world.getChildByName('foreground')[0].setOpacity(1)
 
             const currentPos = this.pos
