@@ -1584,11 +1584,6 @@
     intl-messageformat "10.1.4"
     tslib "2.4.0"
 
-"@gearbox-protocol/interface@^1.4.4":
-  version "1.4.4"
-  resolved "https://registry.yarnpkg.com/@gearbox-protocol/interface/-/interface-1.4.4.tgz#ed777c29efad8fbd03e977b52239c78e67262717"
-  integrity sha512-GqfqTPJIjwB+XonACzrbjp9Wy62/dcxa1sLIBZ6NxYslcxqpQiO3YF2y7aSzNSGfQH3MgqiYXz2AB8zZ/JUk0g==
-
 "@gearbox-protocol/sdk@^1.11.8":
   version "1.11.8"
   resolved "https://registry.yarnpkg.com/@gearbox-protocol/sdk/-/sdk-1.11.8.tgz#c215a754c3e6a09c9f2c0b85aa162f2605b1c200"
@@ -1598,11 +1593,6 @@
     decimal.js-light "^2.5.1"
     deep-eql "^4.1.0"
     moment "^2.29.4"
-
-"@gearbox-protocol/static@^0.0.5":
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/@gearbox-protocol/static/-/static-0.0.5.tgz#60cdff7af99fa21312814e6218902992f415bc7b"
-  integrity sha512-CMx75lQtH6Ckxa3qaoaX02AayIlsVAvUjeL9JSU4jWUjR5NZvxJFW71MLuA3HHUDScXTtxLEr7zR5eQSvXUp1Q==
 
 "@jridgewell/gen-mapping@^0.1.0":
   version "0.1.1"
