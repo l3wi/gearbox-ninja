@@ -17,6 +17,8 @@ import {
 } from '../../hooks/useTokens'
 import { PoolsState } from '../../store/pools/reducer'
 import { syncReducer } from '../../store/sync/reducer'
+import ExitButton from '../exitButton'
+import { SufficientAmountGuard } from '../amountButton'
 
 const depositLPDescription = `Deposit your assets to Gearbox 
 protocol to earn yield. These assets will be lent out to Gearbox's 
@@ -115,7 +117,7 @@ const Form = () => {
   return (
     <FormBg>
       <Underground>
-        <ExitButton onClick={() => exit()}>X</ExitButton>
+        <ExitButton text="Back" func={exit} />
         <Row>
           <Content>
             <h2>{`Deposit ${symbol.toUpperCase()} to Gearbox`}</h2>
@@ -148,19 +150,23 @@ const Form = () => {
               <span>Deposit APY</span>
               <span>{pool?.depositAPY.toFixed(2)}%</span>
             </APYGroup>
-
-            <ApproveButton
-              assets={wrappedCollateral}
-              to={
-                pool.underlyingToken === WSTETH_ADDRESS
-                  ? web3.wstethGateway?.address
-                  : pool.address
-              }
+            <SufficientAmountGuard
+              amount={unwrappedCollateral[0].balance}
+              balance={balance}
             >
-              <SubmitButton onClick={() => handleSubmit()}>
-                {disableSubmit() ? 'not enough' : 'deposit'}
-              </SubmitButton>
-            </ApproveButton>
+              <ApproveButton
+                assets={wrappedCollateral}
+                to={
+                  pool.underlyingToken === WSTETH_ADDRESS
+                    ? web3.wstethGateway?.address
+                    : pool.address
+                }
+              >
+                <SubmitButton onClick={() => handleSubmit()}>
+                  {disableSubmit() ? 'not enough' : 'deposit'}
+                </SubmitButton>
+              </ApproveButton>
+            </SufficientAmountGuard>
           </FormContainer>
         </Row>
       </Underground>
@@ -249,18 +255,6 @@ const SubmitButton = styled.button`
   margin: 0px;
   font-family: 'Press Start 2P';
 `
-
-const ExitButton = styled.button`
-  position: absolute;
-  top: 30px;
-  right: 30px;
-  border: none;
-  background: none;
-  color: white;
-  font-size: x-large;
-  font-family: 'Press Start 2P';
-`
-// BG
 
 const Underground = styled.div`
   position: relative;
