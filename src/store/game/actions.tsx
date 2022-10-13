@@ -77,6 +77,9 @@ export const ChangeStage =
           payload: { currentStage: key, lastPosition: { x: pos.x, y: pos.y } }
         })
       } else {
+        if (currentStage === 'MENU' && key === 'PLAY')
+          audio.playTrack('background_8bit', 0.5)
+
         //@ts-ignore
         state.change(state[key], false) // pls fix
         dispatch({
@@ -127,9 +130,11 @@ export const PauseGame =
       let { isPaused, pause } = getState().game
       if (isPaused) {
         state.resume()
+        audio.resume('background_8bit')
         dispatch({ type: 'RESUME_GAME' })
       } else {
         state.pause()
+        audio.pauseTrack()
         dispatch({ type: 'PAUSE_GAME', payload: { pause: text } })
       }
     } catch (e: any) {

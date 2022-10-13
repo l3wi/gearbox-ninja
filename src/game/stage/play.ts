@@ -3,8 +3,7 @@ import {
   level,
   event,
   input,
-  pool,
-  Vector2d
+  game
 } from 'melonjs/dist/melonjs.module.js'
 // import PlayerEntity from '../renderables/player'
 import { store } from '../../store'
@@ -32,6 +31,9 @@ class PlayScreen extends Stage {
         store.dispatch(actions.game.PauseGame())
       }
     })
+
+    const { nftClaimed } = store.getState().web3
+    if (nftClaimed) game.world.getChildByName('bridge')[0].setOpacity(1)
 
     // load a level
     level.load('app')

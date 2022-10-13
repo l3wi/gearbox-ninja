@@ -3,6 +3,8 @@ import {
   game,
   input,
   state,
+  Sprite,
+  loader,
   event,
   ColorLayer,
   BitmapText
@@ -16,8 +18,26 @@ class TitleScreen extends Stage {
    *  action to perform on state change
    */
   onResetEvent() {
+    // new sprite for the title screen, position at the center of the game viewport
+    var backgroundImage = new Sprite(
+      game.viewport.width / 2,
+      game.viewport.height / 2,
+      {
+        image: loader.getImage('start')
+      }
+    )
+
+    // scale to fit with the viewport size
+    backgroundImage.scale(
+      game.viewport.height / backgroundImage.height,
+      game.viewport.height / backgroundImage.height
+    )
+
+    // add to the world container
+    game.world.addChild(backgroundImage, 1)
+
     // add a gray background to the default Stage
-    game.world.addChild(new ColorLayer('background', '#202020'))
+    // game.world.addChild(new ColorLayer('background', '#202020'))
 
     // add a font text display object
     game.world.addChild(

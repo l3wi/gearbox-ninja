@@ -44,6 +44,7 @@ import { updateCreditManagerEvents, updatePoolEvents } from '../sync/actions'
 import { clearBalancesAllowances } from '../tokens/actions'
 import { getSignerOrThrow, ThunkWeb3Action, Web3Actions } from './index'
 import { removeTransactionFromList, restoreTransactions } from './transactions'
+import { game } from 'melonjs'
 
 export const connectProvider =
   (): ThunkWeb3Action => async (dispatch, getState) => {
@@ -352,6 +353,8 @@ export const isNFTClaimed =
 
           const { index } = claims[signerAddress]
           const claimed = await nftDistributor.isClaimed(index)
+
+          if (claimed) game.world.getChildByName('bridge')[0].setOpacity(1)
           dispatch({ type: 'NFT_CLAIMED_SUCCESS', payload: claimed })
         } catch (e) {
           console.error('store/web3/actions', 'Cant check if NFT is claimed', e)

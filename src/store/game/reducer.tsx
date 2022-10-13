@@ -26,7 +26,7 @@ const initialState: GameState = {
   signRejected: true,
   notification: null,
   stages: {},
-  lastPosition: { x: 2175, y: 0 },
+  lastPosition: { x: 2375, y: 0 },
   currentStage: 'MENU',
   pause: null
 }
@@ -80,12 +80,12 @@ export function gameReducer(
         ...state,
         stages: { ...state.stages, [action.payload.key]: action.payload.stage }
       }
-      case 'SIGNED_MESSAGE':
-        return {
-          ...state,
-          isIllegal: action.payload.isIllegal,
-          signRejected: action.payload.signRejected,
-        }
+    case 'SIGNED_MESSAGE':
+      return {
+        ...state,
+        isIllegal: action.payload.isIllegal,
+        signRejected: action.payload.signRejected
+      }
   }
 
   return state

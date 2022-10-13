@@ -110,10 +110,10 @@ class PlayerEntity extends Sprite {
       this.body.vel.y -= this.body.maxVel.y * 1.6
       game.world.removeChild(this)
       game.viewport.fadeIn('#000000', 500, function () {
-        store.dispatch(actions.game.ChangeStage('PLAY', { x: 2175, y: 0 }))
+        store.dispatch(actions.game.ChangeStage('PLAY', { x: 2375, y: 0 }))
         store.dispatch(actions.game.BeginStage())
         store.dispatch(
-          actions.game.AddNotification('Only true ninjas can make jump!')
+          actions.game.AddNotification('You died :( Go to McDonalds first')
         )
       })
     }
@@ -177,6 +177,11 @@ class PlayerEntity extends Sprite {
             return true
           }
           return false
+        } else if (other.type === 'bridge') {
+          if (!state.web3.nftClaimed) {
+            return false
+          }
+          return true
           // PLATFORM COLLISION
         } else if (other.type === 'platform') {
           if (
@@ -229,8 +234,11 @@ class PlayerEntity extends Sprite {
           }
 
           // Activate
-          if (input.isKeyPressed('jump') && !this.debounce) {
-            console.log('Firing')
+          if (
+            input.isKeyPressed('jump') &&
+            state.game.currentStage != 'CREDITS' &&
+            !this.debounce
+          ) {
             game.world.getChildByName('foreground')[0].setOpacity(1)
 
             const currentPos = this.pos
