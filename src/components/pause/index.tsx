@@ -5,6 +5,7 @@ import { store } from '../../store'
 import actions from '../../store/actions'
 import { RootState } from '../../store/reducer'
 import { activate, declare } from '../../utils/web3'
+import ExitButton from '../exitButton'
 
 const Pause = () => {
   const { game, web3 } = useSelector((state: RootState) => state)
@@ -24,12 +25,13 @@ const Pause = () => {
     store.dispatch(actions.web3.disconnectSigner())
   }
 
+  const prior = window.localStorage.getItem('declared')
   return (
     <PauseBG paused={isPaused}>
-      <ExitButton onClick={() => exit()}>X</ExitButton>
-      <Content>
-        <Title>{isPaused && pause}</Title>
+      <ExitButton text="Back" func={exit} />
+      <Title>{isPaused && pause}</Title>
 
+      <Content>
         {!account && (
           <Row>
             <WalletButton onClick={() => activate('metamask')}>
@@ -41,14 +43,17 @@ const Pause = () => {
           </Row>
         )}
         {account && !isIllegal ? (
-          <Row>
-            Wallet:
-            <span>{account.substring(0, 8) + '...' + account.slice(-5)}</span>
-            <Button onClick={() => disconnect()}>X</Button>
-          </Row>
+          <Col>
+            <span>
+              Wallet:
+              {account.substring(0, 8) + '...' + account.slice(-5)}
+            </span>
+
+            <Button onClick={() => disconnect()}>Disconnect Wallet</Button>
+          </Col>
         ) : null}
 
-        {isIllegal && account ? (
+        {isIllegal && account && !prior ? (
           <Row>
             <TextCol>
               <p>{`I hereby further represent and warrant that:`}</p>
@@ -77,6 +82,18 @@ const Pause = () => {
     </PauseBG>
   )
 }
+
+const Col = styled.div`
+  display: flex;
+  flex-direction: column;
+  font-size: 24px;
+  font-family: 'Press Start 2P';
+  padding: 20px 0px;
+  span {
+    margin-bottom: 30px;
+  }
+`
+
 const TextCol = styled.div`
   display: flex;
   flex-direction: column;
@@ -105,6 +122,7 @@ const Content = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
 `
 
 const WalletButton = styled.button`
@@ -136,7 +154,8 @@ const Button = styled.button`
   font-style: normal;
   color: white;
   background: none;
-  border: none;
+  border: 2px white solid;
+  padding: 15px;
   font-size: 24px;
 `
 const Row = styled.div`
@@ -150,19 +169,6 @@ const Row = styled.div`
   margin-top: 40px;
 `
 
-const ExitButton = styled.button`
-  position: absolute;
-  top: 30px;
-  right: 30px;
-  font-family: 'Courier New', Courier, monospace;
-  font-family: 'Press Start 2P';
-  font-weight: 500;
-  font-size: 2rem;
-  font-style: normal;
-  color: white;
-  background: none;
-  border: none;
-`
 const fadeIn = keyframes`
   from {
     opacity: 0;

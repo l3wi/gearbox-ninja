@@ -15,6 +15,7 @@ import {
 } from '../../hooks/useStrategy'
 
 import OpenStrategyDialog from './openStrategy'
+import ExitButton from '../exitButton'
 
 const getStrategy = (state: RootState) => {
   const { symbol } = state.form
@@ -56,7 +57,7 @@ const Form = () => {
   return (
     <FormBg>
       <Underground>
-        <ExitButton onClick={() => exit()}>X</ExitButton>
+        <ExitButton text="Back" func={exit} />
 
         {!isLoading ? (
           <>
@@ -206,18 +207,6 @@ const ExecuteButton = styled.button`
   text-transform: uppercase;
   font-size: 14px;
   margin: 0px;
-  font-family: 'Press Start 2P';
-`
-
-const ExitButton = styled.button`
-  position: absolute;
-  top: 30px;
-  right: 30px;
-  border: none;
-  background: none;
-  color: white;
-  font-size: x-large;
-  text-transform: uppercase;
   font-family: 'Press Start 2P';
 `
 // BG

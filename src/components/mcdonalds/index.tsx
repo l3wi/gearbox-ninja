@@ -6,6 +6,7 @@ import { store } from '../../store'
 import actions from '../../store/actions'
 import { RootState } from '../../store/reducer'
 import { activate, declare } from '../../utils/web3'
+import ExitButton from '../exitButton'
 
 const McDonalds = () => {
   const { game, web3 } = useSelector((state: RootState) => state)
@@ -39,7 +40,8 @@ const McDonalds = () => {
   return (
     <FormBg>
       <Underground>
-        <ExitButton onClick={() => exit()}>X</ExitButton>
+        <ExitButton text="Back" func={exit} />
+
         <Row>
           <Button onClick={() => toMcDonalds()}></Button>
           <Button onClick={() => handleClick()}></Button>
@@ -67,17 +69,6 @@ const Button = styled.button`
   margin-right: 4%;
   background: transparent;
   border: none;
-`
-
-const ExitButton = styled.button`
-  position: absolute;
-  top: 30px;
-  right: 30px;
-  border: none;
-  background: none;
-  color: white;
-  font-size: x-large;
-  font-family: 'Press Start 2P';
 `
 
 const Underground = styled.div`
