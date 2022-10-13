@@ -14,9 +14,19 @@ const DataManifest = [
     src: 'data/fnt/PressStart2P.fnt'
   },
   {
+    name: 'background_8bit',
+    type: 'audio',
+    src: 'data/bgm/'
+  },
+  {
     name: 'tiles',
     type: 'image',
     src: 'data/img/map/tiles.png'
+  },
+  {
+    name: 'start',
+    type: 'image',
+    src: 'data/img/start.jpeg'
   },
   {
     name: 'pagoda',
