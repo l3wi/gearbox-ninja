@@ -27,7 +27,8 @@ import {
   CHAIN_ID,
   JSON_RPC_PROVIDER,
   CHAIN_TYPE,
-  DEGEN_DISTRIBUTOR
+  DEGEN_DISTRIBUTOR,
+  DEGEN_NFT
 } from '../../config'
 import { captureException } from '../../utils/errors'
 

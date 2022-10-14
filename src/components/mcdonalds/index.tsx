@@ -44,12 +44,31 @@ const McDonalds = () => {
 
         <Row>
           <Button onClick={() => toMcDonalds()}></Button>
-          <Button onClick={() => handleClick()}></Button>
+          <Button onClick={() => handleClick()}>
+            {web3.noWhitelist && !web3.nftClaimed ? (
+              <ButtonText>BECOME A LEVERAGE NINJA</ButtonText>
+            ) : null}
+            {web3.nftClaimed && (
+              <ButtonText>You are already a ninja!</ButtonText>
+            )}
+            {!web3.nftClaimed && !web3.noWhitelist ? (
+              <ButtonText>You are already a ninja!</ButtonText>
+            ) : null}
+          </Button>
         </Row>
       </Underground>
     </FormBg>
   )
 }
+
+const ButtonText = styled.div`
+  font-family: 'MERCURY115';
+  width: 100%;
+  color: white;
+  font-size: 28px;
+  letter-spacing: 4px;
+  padding: 0px 20px 20px;
+`
 
 const Row = styled.div`
   width: 100%;
@@ -69,6 +88,8 @@ const Button = styled.button`
   margin-right: 4%;
   background: transparent;
   border: none;
+  display: flex;
+  align-items: flex-end;
 `
 
 const Underground = styled.div`
