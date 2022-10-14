@@ -32,12 +32,14 @@ class PlayScreen extends Stage {
       }
     })
 
-    const { nftClaimed } = store.getState().web3
-    if (nftClaimed) game.world.getChildByName('bridge')[0].setOpacity(1)
-
     // load a level
     level.load('app')
     store.dispatch(actions.game.BeginStage())
+
+    const { web3, game: gameState } = store.getState()
+    const { nftClaimed } = web3
+    const { currentStage } = gameState
+    if (nftClaimed) game.world.getChildByName('bridge')[0].setOpacity(1)
   }
 
   /**
