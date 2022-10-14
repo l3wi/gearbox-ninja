@@ -15,8 +15,12 @@ import useLocalStorage from '../../hooks/useLocalStorage'
 import { activate, declare } from '../../utils/web3'
 import Lives from '../lives'
 import McDonalds from '../mcdonalds'
+import HomePage from '../home'
 
 const Page = () => {
+  const currentStage = useSelector(
+    (state: RootState) => state.game.currentStage
+  )
   const isPaused = useSelector((state: RootState) => state.game.isPaused)
   const form = useSelector((state: RootState) => state.form)
   const provider = useSelector((state: RootState) => state.web3.provider)
@@ -54,6 +58,8 @@ const Page = () => {
       {!form.isHidden && form.type === 'tube' ? <PoolForm /> : null}
       {!form.isHidden && form.type === 'entrance' ? <StrategyFrom /> : null}
       {!form.isHidden && form.type === 'mcdonalds' ? <McDonalds /> : null}
+      {currentStage === 'MENU' && <HomePage />}
+
       {/* Notification */}
       {isPaused && <Pause />}
       <Lives />
