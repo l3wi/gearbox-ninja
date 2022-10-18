@@ -6,7 +6,7 @@ import { store } from '../../store'
 import actions from '../../store/actions'
 import { RootState } from '../../store/reducer'
 import { activate, declare } from '../../utils/web3'
-import ExitButton from '../exitButton'
+import ExitButton from '../../components/exitButton'
 
 const McDonalds = () => {
   const { game, web3 } = useSelector((state: RootState) => state)

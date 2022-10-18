@@ -39,8 +39,8 @@ import { RootState } from '../../store'
 import actions from '../../store/actions'
 import { isNumeric, nFormatter } from '../../utils/format'
 import { generateNewHash } from '../../utils/opHash'
-import { ApproveButton } from '../approvalButton'
-import { ErrorButtonGuard } from '../errorButton'
+import { ApproveButton } from '../../components/approvalButton'
+import { ErrorButtonGuard } from '../../components/errorButton'
 
 import Picker from './picker'
 import Slider from './slider'
@@ -275,11 +275,11 @@ const OpenStrategyDialog: React.FC<Props> = ({
 
         <Group>
           <>
-            {!allAssetsSelected && (
+            {!allAssetsSelected && 3 > unwrappedCollateral.length ? (
               <PickerButton onClick={() => setPicker(true)}>
                 add asset
               </PickerButton>
-            )}
+            ) : null}
 
             {picker && (
               <Picker

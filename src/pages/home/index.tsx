@@ -5,7 +5,7 @@ import { store } from '../../store'
 import actions from '../../store/actions'
 import { RootState } from '../../store/reducer'
 
-import ExitButton from '../exitButton'
+import ExitButton from '../../components/exitButton'
 
 const HomePage = () => {
   const { game, web3 } = useSelector((state: RootState) => state)
@@ -73,13 +73,26 @@ const HomePage = () => {
       <Underground>
         {/* <ExitButton text="Back" func={exit} /> */}
         <Buttons>
-          <Title ref={playRef} onClick={() => handleClick()} autoFocus>
+          <Title
+            ref={playRef}
+            onMouseEnter={() => setIndex(0)}
+            onClick={() => handleClick(0)}
+            autoFocus
+          >
             Play Game
           </Title>
-          <Text ref={discordRef} onClick={() => handleClick(1)}>
+          <Text
+            ref={discordRef}
+            onMouseEnter={() => setIndex(1)}
+            onClick={() => handleClick(1)}
+          >
             Join Discord
           </Text>
-          <Text ref={docRef} onClick={() => handleClick(2)}>
+          <Text
+            ref={docRef}
+            onMouseEnter={() => setIndex(2)}
+            onClick={() => handleClick(2)}
+          >
             Documentation
           </Text>
         </Buttons>

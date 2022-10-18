@@ -8,7 +8,7 @@ import { RootState } from '../../store/reducer'
 import { generateNewHash } from '../../utils/opHash'
 import { PoolData, TokenData } from '@gearbox-protocol/sdk'
 import { isNumeric, nFormatter } from '../../utils/format'
-import { ApproveButton } from '../approvalButton'
+import { ApproveButton } from '../../components/approvalButton'
 import { useAssets, useWrapETH } from '../../hooks/useAssets'
 import { unwrapTokenAddress, WSTETH_ADDRESS } from '../../config/tokens'
 import {
@@ -17,8 +17,8 @@ import {
 } from '../../hooks/useTokens'
 import { PoolsState } from '../../store/pools/reducer'
 import { syncReducer } from '../../store/sync/reducer'
-import ExitButton from '../exitButton'
-import { SufficientAmountGuard } from '../amountButton'
+import ExitButton from '../../components/exitButton'
+import { SufficientAmountGuard } from '../../components/amountButton'
 
 const depositLPDescription = `Deposit your assets to Gearbox 
 protocol to earn yield. These assets will be lent out to Gearbox's 
