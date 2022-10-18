@@ -6,16 +6,17 @@ import { useSelector, useDispatch } from 'react-redux'
 import actions from '../../store/actions'
 
 import Pause from '../pause'
-import PoolForm from '../pools'
-import StrategyFrom from '../strategy'
+import PoolForm from '../../pages/pools'
+import StrategyFrom from '../../pages/strategy'
 import Notification from '../notification'
 import Video from '../video'
 import { BLOCK_UPDATE_DELAY } from '../../config'
 import useLocalStorage from '../../hooks/useLocalStorage'
 import { activate, declare } from '../../utils/web3'
 import Lives from '../lives'
-import McDonalds from '../mcdonalds'
-import HomePage from '../home'
+import McDonalds from '../../pages/mcdonalds'
+import HomePage from '../../pages/home'
+import Balances from '../balances'
 
 const Page = () => {
   const currentStage = useSelector(
@@ -62,6 +63,7 @@ const Page = () => {
 
       {/* Notification */}
       {isPaused && <Pause />}
+      <Balances />
       <Lives />
       <Notification />
       <Video />

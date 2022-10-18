@@ -4,37 +4,31 @@ import styled from 'styled-components'
 import { IS_TEST_NETWORK, TEST_APP_ADDR } from '../../config'
 import { useTokensDataListWithETH } from '../../hooks/useTokens'
 import { RootState } from '../../store/reducer'
+import { nFormatter } from '../../utils/format'
 
 const URL = IS_TEST_NETWORK ? TEST_APP_ADDR : 'https://app.gearbox.fi'
 
-const Lives = () => {
+const Balances = () => {
   const tokensList = useTokensDataListWithETH()
   const { account } = useSelector((state: RootState) => state.web3)
-  const CAs = useSelector((state: RootState) => state.creditAccounts.list)
   const stage = useSelector((state: RootState) => state.game.currentStage)
-  const lives = CAs ? Object.values(CAs) : []
+  const CAs = useSelector((state: RootState) => state.creditAccounts.list)
 
-  const total = 2
+  const accounts = CAs ? Object.values(CAs) : []
+
   if (stage === 'PLAY' && account) {
     return (
       <Container>
-        LIVES:
-        {CAs &&
-          Array(lives.length)
-            .fill('x')
-            .map((_, i) => (
-              <Life style={{ opacity: 0.3 }}>
-                <img src="/data/img/ninja.png" height={64} />
-              </Life>
-            ))}
-        {CAs &&
-          Array(total - lives.length)
-            .fill('x')
-            .map((_, i) => (
-              <Life>
-                <img src="/data/img/ninja.png" height={64} />
-              </Life>
-            ))}
+        {accounts.map((ca) => {
+          const { symbol, decimals } = tokensList[ca.underlyingToken]
+          return (
+            <Life>{`${symbol}: ${nFormatter(
+              ca.borrowedAmount,
+              decimals,
+              0
+            )}`}</Life>
+          )
+        })}
       </Container>
     )
   } else {
@@ -47,9 +41,9 @@ const Container = styled.div`
   align-items: center;
   position: fixed;
   top: 0px;
-  right: 0px;
+  left: 0px;
   padding: 0px 10px;
-  margin: 20px 0px;
+  margin: 30px 0px;
   font-family: 'Press Start 2P';
   font-weight: 500;
   font-size: 2rem;
@@ -57,12 +51,8 @@ const Container = styled.div`
 `
 
 const Life = styled.div`
-  padding-left: 10px;
+  padding-left: 20px;
   opacity: 1;
-  /* transition: 200ms ease;
-  &:hover {
-    opacity: 1;
-  } */
 `
 
-export default Lives
+export default Balances
