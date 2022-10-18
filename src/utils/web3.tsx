@@ -3,6 +3,7 @@ import { store } from '../store'
 import actions from '../store/actions'
 
 import { Wallets, walletsToConnectors } from '../config/connectors'
+import { BigNumber } from 'ethers'
 
 type EthProvider = {
   isCoinbaseWallet?: boolean
@@ -50,8 +51,20 @@ export const activate = async (w: Wallets) => {
     connector = walletsToConnectors[w]
 
     if (parseInt(window.ethereum?.networkVersion) !== CHAIN_ID) {
-      store.dispatch(actions.game.AddNotification('Wrong Network', 3000))
-      return
+      store.dispatch(actions.game.AddNotification('Wrong Network', 2000))
+      try {
+        const chainId = '0x' + BigNumber.from(CHAIN_ID).toString()
+        console.log(chainId)
+        await window.ethereum?.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId }]
+        })
+      } catch (error) {
+        store.dispatch(
+          actions.game.AddNotification('Network Change Failed', 3000)
+        )
+        return
+      }
     }
   } else {
     // WC uses propmts post to provider setup
