@@ -28,28 +28,36 @@ const Pause = () => {
   const prior = window.localStorage.getItem('declared')
   return (
     <PauseBG paused={isPaused}>
-      <ExitButton text="Back" func={exit} />
-      <Title>{isPaused && pause}</Title>
+      {/* <ExitButton text="Back" func={exit} /> */}
+      <Title>{isPaused && !pause ? 'GAME PAUSED' : pause}</Title>
 
       <Content>
         {!account && (
-          <Row>
-            <WalletButton onClick={() => activate('metamask')}>
-              <img src="/data/img/metamask.png" height={200} />
-            </WalletButton>
-            <WalletButton>
-              <img src="/data/img/wallet-connect.png" height={250} />
-            </WalletButton>
-          </Row>
+          <Col>
+            <Row>
+              <WalletButton onClick={() => activate('metamask')}>
+                <img src="/data/img/metamask.png" height={200} />
+              </WalletButton>
+              <WalletButton>
+                <img src="/data/img/wallet-connect.png" height={250} />
+              </WalletButton>
+            </Row>
+            <Button style={{ marginTop: 100 }} onClick={() => exit()}>
+              BACK TO GAME
+            </Button>
+          </Col>
         )}
         {account && !isIllegal ? (
           <Col>
             <span>
               Wallet:
-              {account.substring(0, 8) + '...' + account.slice(-5)}
+              {account.substring(0, 12) + '...' + account.slice(-8)}
             </span>
 
-            <Button onClick={() => disconnect()}>Disconnect Wallet</Button>
+            <Row>
+              <Button onClick={() => disconnect()}>DISCONNECT</Button>
+              <Button onClick={() => exit()}>BACK TO GAME</Button>
+            </Row>
           </Col>
         ) : null}
 
@@ -89,6 +97,8 @@ const Col = styled.div`
   font-size: 24px;
   font-family: 'Press Start 2P';
   padding: 20px 0px;
+  align-items: center;
+  justify-content: space-between;
   span {
     margin-bottom: 30px;
   }
@@ -199,7 +209,7 @@ const PauseBG = styled.div<{ paused: boolean }>`
   background: rgba(0, 0, 0, 0.7);
   display: flex;
   flex-direction: column;
-  justify-content: space-evenly;
+  justify-content: center;
   align-items: center;
   visibility: ${(props) => (props.paused ? 'visible' : 'hidden')};
   animation: ${(props) => (props.paused ? fadeIn : fadeOut)} 0.5s ease-out;
