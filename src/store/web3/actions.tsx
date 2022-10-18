@@ -297,13 +297,14 @@ export const connectSigner =
         }
       })
 
+      dispatch(actions.game.PauseGame('Wallet Connected'))
+
       dispatch(actions.pools.getList())
       dispatch(actions.creditAccounts.getList())
       dispatch(actions.creditManagers.getList(signer.provider))
       dispatch(isNFTClaimed())
 
       dispatch(restoreTransactions({ account, chainId, provider: library }))
-      dispatch(actions.game.AddNotification('Wallet connected', 3000))
     } catch (e: any) {
       dispatch(disconnectSigner())
       console.error('store/web3/actions' + 'Cant connectSigner' + e)

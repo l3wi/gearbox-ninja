@@ -124,11 +124,11 @@ export const RegisterScreen =
   }
 
 export const PauseGame =
-  (text: string = 'Game Paused'): GameThunkAction =>
+  (text?: string): GameThunkAction =>
   async (dispatch, getState) => {
     try {
       let { isPaused, pause } = getState().game
-      if (isPaused) {
+      if (isPaused && !text) {
         state.resume()
         audio.resume('background_8bit')
         dispatch({ type: 'RESUME_GAME' })
