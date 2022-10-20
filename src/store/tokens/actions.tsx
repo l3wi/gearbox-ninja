@@ -6,14 +6,12 @@ import {
   MAX_INT,
   MCall,
   multicall,
+  Multicall2,
   Multicall2__factory,
   TokenData,
   TxApprove
 } from '@gearbox-protocol/sdk'
-import {
-  Multicall2,
-  Multicall2Interface
-} from '@gearbox-protocol/sdk/lib/types/contracts/support/MultiCall.sol/Multicall2'
+import { Multicall2Interface } from '@gearbox-protocol/sdk/lib/types/@gearbox-protocol/core-v2/contracts/support/MultiCall.sol/Multicall2'
 import { BigNumber } from 'ethers'
 
 import { CHAIN_ID, MULTICALL_ADDRESS } from '../../config'

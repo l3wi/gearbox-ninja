@@ -2,14 +2,12 @@ import {
   AwaitedRes,
   callRepeater,
   IAddressProvider__factory,
+  IPriceOracleV2,
   IPriceOracleV2__factory,
   MCall,
   multicall
 } from '@gearbox-protocol/sdk'
-import {
-  IPriceOracleV2,
-  IPriceOracleV2Interface
-} from '@gearbox-protocol/sdk/lib/types/contracts/interfaces/IPriceOracle.sol/IPriceOracleV2'
+import { IPriceOracleV2Interface } from '@gearbox-protocol/sdk/lib/types/@gearbox-protocol/core-v2/contracts/interfaces/IPriceOracle.sol/IPriceOracleV2'
 import { BigNumber, ethers } from 'ethers'
 
 import { ADDRESS_PROVIDER } from '../../config'

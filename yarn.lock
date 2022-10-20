@@ -1585,9 +1585,9 @@
     tslib "2.4.0"
 
 "@gearbox-protocol/sdk@^1.12.3":
-  version "1.12.3"
-  resolved "https://registry.yarnpkg.com/@gearbox-protocol/sdk/-/sdk-1.12.3.tgz#7bd258d250dbff71943905ae5519b2de7b8463cb"
-  integrity sha512-mtRSJK5LE0zrZlnqNeI39zgViNQqs4ftO7mVIsiDQ9lNgFahBTPxp8ZUA4x7ypRnUJ0QwLYJHqCznrxUVtnClA==
+  version "1.12.4"
+  resolved "https://registry.yarnpkg.com/@gearbox-protocol/sdk/-/sdk-1.12.4.tgz#b0380f402742582e25fe52421d3090677c04142f"
+  integrity sha512-lL3dAfxY8PYRAFRcyQydHlnHYMjXKK2wNk2L65pw0ZPgdujaSaujSr9YvjTF9+j2kqEeo2failC4Q3esgJRYLA==
   dependencies:
     "@types/deep-eql" "^4.0.0"
     decimal.js-light "^2.5.1"
