@@ -260,7 +260,7 @@ const Underground = styled.div`
   position: relative;
   display: flex;
   flex-direction: column;
-  padding-top: 25%;
+  padding-top: 20%;
   /* justify-content: center; */
   align-items: center;
   min-width: 1023px;
@@ -286,7 +286,15 @@ const FormBg = styled.div`
   align-items: center;
 `
 const Row = styled.div`
+  padding: 30px 50px;
   display: flex;
+  background-image: url('/data/img/backboard.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  -webkit-background-size: contain;
+  -moz-background-size: contain;
+  -o-background-size: contain;
+  background-size: contain;
 `
 
 export default Form
