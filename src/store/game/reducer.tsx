@@ -26,7 +26,7 @@ const initialState: GameState = {
   signRejected: true,
   notification: null,
   stages: {},
-  lastPosition: { x: 2375, y: 0 },
+  lastPosition: { x: 2670, y: 0 },
   currentStage: 'MENU',
   pause: null
 }
