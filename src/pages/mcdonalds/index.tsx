@@ -12,10 +12,13 @@ const McDonalds = () => {
   const { game, web3 } = useSelector((state: RootState) => state)
 
   const handleClick = async () => {
-    if (web3.noWhitelist)
-      return store.dispatch(
+    if (web3.noWhitelist) {
+      store.dispatch(
         actions.game.AddNotification('You are incapable of ninja-dom!')
       )
+      window.open('https://discord.com/invite/gearbox', '_blank')
+      return
+    }
     if (web3.nftClaimed)
       return store.dispatch(
         actions.game.AddNotification('You are already a ninja!')
@@ -45,14 +48,17 @@ const McDonalds = () => {
         <Row>
           <Button onClick={() => toMcDonalds()}></Button>
           <Button onClick={() => handleClick()}>
-            {web3.noWhitelist && !web3.nftClaimed ? (
+            {!web3.noWhitelist && !web3.nftClaimed ? (
               <ButtonText>BECOME A LEVERAGE NINJA</ButtonText>
             ) : null}
-            {web3.nftClaimed && (
-              <ButtonText>You are already a ninja!</ButtonText>
+            {web3.noWhitelist && (
+              <ButtonText>
+                YOU CAN'T BECOME A NINJA! <br />
+                GO TO DISCORD
+              </ButtonText>
             )}
             {!web3.nftClaimed && !web3.noWhitelist ? (
-              <ButtonText>You are already a ninja!</ButtonText>
+              <ButtonText>YOU ARE ALREADY A NINJA!</ButtonText>
             ) : null}
           </Button>
         </Row>
@@ -90,6 +96,7 @@ const Button = styled.button`
   border: none;
   display: flex;
   align-items: flex-end;
+  line-height: 35px;
 `
 
 const Underground = styled.div`
