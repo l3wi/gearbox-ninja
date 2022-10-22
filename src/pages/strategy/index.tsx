@@ -54,6 +54,8 @@ const Form = () => {
     store.dispatch(actions.game.ChangeStage('PLAY'))
   }
 
+  const click = () => window.open('https://app.gearbox.fi/accounts/', '_blank')
+
   return (
     <FormBg>
       <Underground>
@@ -75,142 +77,41 @@ const Form = () => {
             />
           </>
         ) : (
-          <>
-            <h1>{`Congratulations! You're a Leverage Ninja!`}</h1>
-            <h3>
-              To manage this Credit Account go to{' '}
-              <a href={`https://app.gearbox.fi/accounts/`}>Gearbox.fi →</a>
-            </h3>
-          </>
+          <Group>
+            <h1>{`Congratulations!`}</h1>
+            <h1>{`You're a Leverage Ninja`}</h1>
+
+            <Button onClick={() => click()}>Manage your account</Button>
+          </Group>
         )}
       </Underground>
     </FormBg>
   )
 }
 
-function useLiquidationAssets(
-  assets: Array<string>,
-  underlyingToken: string,
-  tokensList: Record<string, TokenData>
-): Array<string> {
-  const liquidationAssets = useMemo(
-    () =>
-      assets
-        .filter((address) => address !== underlyingToken)
-        .map((address) => {
-          const { symbol } = tokensList[address] || {}
-
-          return symbol
-        })
-        .filter((symbol) => symbol),
-    [assets, underlyingToken, tokensList]
-  )
-  return liquidationAssets
-}
-
 const Group = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 10px 0px;
-  font-size: 14px;
-  width: 100%;
-`
-
-const RmItem = styled.button`
-  outline: none;
-  border: none;
-  background: none;
-  font-family: 'Press Start 2P';
-  color: white;
-  font-size: 15px;
-`
-
-const PickerButton = styled.button`
-  width: 100%;
-  color: rgba(255, 255, 255, 0.5);
-  background: transparent;
-  padding: 15px 8px;
   font-family: 'Courier New', Courier, monospace;
-  font-weight: 800;
-  text-transform: uppercase;
-  font-size: 15px;
-  margin: 0px;
   font-family: 'Press Start 2P';
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  transition: 0.1s ease-in-out;
-  &:hover {
-    border: 2px solid rgba(255, 255, 255, 1);
-    color: rgba(255, 255, 255, 1);
-  }
-`
-
-const Section = styled.div`
-  padding: 10px 0px;
-`
-
-const InputSuper = styled.div`
-  font-size: 14px;
-  margin-bottom: 10px;
   display: flex;
-  justify-content: space-between;
-`
-
-const InputGroup = styled.div`
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  border: 2px solid white;
-  /* padding: 3px 2px; */
-  box-sizing: border-box;
-  height: 45px;
-`
-
-const Input = styled.input`
-  border: none;
-  outline: none;
-  background: none;
-  color: white;
-  width: 150px;
-  padding: 5px 8px 0px;
-  font-size: 18px;
-`
-
-const MaxButton = styled.div`
-  background: transparent;
-  color: white;
-  border: none;
-  font-size: 18px;
-  padding: 4px 6px;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  font-family: 'Press Start 2P';
-  border-left: 2px solid white;
-  display: flex;
-  align-items: center;
+  line-height: 30px;
 `
 
-const FormContainer = styled.div`
-  font-size: 18px;
-  width: 100%;
-  max-width: 350px;
-  padding: 20px;
-`
-
-const ExecuteButton = styled.button`
-  width: 100%;
-  background: gray;
-  border: none;
-  color: white;
-  padding: 15px 8px;
+const Button = styled.button`
   font-family: 'Courier New', Courier, monospace;
-  font-weight: 800;
-  text-transform: uppercase;
-  font-size: 14px;
-  margin: 0px;
   font-family: 'Press Start 2P';
+  font-weight: 500;
+  font-size: 2rem;
+  font-style: normal;
+  color: white;
+  background: none;
+  border: 2px white solid;
+  padding: 15px;
+  font-size: 24px;
+  min-width: 500px;
 `
-// BG
-
 const Underground = styled.div`
   position: relative;
   display: flex;

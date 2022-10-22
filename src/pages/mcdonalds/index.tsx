@@ -57,7 +57,7 @@ const McDonalds = () => {
                 GO TO DISCORD
               </ButtonText>
             )}
-            {!web3.nftClaimed && !web3.noWhitelist ? (
+            {web3.nftClaimed && !web3.noWhitelist ? (
               <ButtonText>YOU ARE ALREADY A NINJA!</ButtonText>
             ) : null}
           </Button>
