@@ -1,3 +1,4 @@
+import { TokenData } from '@gearbox-protocol/sdk'
 import React, { useState } from 'react'
 import { useSelector } from 'react-redux'
 import styled from 'styled-components'
@@ -8,27 +9,31 @@ import { nFormatter } from '../../utils/format'
 
 const URL = IS_TEST_NETWORK ? TEST_APP_ADDR : 'https://app.gearbox.fi'
 
+const getAddressFromSymbol = (s: string, details: Record<string, TokenData>) =>
+  Object.values(details).find((t) => t.symbol === s)
+
 const Balances = () => {
-  const tokensList = useTokensDataListWithETH()
-  const { account } = useSelector((state: RootState) => state.web3)
+  const { account, balance } = useSelector((state: RootState) => state.web3)
+  const { details, balances } = useSelector((state: RootState) => state.tokens)
   const stage = useSelector((state: RootState) => state.game.currentStage)
-  const CAs = useSelector((state: RootState) => state.creditAccounts.list)
 
-  const accounts = CAs ? Object.values(CAs) : []
-
-  if (stage === 'PLAY' && account) {
+  if (stage === 'PLAY' && Object.keys(balances).length) {
     return (
       <Container>
-        {accounts.map((ca) => {
-          const { symbol, decimals } = tokensList[ca.underlyingToken]
-          return (
-            <Life>{`${symbol}: ${nFormatter(
-              ca.borrowedAmount,
-              decimals,
-              0
-            )}`}</Life>
-          )
-        })}
+        {['USDC', 'DAI', 'WBTC'].map((i) => (
+          <Life>
+            <span>{i}</span>
+            {nFormatter(
+              balances[getAddressFromSymbol(i, details).address],
+              getAddressFromSymbol(i, details).decimals,
+              2
+            )}
+          </Life>
+        ))}
+        <Life>
+          <span>ETH</span>
+          {nFormatter(balance, 18, 2)}
+        </Life>
       </Container>
     )
   } else {
@@ -38,12 +43,15 @@ const Balances = () => {
 
 const Container = styled.div`
   display: flex;
+  width: 100%;
   align-items: center;
+  justify-content: space-between;
   position: fixed;
   top: 0px;
   left: 0px;
-  padding: 0px 10px;
-  margin: 30px 0px;
+  padding: 30px 20px;
+  margin: 0px 0px;
+  box-sizing: border-box;
   font-family: 'Press Start 2P';
   font-weight: 500;
   font-size: 2rem;
@@ -53,6 +61,8 @@ const Container = styled.div`
 const Life = styled.div`
   padding-left: 20px;
   opacity: 1;
+  display: flex;
+  flex-direction: column;
 `
 
 export default Balances
