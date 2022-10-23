@@ -80,6 +80,10 @@ export type Web3Actions =
   | {
       type: 'NO_NFT_WHITELIST'
     }
+  | {
+      type: 'NFT_CLAIMABLE_BALANCE'
+      payload: number
+    }
 
 export type ThunkWeb3Action = ThunkAction<
   void,

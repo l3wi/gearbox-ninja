@@ -17,7 +17,8 @@ import {
   IwstETHGateWay__factory,
   stEthPoolWrapper,
   IDegenNFT__factory,
-  IDegenDistributor__factory
+  IDegenDistributor__factory,
+  IERC721Metadata__factory
 } from '@gearbox-protocol/sdk'
 import { providers } from 'ethers'
 
@@ -303,6 +304,7 @@ export const connectSigner =
       dispatch(actions.creditAccounts.getList())
       dispatch(actions.creditManagers.getList(signer.provider))
       dispatch(isNFTClaimed())
+      dispatch(currentNFTBalance())
 
       dispatch(restoreTransactions({ account, chainId, provider: library }))
     } catch (e: any) {
@@ -336,6 +338,32 @@ interface MerkleDistributorInfo {
   }
 }
 
+export const currentNFTBalance =
+  (): ThunkWeb3Action => async (dispatch, getState) => {
+    import('../../config/merkle.json').then(
+      async (merkle: MerkleDistributorInfo) => {
+        try {
+          const { claims } = merkle
+          const signer = getSignerOrThrow(getState)
+          const signerAddress = await signer.getAddress()
+
+          if (!claims[signerAddress])
+            return dispatch({ type: 'NFT_BALANCE_SUCCESS', payload: 0 })
+
+          const nftDistributor = IERC721Metadata__factory.connect(
+            DEGEN_NFT,
+            signer
+          )
+
+          const amount = await nftDistributor.balanceOf(signerAddress)
+          dispatch({ type: 'NFT_BALANCE_SUCCESS', payload: amount.toNumber() })
+        } catch (e) {
+          console.error('store/web3/actions', 'Cant check if NFT is claimed', e)
+        }
+      }
+    )
+  }
+
 export const isNFTClaimed =
   (): ThunkWeb3Action => async (dispatch, getState) => {
     import('../../config/merkle.json').then(
@@ -353,11 +381,12 @@ export const isNFTClaimed =
             signer
           )
 
-          const { index } = claims[signerAddress]
+          const { index, amount } = claims[signerAddress]
           const claimed = await nftDistributor.isClaimed(index)
 
           if (claimed) game.world.getChildByName('bridge')[0].setOpacity(1)
           dispatch({ type: 'NFT_CLAIMED_SUCCESS', payload: claimed })
+          dispatch({ type: 'NFT_CLAIMABLE_BALANCE', payload: parseInt(amount) })
         } catch (e) {
           console.error('store/web3/actions', 'Cant check if NFT is claimed', e)
         }

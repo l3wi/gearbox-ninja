@@ -16,6 +16,7 @@ export interface Web3State {
   noWhitelist?: boolean
   nftClaimed?: boolean
   nftBalance?: number
+  nftAmount?: number
 
   dataCompressor?: IDataCompressor
   balance?: BigNumberish
@@ -91,6 +92,12 @@ export function web3Reducer(
       return {
         ...state,
         nftClaimed: action.payload
+      }
+
+    case 'NFT_CLAIMABLE_BALANCE':
+      return {
+        ...state,
+        nftAmount: action.payload
       }
     case 'LISTENERS_ADDED':
       return {
