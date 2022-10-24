@@ -63,13 +63,31 @@ const Page = () => {
 
       {/* Notification */}
       {isPaused && <Pause />}
-      <Balances />
-      <Lives />
+
+      <Container>
+        <Balances />
+        <Lives />
+      </Container>
+
       <Notification />
       <Video />
     </Layout>
   )
 }
+const Container = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  position: fixed;
+  top: 0px;
+  right: 0px;
+  padding: 20px 10px;
+  font-family: 'Press Start 2P';
+  font-weight: 500;
+  font-size: 2rem;
+  font-style: normal;
+`
 
 const Layout = styled.main`
   position: fixed;

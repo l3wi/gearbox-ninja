@@ -22,15 +22,15 @@ const Lives = () => {
       <Container>
         LIVES:
         {CAs &&
-          Array(total - lives)
+          Array(lives)
             .fill('x')
             .map((_, i) => (
               <Life style={{ opacity: 0.3 }}>
                 <img src="/data/img/ninja.png" height={64} />
               </Life>
             ))}
-        {CAs && lives != 0
-          ? Array(lives)
+        {CAs
+          ? Array(total - lives)
               .fill('x')
               .map((_, i) => (
                 <Life>
@@ -48,14 +48,11 @@ const Lives = () => {
 const Container = styled.div`
   display: flex;
   align-items: center;
-  position: fixed;
-  bottom: 0px;
-  left: 0px;
   padding: 0px 10px;
   margin: 20px 0px;
   font-family: 'Press Start 2P';
   font-weight: 500;
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-style: normal;
 `
 

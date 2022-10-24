@@ -22,7 +22,7 @@ const Balances = () => {
       <Container>
         {['USDC', 'DAI', 'WBTC'].map((i) => (
           <Life>
-            <span>{i}</span>
+            <span style={{ paddingRight: 30 }}>{i}</span>
             {nFormatter(
               balances[getAddressFromSymbol(i, details).address],
               getAddressFromSymbol(i, details).decimals,
@@ -31,7 +31,7 @@ const Balances = () => {
           </Life>
         ))}
         <Life>
-          <span>ETH</span>
+          <span style={{ paddingRight: 30 }}>ETH</span>
           {nFormatter(balance, 18, 2)}
         </Life>
       </Container>
@@ -42,19 +42,16 @@ const Balances = () => {
 }
 
 const Container = styled.div`
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  padding: 30px 20px;
+  width: fit-content;
+  display: grid;
+  column-gap: 20px;
+  row-gap: 10px;
+  grid-template-columns: repeat(2, 1fr);
   margin: 0px 0px;
   box-sizing: border-box;
   font-family: 'Press Start 2P';
   font-weight: 500;
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-style: normal;
 `
 
@@ -62,7 +59,7 @@ const Life = styled.div`
   padding-left: 20px;
   opacity: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 `
 
 export default Balances
