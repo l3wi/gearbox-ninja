@@ -39,6 +39,11 @@ const DataManifest = [
     src: 'data/img/underground.png'
   },
   {
+    name: 'bg_slice',
+    type: 'image',
+    src: 'data/img/map/bg_slice.png'
+  },
+  {
     name: 'ninja-smol',
     type: 'image',
     src: 'data/img/sprite/ninja-smol.png'

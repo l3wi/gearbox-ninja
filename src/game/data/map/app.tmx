@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.9" tiledversion="1.9.0" orientation="orthogonal" renderorder="right-down" width="92" height="8" tilewidth="64" tileheight="64" infinite="0" backgroundcolor="#595c72" nextlayerid="15" nextobjectid="88">
+<map version="1.9" tiledversion="1.9.0" orientation="orthogonal" renderorder="right-down" width="92" height="8" tilewidth="64" tileheight="64" infinite="0" backgroundcolor="#595c72" nextlayerid="22" nextobjectid="88">
  <tileset firstgid="1" name="tiles" tilewidth="64" tileheight="64" tilecount="352" columns="44">
   <image source="../img/map/tiles.png" width="2816" height="512"/>
  </tileset>
+ <imagelayer id="18" name="bg_slice" repeatx="1">
+  <image source="../img/map/bg_slice.png" width="128" height="512"/>
+ </imagelayer>
  <layer id="11" name="bg_detail" width="92" height="8">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,34,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,4,4,4,0,0,0,0,0,0,0,4,4,4,4,4,4,4,4,0,0,0,0,0,0,
