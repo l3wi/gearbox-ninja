@@ -46,7 +46,9 @@ const McDonalds = () => {
         <ExitButton text="Back" func={exit} />
 
         <Row>
-          <Button onClick={() => toMcDonalds()}></Button>
+          <Button onClick={() => toMcDonalds()}>
+            <ButtonText>GET A JOB</ButtonText>
+          </Button>
           <Button onClick={() => handleClick()}>
             {!web3.noWhitelist && !web3.nftClaimed ? (
               <ButtonText>BECOME A LEVERAGE NINJA</ButtonText>
@@ -74,6 +76,7 @@ const ButtonText = styled.div`
   font-size: 28px;
   letter-spacing: 4px;
   padding: 0px 20px 20px;
+  height: 70px;
 `
 
 const Row = styled.div`
@@ -95,7 +98,8 @@ const Button = styled.button`
   background: transparent;
   border: none;
   display: flex;
-  align-items: flex-end;
+  flex-direction: column;
+  justify-content: flex-end;
   line-height: 35px;
 `
 
