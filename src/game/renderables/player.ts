@@ -113,7 +113,9 @@ class PlayerEntity extends Sprite {
         store.dispatch(actions.game.ChangeStage('PLAY', { x: 2375, y: 0 }))
         store.dispatch(actions.game.BeginStage())
         store.dispatch(
-          actions.game.AddNotification('You died :( Go to McDonalds first')
+          actions.game.AddNotification(
+            'Game Over! You should go to McDonalds first'
+          )
         )
       })
     }
