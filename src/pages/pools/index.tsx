@@ -83,7 +83,11 @@ const Form = () => {
   const [wrappedCollateral, ethAmount] = useWrapETH(unwrappedCollateral)
 
   const disableSubmit = () => {
-    if (unwrappedCollateral[0].balance.gt(balance)) return true
+    if (
+      unwrappedCollateral[0].balance.gt(balance) ||
+      unwrappedCollateral[0].balance.isZero()
+    )
+      return true
     return false
   }
 
