@@ -1,8 +1,13 @@
 import { Web3Provider } from "@ethersproject/providers";
+import WalletConnectProvider from "@walletconnect/web3-provider";
 import { BigNumber } from "ethers";
 
 import { BLOCK_UPDATE_DELAY, CHAIN_ID } from "../config";
-import { Wallets, walletsToConnectors } from "../config/connectors";
+import {
+  walletconnect,
+  Wallets,
+  walletsToConnectors,
+} from "../config/connectors";
 import { store } from "../store";
 import actions from "../store/actions";
 
@@ -69,9 +74,10 @@ export const activate = async (w: Wallets) => {
     }
   } else {
     // WC uses propmts post to provider setup
+    await walletconnect.enable();
     connector = walletsToConnectors[w];
-    // @ts-ignore
-    await connector.enable(); // need to extend Web3Provider interface
+    console.log(connector);
+    console.log(await connector.getBlockNumber());
   }
   const { dataCompressor } = store.getState().web3;
   const chainId = CHAIN_ID;
