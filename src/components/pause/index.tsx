@@ -153,7 +153,7 @@ const Title = styled.h1`
   font-weight: 800;
   text-transform: uppercase;
   font-size: 48px;
-  margin: 15px 0px;
+  margin: 80px 0px 0px;
   font-family: 'Press Start 2P';
 `
 const Button = styled.button`
