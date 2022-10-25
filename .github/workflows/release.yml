@@ -1,7 +1,6 @@
 name: Release
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - "main"
@@ -46,8 +45,6 @@ jobs:
           REACT_APP_COMMIT_SHA: ${{ github.sha }}
 
       - name: Publish to Cloudflare Pages
-        # On main branch, run this only manually
-        if: ${{ github.event_name == 'workflow_dispatch' && github.ref_name == 'main' || github.event_name == 'push' && github.ref_name != 'main' }}
         uses: cloudflare/pages-action@1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_TOKEN }}
