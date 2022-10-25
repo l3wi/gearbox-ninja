@@ -57,7 +57,7 @@ export const connectProvider =
         "store/web3/actions" +
           "Cant connectProvider" +
           `${JSON_RPC_PROVIDER}` +
-          e
+          e,
       );
     }
   };
@@ -66,12 +66,12 @@ type PossibleProviders = providers.JsonRpcProvider | providers.Web3Provider;
 
 export const updateProvider =
   (provider: PossibleProviders): ThunkWeb3Action =>
-  async (dispatch) => {
+  async dispatch => {
     try {
       const addressProviderMultiCall = new MultiCallContract(
         ADDRESS_PROVIDER,
         IAddressProvider__factory.createInterface(),
-        provider
+        provider,
       );
 
       const [
@@ -97,17 +97,17 @@ export const updateProvider =
           {
             method: "getLeveragedActions()",
           },
-        ])
+        ]),
       );
 
       const dataCompressor = IDataCompressor__factory.connect(
         dataCompressorAddress,
-        provider
+        provider,
       );
 
       const wethGateway = IWETHGateway__factory.connect(
         wethGateWayAddress,
-        provider
+        provider,
       );
 
       dispatch({
@@ -151,19 +151,19 @@ export const connectSigner =
 
       const addressProvider = IAddressProvider__factory.connect(
         ADDRESS_PROVIDER || "",
-        signer.provider
+        signer.provider,
       );
 
       const wethGateWayAddress = await addressProvider.getWETHGateway();
 
       const wethGateway = IWETHGateway__factory.connect(
         wethGateWayAddress,
-        signer
+        signer,
       );
 
       const wstethGateway = IwstETHGateWay__factory.connect(
         stEthPoolWrapper[CHAIN_TYPE],
-        signer
+        signer,
       );
 
       dispatch({
@@ -181,7 +181,7 @@ export const connectSigner =
       const dataCompressorMultiCall = new MultiCallContract(
         dataCompressor.address,
         dataCompressor.interface,
-        signer.provider
+        signer.provider,
       );
 
       const [pools, creditManagers] = await callRepeater(() =>
@@ -194,13 +194,13 @@ export const connectSigner =
           {
             method: "getCreditManagersList()",
           },
-        ])
+        ]),
       );
 
       const isListenersConnected = getState().web3.listeners[account];
       dispatch({ type: "LISTENERS_ADDED", payload: account });
 
-      pools.forEach((pl) => {
+      pools.forEach(pl => {
         if (!isListenersConnected) {
           const contract = IPoolService__factory.connect(pl.addr, signer);
           const pool = new PoolData(pl);
@@ -220,7 +220,7 @@ export const connectSigner =
                 account,
                 txHash,
                 chainId,
-              })
+              }),
             );
           };
 
@@ -231,14 +231,14 @@ export const connectSigner =
         }
       });
 
-      creditManagers.forEach((cm) => {
+      creditManagers.forEach(cm => {
         if (!isListenersConnected) {
           const contract = ICreditManager__factory.connect(cm.addr, signer);
 
           const creditManager = new CreditManagerData(cm);
 
           dispatch(
-            updateCreditManagerEvents({ account, creditManager, contract })
+            updateCreditManagerEvents({ account, creditManager, contract }),
           );
 
           const updateCreditManagers = (...args: any) => {
@@ -250,29 +250,29 @@ export const connectSigner =
                 account,
                 txHash,
                 chainId,
-              })
+              }),
             );
 
             dispatch(caGetList());
 
             dispatch(
-              updateCreditManagerEvents({ account, creditManager, contract })
+              updateCreditManagerEvents({ account, creditManager, contract }),
             );
           };
 
           contract.on(
             contract.filters.OpenCreditAccount(null, account),
-            updateCreditManagers
+            updateCreditManagers,
           );
 
           contract.on(
             contract.filters.CloseCreditAccount(account),
-            updateCreditManagers
+            updateCreditManagers,
           );
 
           contract.on(
             contract.filters.RepayCreditAccount(account),
-            updateCreditManagers
+            updateCreditManagers,
           );
 
           contract.on(contract.filters.LiquidateCreditAccount(account), () => {
@@ -280,16 +280,16 @@ export const connectSigner =
             dispatch(deleteByCreditManager(creditManager.address));
 
             dispatch(
-              updateCreditManagerEvents({ account, creditManager, contract })
+              updateCreditManagerEvents({ account, creditManager, contract }),
             );
           });
           contract.on(
             contract.filters.AddCollateral(account),
-            updateCreditManagers
+            updateCreditManagers,
           );
           contract.on(
             contract.filters.IncreaseBorrowedAmount(account),
-            updateCreditManagers
+            updateCreditManagers,
           );
           contract.on(contract.filters.ExecuteOrder(account), () => {
             dispatch(getByCreditManager(creditManager.address, account));
@@ -313,7 +313,7 @@ export const connectSigner =
   };
 
 export function disconnectSigner(): ThunkWeb3Action {
-  return async (dispatch) => {
+  return async dispatch => {
     try {
       dispatch(clearCreditAccounts());
       dispatch(clearBalancesAllowances());
@@ -337,7 +337,7 @@ interface MerkleDistributorInfo {
 }
 
 export const checkNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
-  import("../../config/merkle_testnet.json").then(
+  import("../../config/merkle.json").then(
     async (merkle: MerkleDistributorInfo) => {
       try {
         const { claims } = merkle;
@@ -352,7 +352,7 @@ export const checkNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
         const degenNFT = IERC721Metadata__factory.connect(DEGEN_NFT, signer);
         const nftDistributor = IDegenDistributor__factory.connect(
           DEGEN_DISTRIBUTOR,
-          signer
+          signer,
         );
 
         const { index, amount } = claims[signerAddress];
@@ -367,12 +367,12 @@ export const checkNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
       } catch (e) {
         console.error("store/web3/actions", "Cant check if NFT is claimed", e);
       }
-    }
+    },
   );
 };
 
 export const mintNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
-  import("../../config/merkle_testnet.json").then(
+  import("../../config/merkle.json").then(
     async (merkle: MerkleDistributorInfo) => {
       try {
         const signer = getSignerOrThrow(getState);
@@ -380,7 +380,7 @@ export const mintNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
 
         const nftDistributor = IDegenDistributor__factory.connect(
           DEGEN_DISTRIBUTOR,
-          signer
+          signer,
         );
         updateStatus("0", "STATUS.WAITING");
         dispatch(actions.game.AddNotification("Waiting for user", 500));
@@ -390,7 +390,7 @@ export const mintNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
           index,
           signerAddress,
           amount,
-          proof
+          proof,
         );
 
         updateStatus("0", "STATUS.LOADING");
@@ -399,6 +399,7 @@ export const mintNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
         await receipt.wait();
 
         dispatch(actions.game.AddNotification("Mint successful!"));
+        dispatch({ type: "NFT_CLAIMED_SUCCESS", payload: true });
         updateStatus("0", "STATUS.SUCCESS");
         return true;
       } catch (e) {
@@ -408,7 +409,7 @@ export const mintNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
 
         return false;
       }
-    }
+    },
   );
 };
 
