@@ -76,6 +76,19 @@ export const activate = async (w: Wallets) => {
   const { dataCompressor } = store.getState().web3
   const chainId = CHAIN_ID
 
+  const isDelared = window.localStorage.getItem('declared')
+  if (isDelared) {
+    store.dispatch({
+      type: 'SIGNED_MESSAGE',
+      payload: { isIllegal: false }
+    })
+  } else {
+    store.dispatch({
+      type: 'SIGNED_MESSAGE',
+      payload: { isIllegal: true }
+    })
+  }
+
   try {
     await store.dispatch(
       actions.web3.connectSigner({
@@ -95,14 +108,6 @@ export const activate = async (w: Wallets) => {
         console.log('Account changed')
         ;(window.ethereum as any).removeAllListeners('accountsChanged')
         store.dispatch(actions.web3.setWalletType(w))
-      })
-    }
-
-    const isDelared = window.localStorage.getItem('declared')
-    if (isDelared) {
-      store.dispatch({
-        type: 'SIGNED_MESSAGE',
-        payload: { isIllegal: false }
       })
     }
 
