@@ -85,5 +85,6 @@
       "prettier --write"
     ],
     "*.{json,md}": "prettier --write"
-  }
+  },
+  "prettier": "@gearbox-protocol/prettier-config"
 }
