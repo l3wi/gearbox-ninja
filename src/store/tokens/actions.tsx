@@ -34,7 +34,7 @@ const getTokenContract = async (getState: () => RootState, address: string) => {
 };
 
 export const updateBatchBalances = (
-  updatedBalances: Record<string, BigNumber>
+  updatedBalances: Record<string, BigNumber>,
 ): TokenAction => ({
   type: "TOKEN_BATCH_BALANCE_SUCCESS",
   payload: updatedBalances,
@@ -63,7 +63,7 @@ export const getTokenAllowance =
 
       const token = await getTokenContract(getState, tokenAddress);
       const allowance = BigNumber.from(
-        await callRepeater(() => token.allowance(account, to))
+        await callRepeater(() => token.allowance(account, to)),
       );
 
       dispatch({
@@ -78,7 +78,7 @@ export const getTokenAllowance =
         "Cant getTokenAllowance",
         tokenAddress,
         to,
-        e
+        e,
       );
     }
   };
@@ -130,18 +130,20 @@ export const approveToken =
           callback: () => {
             dispatch(getTokenAllowance({ tokenAddress, to, account }));
           },
-        })
+        }),
       );
       dispatch(actions.game.AddNotification("Token Approved", 2000));
     } catch (e: any) {
       dispatch({ type: "TOKEN_DELETE_VIRTUAL_ALLOWANCE", payload: id });
       dispatch(updateStatus(opHash, "STATUS.FAILURE", getError(e)));
+      dispatch(actions.game.AddNotification("Failure Approving Token", 2000));
+
       captureException(
         "store/tokens/actions",
         "Cant approveToken",
         tokenAddress,
         to,
-        e
+        e,
       );
     }
   };
@@ -165,7 +167,7 @@ export const getTokenBalances =
 
       const calls: [
         MCall<Multicall2Interface>,
-        ...Array<MCall<ERC20Interface>>
+        ...Array<MCall<ERC20Interface>>,
       ] = [
         {
           address: MULTICALL_ADDRESS,
@@ -174,13 +176,13 @@ export const getTokenBalances =
           params: [account],
         },
         ...tokenAddresses.map(
-          (tokenAddress) =>
+          tokenAddress =>
             ({
               address: tokenAddress,
               interface: IERC20__factory.createInterface(),
               method: "balanceOf(address)",
               params: [account],
-            } as const)
+            } as const),
         ),
       ];
 
@@ -188,9 +190,9 @@ export const getTokenBalances =
         multicall<
           [
             AwaitedRes<Multicall2["getEthBalance"]>,
-            ...Array<AwaitedRes<IERC20["balanceOf"]>>
+            ...Array<AwaitedRes<IERC20["balanceOf"]>>,
           ]
-        >(calls, provider)
+        >(calls, provider),
       );
 
       dispatch({ type: "WEB3_BALANCE_SUCCESS", payload: ethBalance });
@@ -200,7 +202,7 @@ export const getTokenBalances =
           acc[tokenAddresses[num]] = b;
           return acc;
         },
-        {}
+        {},
       );
 
       dispatch(updateBatchBalances(balances));
@@ -227,7 +229,7 @@ export const getTokenBalance =
 
       const token = await getTokenContract(getState, tokenAddressLc);
       const balance = BigNumber.from(
-        await callRepeater(() => token.connect(signer).balanceOf(account))
+        await callRepeater(() => token.connect(signer).balanceOf(account)),
       );
 
       dispatch({
@@ -241,7 +243,7 @@ export const getTokenBalance =
         "store/tokens/actions",
         "Cant getTokenBalance",
         tokenAddressLc,
-        e
+        e,
       );
     }
   };
@@ -250,7 +252,7 @@ export const getTokenAllowances =
   (
     tokensList: Record<string, TokenData>,
     to: string,
-    account: string
+    account: string,
   ): ThunkTokenAction =>
   async (dispatch, getState) => {
     try {
@@ -262,19 +264,19 @@ export const getTokenAllowances =
       const tokenAddresses = Object.keys(tokensList);
 
       const calls: Array<MCall<ERC20Interface>> = tokenAddresses.map(
-        (address) => ({
+        address => ({
           address,
           interface: IERC20__factory.createInterface(),
           method: "allowance(address,address)",
           params: [account, to],
-        })
+        }),
       );
 
       const allowanceBNs = await callRepeater(() =>
         multicall<Array<AwaitedRes<IERC20["allowance"]>>>(
           calls,
-          signer.provider!
-        )
+          signer.provider!,
+        ),
       );
 
       const allowances = tokenAddresses.reduce<Record<string, BigNumber>>(
@@ -284,7 +286,7 @@ export const getTokenAllowances =
           acc[id] = bn || BigNumber.from(0);
           return acc;
         },
-        {}
+        {},
       );
 
       dispatch({
@@ -297,7 +299,7 @@ export const getTokenAllowances =
         "Cant getTokenAllowances",
         account,
         to,
-        e
+        e,
       );
     }
   };
