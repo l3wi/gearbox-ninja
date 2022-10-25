@@ -9,6 +9,8 @@ import { activate, declare } from '../../utils/web3'
 import ExitButton from '../../components/exitButton'
 
 const McDonalds = () => {
+  const [minter, setMinter] = useState(false)
+
   const { game, web3 } = useSelector((state: RootState) => state)
 
   const handleClick = async () => {
@@ -25,8 +27,10 @@ const McDonalds = () => {
       )
     if (!web3.account) await activate('metamask')
     if (game.isIllegal) await declare()
-    store.dispatch(actions.web3.mintNFT())
+    setMinter(true)
   }
+
+  const mint = () => store.dispatch(actions.web3.mintNFT())
 
   const toMcDonalds = () => {
     window.open(
@@ -49,34 +53,58 @@ const McDonalds = () => {
           <Button onClick={() => toMcDonalds()}>
             <ButtonText>GET A JOB</ButtonText>
           </Button>
-          <Button onClick={() => handleClick()}>
-            {!web3.noWhitelist && !web3.nftClaimed ? (
-              <ButtonText>BECOME A LEVERAGE NINJA</ButtonText>
-            ) : null}
-            {web3.noWhitelist && (
-              <ButtonText>
-                YOU CAN'T BECOME A NINJA! <br />
-                GO TO DISCORD
-              </ButtonText>
-            )}
-            {web3.nftClaimed && !web3.noWhitelist ? (
-              <ButtonText>YOU ARE ALREADY A NINJA!</ButtonText>
-            ) : null}
-          </Button>
+          {minter ? (
+            <Button style={{ background: '#FF0000' }} onClick={() => mint()}>
+              <h2>MINT {web3.nftAmount} NFTs</h2>
+              <span>
+                Each time you open a Credit Account, you burn a DEGEN NFT
+              </span>
+              <p>Choose Wisely</p>
+            </Button>
+          ) : (
+            <Button onClick={() => handleClick()}>
+              {!web3.noWhitelist && !web3.nftClaimed ? (
+                <ButtonText>BECOME A LEVERAGE NINJA</ButtonText>
+              ) : null}
+              {web3.noWhitelist && (
+                <ButtonText>
+                  YOU AREN'T A NINJA! <br />
+                  GO TO DISCORD
+                </ButtonText>
+              )}
+              {web3.nftClaimed && !web3.noWhitelist ? (
+                <ButtonText>YOU ARE ALREADY A NINJA!</ButtonText>
+              ) : null}
+            </Button>
+          )}
         </Row>
       </Underground>
     </FormBg>
   )
 }
-
-const ButtonText = styled.div`
+const Button = styled.button`
+  width: 40.5%;
+  height: 50.5%;
+  margin-right: 4%;
+  background: transparent;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 35px;
   font-family: 'MERCURY115';
-  width: 100%;
-  color: white;
   font-size: 28px;
   letter-spacing: 4px;
+  text-align: center;
+  color: white;
+  position: relative;
+`
+
+const ButtonText = styled.div`
+  width: 100%;
   padding: 0px 20px 20px;
   height: 70px;
+  margin-top: 35%;
 `
 
 const Row = styled.div`
@@ -90,17 +118,6 @@ const Row = styled.div`
   padding-top: 9%;
   padding-bottom: 0%;
   padding-left: 7.5%;
-`
-const Button = styled.button`
-  width: 40.5%;
-  height: 50.5%;
-  margin-right: 4%;
-  background: transparent;
-  border: none;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  line-height: 35px;
 `
 
 const Underground = styled.div`
