@@ -43,6 +43,7 @@ export const connect = async () => {
 // 3. Activate Listeners for changes
 // X. Throw if errors
 export const activate = async (w: Wallets) => {
+  store.dispatch(actions.game.AddNotification("Connecting Wallet...", 1000));
   const isInjectedWallet = w === "metamask"; // removed coinbase
 
   let connector: Web3Provider;
@@ -55,14 +56,13 @@ export const activate = async (w: Wallets) => {
       store.dispatch(actions.game.AddNotification("Wrong Network", 2000));
       try {
         const chainId = "0x" + BigNumber.from(CHAIN_ID).toString();
-        console.log(chainId);
         await window.ethereum?.request({
           method: "wallet_switchEthereumChain",
           params: [{ chainId }],
         });
       } catch (error) {
         store.dispatch(
-          actions.game.AddNotification("Network Change Failed", 3000)
+          actions.game.AddNotification("Network Change Failed", 3000),
         );
         return;
       }
@@ -95,7 +95,7 @@ export const activate = async (w: Wallets) => {
         library: connector,
         dataCompressor,
         chainId,
-      })
+      }),
     );
 
     if (window.ethereum && isInjectedWallet) {
@@ -112,7 +112,7 @@ export const activate = async (w: Wallets) => {
             library: connector,
             dataCompressor,
             chainId,
-          })
+          }),
         );
         store.dispatch(actions.web3.setWalletType(w));
       });
@@ -135,12 +135,16 @@ export const activate = async (w: Wallets) => {
         }
       } catch (e: any) {
         console.error("Cant useWeb3" + e);
+
         // e.code === 4902 - chain not added
         // e.code === -32002 - request already pending
       }
     }
 
     store.dispatch(actions.web3.setWalletType(undefined));
+    store.dispatch(
+      actions.game.AddNotification("Unable to connect wallet", 2000),
+    );
     console.error("Cant Web3" + eo);
   }
 };
