@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+      - "next"
+
+env:
+  HUSKY: 0
+  CI: true
+  # Prefixes for domain names
+  NETWORK_PREFIX: ${{ github.ref_name == 'main' && 'mainnet.' || 'goerli.' }}
+  TESTNET_PREFIX: ${{ github.ref_name != 'main' && 'goerli.' || '' }}
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          cache: "yarn"
+          node-version-file: ".nvmrc"
+
+      - name: Configure access to private npm packages
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+
+      - name: Install deps
+        run: yarn install --frozen-lockfile
+
+      - name: Build
+        run: yarn build
+        env:
+          REACT_APP_CHAIN_ID: ${{ github.ref_name == 'main' && '1' || '5' }}
+          REACT_APP_JSON_RPC_GOERLI: ${{ secrets.REACT_APP_JSON_RPC_GOERLI }}
+          REACT_APP_JSON_RPC_MAINNET: ${{ secrets.REACT_APP_JSON_RPC_MAINNET }}
+          REACT_APP_ADDRESS_PROVIDER: ${{ github.ref_name == 'main' && '0xcF64698AFF7E5f27A11dff868AF228653ba53be0' || '0x95f4cea53121b8A2Cb783C6BFB0915cEc44827D3' }}
+          # TODO: currently, not existing on mainnet, using goerli value
+          REACT_APP_DEGEN_DISTRIBUTOR: ${{ github.ref_name == 'main' && '0x7cBc200cecbe1ca5Df8416cE4fa70088b9080167' || '0x7cBc200cecbe1ca5Df8416cE4fa70088b9080167' }}
+          # TODO: currently, not existing on mainnet, using goerli value
+          REACT_APP_DEGEN_NFT: ${{ github.ref_name == 'main' && '0x28B321F2c68FcC4F543b3c99bAe82b9330711118' || '0x28B321F2c68FcC4F543b3c99bAe82b9330711118' }}
+          REACT_APP_COMMIT_SHA: ${{ github.sha }}
+
+      - name: Publish to Cloudflare Pages
+        # On main branch, run this only manually
+        if: ${{ github.event_name == 'workflow_dispatch' && github.ref_name == 'main' || github.event_name == 'push' && github.ref_name != 'main' }}
+        uses: cloudflare/pages-action@1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT }}
+          projectName: ${{ secrets.CF_PROJECT_NAME }}
+          directory: dist
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
