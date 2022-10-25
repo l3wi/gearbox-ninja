@@ -107,6 +107,13 @@ export const activate = async (w: Wallets) => {
       window.ethereum.on('accountsChanged', async () => {
         console.log('Account changed')
         ;(window.ethereum as any).removeAllListeners('accountsChanged')
+        await store.dispatch(
+          actions.web3.connectSigner({
+            library: connector,
+            dataCompressor,
+            chainId
+          })
+        )
         store.dispatch(actions.web3.setWalletType(w))
       })
     }
