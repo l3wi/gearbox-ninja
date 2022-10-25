@@ -69,7 +69,7 @@ const McDonalds = () => {
               ) : null}
               {web3.noWhitelist && (
                 <ButtonText>
-                  YOU AREN'T A NINJA! <br />
+                  {`YOU AREN'T A NINJA!`} <br />
                   GO TO DISCORD
                 </ButtonText>
               )}

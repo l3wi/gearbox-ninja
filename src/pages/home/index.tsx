@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 
@@ -8,7 +8,6 @@ import actions from "../../store/actions";
 import { RootState } from "../../store/reducer";
 
 const HomePage = () => {
-  const { game, web3 } = useSelector((state: RootState) => state);
   const [index, setIndex] = useState(0);
 
   const playRef = useRef();
@@ -18,9 +17,9 @@ const HomePage = () => {
   // @ts-ignore
   function downHandler({ key }) {
     if (key === "ArrowDown") {
-      if (index != 2) setIndex(index + 1);
+      if (index !== 2) setIndex(index + 1);
     } else if (key === "ArrowUp") {
-      if (index != 0) setIndex(index - 1);
+      if (index !== 0) setIndex(index - 1);
     } else if (key === "Enter") {
       handleClick();
     }
@@ -42,7 +41,7 @@ const HomePage = () => {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     window.addEventListener("keydown", downHandler);
     return () => {
       window.removeEventListener("keydown", downHandler);

@@ -6,10 +6,7 @@ import { IS_TEST_NETWORK, TEST_APP_ADDR } from "../../config";
 import { useTokensDataListWithETH } from "../../hooks/useTokens";
 import { RootState } from "../../store/reducer";
 
-const URL = IS_TEST_NETWORK ? TEST_APP_ADDR : "https://app.gearbox.fi";
-
 const Lives = () => {
-  const tokensList = useTokensDataListWithETH();
   const { account, nftBalance, nftAmount } = useSelector(
     (state: RootState) => state.web3
   );
@@ -26,7 +23,7 @@ const Lives = () => {
           Array(lives)
             .fill("x")
             .map((_, i) => (
-              <Life style={{ opacity: 0.3 }}>
+              <Life key={i} style={{ opacity: 0.3 }}>
                 <img src="/data/img/ninja.png" height={64} />
               </Life>
             ))}
@@ -34,7 +31,7 @@ const Lives = () => {
           ? Array(total - lives)
               .fill("x")
               .map((_, i) => (
-                <Life>
+                <Life key={"io" + i}>
                   <img src="/data/img/ninja.png" height={64} />
                 </Life>
               ))

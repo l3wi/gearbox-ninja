@@ -5,9 +5,9 @@ import { CHAIN_ID, JSON_RPC_PROVIDER } from "../config";
 
 const currentRpcString = JSON_RPC_PROVIDER as string;
 
-const activeRpcUrl = {
-  [CHAIN_ID]: currentRpcString,
-};
+// const activeRpcUrl = {
+//   [CHAIN_ID]: currentRpcString,
+// };
 
 export const injected = new Web3Provider(
   (window as any).ethereum, // Haaaaacky

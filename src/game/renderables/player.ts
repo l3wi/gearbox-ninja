@@ -131,7 +131,7 @@ class PlayerEntity extends Sprite {
         const state = store.getState();
         if (
           typeof other.type === "string" &&
-          other.type.indexOf("tube") != -1
+          other.type.indexOf("tube") !== -1
         ) {
           // TUBE COLLISION + ACTIVATE
           // last time we hit an entrance
@@ -198,7 +198,7 @@ class PlayerEntity extends Sprite {
           // DECLARATION BARRIER COLLISION
         } else if (
           typeof other.type === "string" &&
-          other.type.indexOf("declare") != -1
+          other.type.indexOf("declare") !== -1
         ) {
           const side = other.type.split("-")[1];
           // If declared wall is passable
@@ -224,7 +224,7 @@ class PlayerEntity extends Sprite {
           // Building Entrance
         } else if (
           typeof other.type === "string" &&
-          other.type.indexOf("entrance") != -1
+          other.type.indexOf("entrance") !== -1
         ) {
           // last time we hit an entrance
           this.isEntrance = Date.now();
@@ -237,7 +237,7 @@ class PlayerEntity extends Sprite {
           // Activate
           if (
             input.isKeyPressed("jump") &&
-            state.game.currentStage != "CREDITS" &&
+            state.game.currentStage !== "CREDITS" &&
             !this.debounce
           ) {
             game.world.getChildByName("foreground")[0].setOpacity(1);

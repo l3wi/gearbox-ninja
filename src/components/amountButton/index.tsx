@@ -20,11 +20,7 @@ export function SufficientAmountGuard({
         balance.isZero() ||
         balance.isNegative()
       }
-      guard={
-        <Button disabled>
-          <>insufficient funds</>
-        </Button>
-      }
+      guard={<Button disabled>insufficient funds</Button>}
     >
       {children}
     </Guard>

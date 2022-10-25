@@ -42,8 +42,6 @@ export function ApproveButton({
   const [, pendingTokens] = useVirtualTokenAllowances();
   const { symbol } = useTokenDataWithEth(tokenAddress) || {};
 
-  const [hash, setHash] = useState("0");
-
   const onApprove = () => {
     if (to && tokenAddress && account) {
       const opHash = generateNewHash("APPROVE-");
@@ -56,7 +54,6 @@ export function ApproveButton({
           opHash,
         })
       );
-      setHash(opHash);
     }
   };
 

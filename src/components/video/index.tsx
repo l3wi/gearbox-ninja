@@ -1,11 +1,11 @@
-import React, { RefObject, useState } from "react";
+import { createRef, useState } from "react";
 import styled, { keyframes } from "styled-components";
 
 const Video = () => {
   const [mute, setMute] = useState(true);
 
   const [visible, setVisible] = useState(true);
-  const videoRef: any = React.createRef();
+  const videoRef: any = createRef();
 
   const unmute = () => {
     setMute(!mute);
