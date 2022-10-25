@@ -11,54 +11,54 @@ import {
   SupportedContract,
   SwapOperation,
   Trade,
-  TxParser
-} from '@gearbox-protocol/sdk'
-import { MultiCall } from '@gearbox-protocol/sdk/lib/pathfinder/core'
-import { BigNumber, Signer } from 'ethers'
+  TxParser,
+} from "@gearbox-protocol/sdk";
+import { MultiCall } from "@gearbox-protocol/sdk/lib/pathfinder/core";
+import { BigNumber, Signer } from "ethers";
 
-import { captureException } from '../utils/errors'
-import { currentContractsData } from './contracts'
+import { captureException } from "../utils/errors";
+import { currentContractsData } from "./contracts";
 
 interface AdapterManagerProps {
-  creditManager: CreditManagerData
-  signer: Signer
-  pathFinder: PathFinder
+  creditManager: CreditManagerData;
+  signer: Signer;
+  pathFinder: PathFinder;
 }
 
 export interface GetOneTokenPathProps {
-  from: string
-  to: string
-  amount: BigNumber
-  creditAccount: CreditAccountData
-  slippage: number
+  from: string;
+  to: string;
+  amount: BigNumber;
+  creditAccount: CreditAccountData;
+  slippage: number;
 }
 
 export interface GetPathsProps extends GetOneTokenPathProps {
-  swapType: SwapOperation
+  swapType: SwapOperation;
 }
 
 export class AdapterManager {
-  readonly id: string
-  readonly pathFinder: PathFinder
-  readonly creditFacade: ICreditFacade
-  readonly adapters: Record<string, BaseAdapter>
-  readonly creditManager: CreditManagerData
+  readonly id: string;
+  readonly pathFinder: PathFinder;
+  readonly creditFacade: ICreditFacade;
+  readonly adapters: Record<string, BaseAdapter>;
+  readonly creditManager: CreditManagerData;
   constructor({ creditManager, signer, pathFinder }: AdapterManagerProps) {
-    const { creditFacade: creditFacadeAddress, adapters } = creditManager
+    const { creditFacade: creditFacadeAddress, adapters } = creditManager;
 
-    this.id = creditManager.id.toLowerCase()
-    this.creditManager = creditManager
+    this.id = creditManager.id.toLowerCase();
+    this.creditManager = creditManager;
 
     this.adapters = Object.entries(adapters).reduce<
       Record<string, BaseAdapter>
     >((acc, [contractAddress, adapterAddress]) => {
-      const contractSymbol = contractsByAddress[contractAddress]
+      const contractSymbol = contractsByAddress[contractAddress];
       if (!contractSymbol) {
-        console.error('Contract not found', contractAddress)
-        return acc
+        console.error("Contract not found", contractAddress);
+        return acc;
       }
 
-      const params = contractParams[contractSymbol]
+      const params = contractParams[contractSymbol];
 
       acc[contractAddress] = new BaseAdapter({
         name: params.name,
@@ -66,17 +66,17 @@ export class AdapterManager {
         contractAddress,
         adapterAddress,
         contractSymbol,
-        creditManager: creditManager.address
-      })
+        creditManager: creditManager.address,
+      });
 
-      return acc
-    }, {})
+      return acc;
+    }, {});
 
     this.creditFacade = ICreditFacade__factory.connect(
       creditFacadeAddress,
       signer
-    )
-    this.pathFinder = pathFinder
+    );
+    this.pathFinder = pathFinder;
   }
 
   async findAllSwaps({
@@ -85,7 +85,7 @@ export class AdapterManager {
     to,
     amount,
     creditAccount,
-    slippage
+    slippage,
   }: GetPathsProps): Promise<Array<Trade>> {
     try {
       const results = await this.pathFinder.findAllSwaps(
@@ -95,15 +95,15 @@ export class AdapterManager {
         to,
         amount,
         slippage
-      )
+      );
 
       const trades = results.reduce<Array<Trade>>((acc, tradePath) => {
-        const { calls } = tradePath
+        const { calls } = tradePath;
         const callAdapters = getCallAdapters(
           calls,
           this.adapters,
           this.creditManager
-        )
+        );
 
         const trade = new Trade({
           tradePath,
@@ -114,22 +114,22 @@ export class AdapterManager {
           expectedAmount: tradePath.amount,
           tokenFrom: from,
           tokenTo: to,
-          operationName: Trade.getOperationName(from, to)
-        })
+          operationName: Trade.getOperationName(from, to),
+        });
 
-        acc.push(trade)
+        acc.push(trade);
 
-        return acc
-      }, [])
+        return acc;
+      }, []);
 
-      return sortTrades(trades, '')
+      return sortTrades(trades, "");
     } catch (e: any) {
       captureException(
-        'adapterManager/findOneTokenPath',
-        'Cant get single trade path',
+        "adapterManager/findOneTokenPath",
+        "Cant get single trade path",
         e
-      )
-      return []
+      );
+      return [];
     }
   }
 
@@ -138,7 +138,7 @@ export class AdapterManager {
     to,
     amount,
     creditAccount,
-    slippage
+    slippage,
   }: GetOneTokenPathProps): Promise<Trade | undefined> {
     try {
       const tradePath = await this.pathFinder.findOneTokenPath(
@@ -147,13 +147,13 @@ export class AdapterManager {
         to,
         amount,
         slippage
-      )
+      );
 
       const callAdapters = getCallAdapters(
         tradePath.calls,
         this.adapters,
         this.creditManager
-      )
+      );
 
       const trade = new Trade({
         tradePath,
@@ -164,17 +164,17 @@ export class AdapterManager {
         expectedAmount: tradePath.amount,
         tokenFrom: from,
         tokenTo: to,
-        operationName: Trade.getOperationName(from, to)
-      })
+        operationName: Trade.getOperationName(from, to),
+      });
 
-      return trade
+      return trade;
     } catch (e: any) {
       captureException(
-        'adapterManager/findOneTokenPath',
-        'Cant get single trade path',
+        "adapterManager/findOneTokenPath",
+        "Cant get single trade path",
         e
-      )
-      return undefined
+      );
+      return undefined;
     }
   }
 }
@@ -185,56 +185,56 @@ function getCallAdapters(
   cm: CreditManagerData
 ) {
   const callAdapters = calls.reduce<Array<BaseAdapter>>((acc, call) => {
-    const { contract: contractSymbol } = TxParser.getParseData(call.target)
-    if (!isSupportedContract(contractSymbol)) return acc
+    const { contract: contractSymbol } = TxParser.getParseData(call.target);
+    if (!isSupportedContract(contractSymbol)) return acc;
 
-    const contractAddress = currentContractsData[contractSymbol]
+    const contractAddress = currentContractsData[contractSymbol];
     const adapter =
-      adapters[contractAddress] || connectAdapter(contractSymbol, cm)
+      adapters[contractAddress] || connectAdapter(contractSymbol, cm);
 
-    acc.push(adapter)
+    acc.push(adapter);
 
-    return acc
-  }, [])
+    return acc;
+  }, []);
 
-  return callAdapters
+  return callAdapters;
 }
 
 function connectAdapter(
   contractSymbol: SupportedContract,
   cm: CreditManagerData
 ) {
-  const { name, type } = contractParams[contractSymbol]
-  const contractAddress = currentContractsData[contractSymbol]
+  const { name, type } = contractParams[contractSymbol];
+  const contractAddress = currentContractsData[contractSymbol];
 
   return new BaseAdapter({
     name,
     adapterInterface: type,
-    adapterAddress: '',
+    adapterAddress: "",
     contractAddress,
     contractSymbol,
-    creditManager: cm.address
-  })
+    creditManager: cm.address,
+  });
 }
 
 function sortTrades(trades: Array<Trade>, swapStrategy: string) {
-  if (trades.length === 0) return []
+  if (trades.length === 0) return [];
 
-  const { swapType } = trades[0]
+  const { swapType } = trades[0];
 
   const sorted = trades.sort((a, b) => {
     const aSelected =
-      a.getName().toLowerCase().search(swapStrategy.toLowerCase()) >= 0
+      a.getName().toLowerCase().search(swapStrategy.toLowerCase()) >= 0;
     const bSelected =
-      b.getName().toLowerCase().search(swapStrategy.toLowerCase()) >= 0
+      b.getName().toLowerCase().search(swapStrategy.toLowerCase()) >= 0;
 
     if ((aSelected && bSelected) || (!aSelected && !bSelected)) {
-      const sign = a.expectedAmount.gt(b.expectedAmount) ? -1 : 1
-      return swapType === SwapOperation.EXACT_INPUT ? sign : -sign
+      const sign = a.expectedAmount.gt(b.expectedAmount) ? -1 : 1;
+      return swapType === SwapOperation.EXACT_INPUT ? sign : -sign;
     }
 
-    return aSelected ? -1 : 1
-  })
+    return aSelected ? -1 : 1;
+  });
 
-  return sorted
+  return sorted;
 }

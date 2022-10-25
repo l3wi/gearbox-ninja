@@ -15,51 +15,51 @@
  * limitations under the License.
  */
 
-import { OperationState } from './reducer'
-export { updateStatus } from './actions'
-export { operationReducer } from './reducer'
+import { OperationState } from "./reducer";
+export { updateStatus } from "./actions";
+export { operationReducer } from "./reducer";
 
 export interface Operation {
-  id: string
-  status: STATUS
-  error?: string
-  options?: unknown
+  id: string;
+  status: STATUS;
+  error?: string;
+  options?: unknown;
 }
 
 export type OperationTypes =
-  | 'OPERATION_REQUEST'
-  | 'OPERATION_SUCCESS'
-  | 'OPERATION_FAILURE'
+  | "OPERATION_REQUEST"
+  | "OPERATION_SUCCESS"
+  | "OPERATION_FAILURE";
 
-export type OperationActions = {
-  type: OperationTypes
-  payload: Operation
+export interface OperationActions {
+  type: OperationTypes;
+  payload: Operation;
 }
 
-export type OperationRootState = {
-  operations: OperationState
+export interface OperationRootState {
+  operations: OperationState;
 }
 
 export function operationSelector(hash: string) {
-  return (state: OperationRootState) => state.operations[hash]
+  return (state: OperationRootState) => state.operations[hash];
 }
 
 export type STATUS =
-  | 'STATUS.WAITING'
-  | 'STATUS.LOADING'
-  | 'STATUS.UPDATING'
-  | 'STATUS.SUCCESS'
-  | 'STATUS.FAILURE'
+  | "STATUS.WAITING"
+  | "STATUS.LOADING"
+  | "STATUS.UPDATING"
+  | "STATUS.SUCCESS"
+  | "STATUS.FAILURE";
 
 export interface ErrorWeb3 {
-  code?: number
+  code?: number;
   data?: {
-    code?: number
-    message?: string
-  }
-  message?: string
+    code?: number;
+    message?: string;
+  };
+  message?: string;
 }
 
 export function getError(e: ErrorWeb3): string {
-  return e?.data?.message || e?.message || e.toString() || 'Unknown error'
+  return e?.data?.message || e?.message || e.toString() || "Unknown error";
 }

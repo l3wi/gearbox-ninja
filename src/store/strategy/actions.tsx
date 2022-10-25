@@ -10,40 +10,39 @@ import {
   PRICE_DECIMALS,
   Strategy,
   tokenSymbolByAddress,
-  TxOpenMultitokenAccount
-} from '@gearbox-protocol/sdk'
-import { updateStatus } from '../operations'
-import { BigNumber, ethers } from 'ethers'
+  TxOpenMultitokenAccount,
+} from "@gearbox-protocol/sdk";
+import { BigNumber, ethers } from "ethers";
 
-import { CHAIN_ID } from '../../config'
-import { strategiesPayload } from '../../config/strategy'
-import { captureException } from '../../utils/errors'
-import { generateNewHash } from '../../utils/opHash'
+import { CHAIN_ID } from "../../config";
+import { strategiesPayload } from "../../config/strategy";
+import { captureException } from "../../utils/errors";
+import { generateNewHash } from "../../utils/opHash";
 import {
   getByCreditManager,
   getList as caGetList,
   openInProgressByCreditManager,
-  removeOpenInProgressByCreditManager
-} from '../creditAccounts/actions'
-import { getError } from '../operations'
-import { getTokenBalances } from '../tokens/actions'
-import { getSignerOrThrow } from '../web3'
-import { addPendingTransaction } from '../web3/transactions'
+  removeOpenInProgressByCreditManager,
+} from "../creditAccounts/actions";
+import { getError, updateStatus } from "../operations";
+import { getTokenBalances } from "../tokens/actions";
+import { getSignerOrThrow } from "../web3";
+import { addPendingTransaction } from "../web3/transactions";
 import {
   getAPYValue,
   getConvexAPY,
   getCurveAPY,
   getLidoAPY,
-  getYearnAPY
-} from './apy'
-import { StrategyAction, StrategyPath, StrategyThunkAction } from './index'
+  getYearnAPY,
+} from "./apy";
+import { StrategyAction, StrategyPath, StrategyThunkAction } from "./index";
 
 const memoProvidePrice =
   (prices: Record<string, BigNumber>) =>
-  (t = '') => {
-    const price = prices[t?.toLowerCase()]
-    return price || PRICE_DECIMALS
-  }
+  (t = "") => {
+    const price = prices[t?.toLowerCase()];
+    return price || PRICE_DECIMALS;
+  };
 
 export const getApy =
   (
@@ -53,40 +52,40 @@ export const getApy =
   ): StrategyThunkAction =>
   async (dispatch) => {
     try {
-      const networkType = getNetworkType(CHAIN_ID)
-      const providePrice = memoProvidePrice(prices)
+      const networkType = getNetworkType(CHAIN_ID);
+      const providePrice = memoProvidePrice(prices);
 
-      const [crv, originalCrv] = await getCurveAPY()
+      const [crv, originalCrv] = await getCurveAPY();
 
       const [cvx, ldo, yearn] = await Promise.all([
         getConvexAPY({
           provider,
           networkType,
           getTokenPrice: providePrice,
-          curveAPY: originalCrv
+          curveAPY: originalCrv,
         }),
         getLidoAPY(provider, networkType),
-        getYearnAPY()
-      ])
+        getYearnAPY(),
+      ]);
 
       const lpTokenAPY = Object.values(lpTokensDataList).reduce(
         (acc, tokenDetails) => {
-          const { symbol } = tokenDetails
+          const { symbol } = tokenDetails;
 
-          acc[symbol] = getAPYValue(tokenDetails, { crv, cvx, yearn })
-          return acc
+          acc[symbol] = getAPYValue(tokenDetails, { crv, cvx, yearn });
+          return acc;
         },
         {} as Record<LPTokens, number>
-      )
+      );
 
       dispatch({
-        type: 'SET_APY_BULK',
-        payload: { ...lpTokenAPY, STETH: ldo }
-      })
+        type: "SET_APY_BULK",
+        payload: { ...lpTokenAPY, STETH: ldo },
+      });
     } catch (e: any) {
-      captureException('store/strategy/actions', 'Cant getApy', e)
+      captureException("store/strategy/actions", "Cant getApy", e);
     }
-  }
+  };
 
 export const getStrategies =
   (apys: LpTokensAPY): StrategyThunkAction =>
@@ -94,41 +93,41 @@ export const getStrategies =
     try {
       const strategies = strategiesPayload.reduce<Record<string, Strategy>>(
         (acc, payload) => {
-          const symbol = tokenSymbolByAddress[payload.lpToken]
+          const symbol = tokenSymbolByAddress[payload.lpToken];
           if (!isTokenWithAPY(symbol)) {
             console.error(
               `Strategy LP token has no apy: ${payload.lpToken} ${symbol}`
-            )
-            return acc
+            );
+            return acc;
           }
 
           acc[payload.lpToken] = new Strategy({
             ...payload,
-            apy: apys[symbol] || 0
-          })
-          return acc
+            apy: apys[symbol] || 0,
+          });
+          return acc;
         },
         {}
-      )
+      );
 
       dispatch({
-        type: 'SET_STRATEGY_BULK',
-        payload: strategies
-      })
+        type: "SET_STRATEGY_BULK",
+        payload: strategies,
+      });
     } catch (e: any) {
-      captureException('store/pice/actions', 'Cant getStrategies', e)
+      captureException("store/pice/actions", "Cant getStrategies", e);
     }
-  }
+  };
 
 export const clearOpenStrategyPath = (): StrategyAction => ({
-  type: 'CLEAR_STRATEGY_OPEN_PATH'
-})
+  type: "CLEAR_STRATEGY_OPEN_PATH",
+});
 
 interface GetOpenStrategyPathProps {
-  creditManager: CreditManagerData
-  targetTokenAddress: string
-  assets: Array<Asset>
-  slippage: number
+  creditManager: CreditManagerData;
+  targetTokenAddress: string;
+  assets: Array<Asset>;
+  slippage: number;
 }
 
 export const getOpenStrategyPath =
@@ -136,65 +135,65 @@ export const getOpenStrategyPath =
     creditManager,
     assets,
     targetTokenAddress,
-    slippage
+    slippage,
   }: GetOpenStrategyPathProps): StrategyThunkAction =>
   async (dispatch, getState) => {
-    const openId = generateNewHash('')
+    const openId = generateNewHash("");
     try {
       const {
-        web3: { pathFinder }
-      } = getState()
-      if (!pathFinder) throw new Error('pathfinder is undefined')
+        web3: { pathFinder },
+      } = getState();
+      if (!pathFinder) throw new Error("pathfinder is undefined");
 
-      dispatch({ type: 'UPDATE_STRATEGY_OPEN_ID', payload: openId })
+      dispatch({ type: "UPDATE_STRATEGY_OPEN_ID", payload: openId });
 
       const record = assets.reduce<Record<string, BigNumber>>((acc, asset) => {
-        acc[asset.token] = asset.balance
-        return acc
-      }, {})
+        acc[asset.token] = asset.balance;
+        return acc;
+      }, {});
 
       const { balances, calls } = await pathFinder.findOpenStrategyPath(
         creditManager,
         record,
         targetTokenAddress,
         slippage
-      )
+      );
 
       const resultAssets = Object.entries(balances).reduce<Array<Asset>>(
         (acc, [token, balance]) => {
-          acc.push({ token, balance })
-          return acc
+          acc.push({ token, balance });
+          return acc;
         },
         []
-      )
+      );
 
       dispatch({
-        type: 'SET_STRATEGY_OPEN_PATH',
+        type: "SET_STRATEGY_OPEN_PATH",
         payload: {
           strategyPath: {
             balances: resultAssets,
-            calls
+            calls,
           },
-          openId
-        }
-      })
+          openId,
+        },
+      });
     } catch (e: any) {
-      captureException('store/strategy/actions', 'Cant getOpenStrategyPath', e)
+      captureException("store/strategy/actions", "Cant getOpenStrategyPath", e);
       dispatch({
-        type: 'STRATEGY_OPEN_PATH_NOT_FOUND',
-        payload: openId
-      })
+        type: "STRATEGY_OPEN_PATH_NOT_FOUND",
+        payload: openId,
+      });
     }
-  }
+  };
 
 export interface OpenStrategyProps {
-  creditManager: CreditManagerData
-  strategyPath: StrategyPath
-  wrappedCollateral: Array<Asset>
-  borrowedAmount: BigNumber
-  ethAmount: BigNumber
-  opHash: string
-  chainId?: number
+  creditManager: CreditManagerData;
+  strategyPath: StrategyPath;
+  wrappedCollateral: Array<Asset>;
+  borrowedAmount: BigNumber;
+  ethAmount: BigNumber;
+  opHash: string;
+  chainId?: number;
 }
 
 export const openStrategy =
@@ -204,29 +203,29 @@ export const openStrategy =
     wrappedCollateral,
     borrowedAmount,
     ethAmount,
-    opHash = '0',
-    chainId = CHAIN_ID
+    opHash = "0",
+    chainId = CHAIN_ID,
   }: OpenStrategyProps): StrategyThunkAction =>
   async (dispatch, getState) => {
     try {
-      dispatch(updateStatus(opHash, 'STATUS.WAITING'))
+      dispatch(updateStatus(opHash, "STATUS.WAITING"));
 
-      const signer = getSignerOrThrow(getState)
+      const signer = getSignerOrThrow(getState);
       const {
         address: creditManagerAddress,
         underlyingToken,
-        creditFacade: creditFacadeAddress
-      } = creditManager
+        creditFacade: creditFacadeAddress,
+      } = creditManager;
       const creditFacade = ICreditFacade__factory.connect(
         creditFacadeAddress,
         signer
-      )
-      const account = await signer.getAddress()
+      );
+      const account = await signer.getAddress();
 
       const collateralCalls = wrappedCollateral.map(
         ({ token: tokenAddress, balance: amount }) =>
           creditManager.encodeAddCollateral(account, tokenAddress, amount)
-      )
+      );
 
       const receipt = await creditFacade.openCreditAccountMulticall(
         borrowedAmount,
@@ -234,9 +233,9 @@ export const openStrategy =
         [...collateralCalls, ...strategyPath.calls],
         0,
         { value: ethAmount }
-      )
+      );
 
-      dispatch(openInProgressByCreditManager(creditManagerAddress))
+      dispatch(openInProgressByCreditManager(creditManagerAddress));
 
       const evmTx = new TxOpenMultitokenAccount({
         txHash: receipt.hash,
@@ -246,25 +245,25 @@ export const openStrategy =
         underlyingToken,
         assets: strategyPath.balances
           .filter(({ balance }) => balance.gt(1))
-          .map(({ token: tokenAddress }) => tokenAddress)
-      })
+          .map(({ token: tokenAddress }) => tokenAddress),
+      });
 
       dispatch(
         addPendingTransaction({
           chainId,
           tx: evmTx,
           callback: () => {
-            dispatch(getByCreditManager(creditManagerAddress, account))
+            dispatch(getByCreditManager(creditManagerAddress, account));
 
-            dispatch(caGetList())
-            dispatch(removeOpenInProgressByCreditManager(creditManagerAddress))
-            dispatch(getTokenBalances({ account }))
-            dispatch(updateStatus(opHash, 'STATUS.SUCCESS'))
-          }
+            dispatch(caGetList());
+            dispatch(removeOpenInProgressByCreditManager(creditManagerAddress));
+            dispatch(getTokenBalances({ account }));
+            dispatch(updateStatus(opHash, "STATUS.SUCCESS"));
+          },
         })
-      )
+      );
     } catch (e: any) {
-      dispatch(updateStatus(opHash, 'STATUS.FAILURE', getError(e)))
-      captureException('store/strategy/actions', 'Cant openStrategy', e)
+      dispatch(updateStatus(opHash, "STATUS.FAILURE", getError(e)));
+      captureException("store/strategy/actions", "Cant openStrategy", e);
     }
-  }
+  };

@@ -1,17 +1,17 @@
 import {
-  Stage,
+  BitmapText,
+  ColorLayer,
+  event,
   game,
   input,
-  state,
-  Sprite,
   loader,
-  event,
-  ColorLayer,
-  BitmapText
-} from 'melonjs/dist/melonjs.module.js'
+  Sprite,
+  Stage,
+  state,
+} from "melonjs/dist/melonjs.module.js";
 
-import { store } from '../../store'
-import actions from '../../store/actions'
+import { store } from "../../store";
+import actions from "../../store/actions";
 
 class TitleScreen extends Stage {
   /**
@@ -68,8 +68,8 @@ class TitleScreen extends Stage {
    *  action to perform when leaving this screen (state change)
    */
   onDestroyEvent() {
-    input.unbindKey(input.KEY.ENTER)
+    input.unbindKey(input.KEY.ENTER);
   }
 }
 
-export default TitleScreen
+export default TitleScreen;

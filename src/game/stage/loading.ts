@@ -1,10 +1,10 @@
 import {
-  Stage,
-  Sprite,
-  video,
+  game,
   loader,
-  game
-} from 'melonjs/dist/melonjs.module.js'
+  Sprite,
+  Stage,
+  video,
+} from "melonjs/dist/melonjs.module.js";
 
 class LoadingScreen extends Stage {
   /**
@@ -12,13 +12,13 @@ class LoadingScreen extends Stage {
    */
   onResetEvent() {
     // set a background color
-    game.world.backgroundColor.parseCSS('#202020')
+    game.world.backgroundColor.parseCSS("#202020");
 
     loader.load(
       {
-        name: 'gear',
-        type: 'image',
-        src: './data/img/gear.png'
+        name: "gear",
+        type: "image",
+        src: "./data/img/gear.png",
       },
       () => {
         game.world.addChild(
@@ -26,18 +26,18 @@ class LoadingScreen extends Stage {
             video.renderer.getWidth() / 2,
             video.renderer.getHeight() / 2,
             {
-              image: 'gear',
+              image: "gear",
               framewidth: 102,
-              frameheight: 102
+              frameheight: 102,
             }
           ),
           2
-        )
+        );
       },
       (err: any) => {
-        alert(err)
+        alert(err);
       }
-    )
+    );
   }
 
   /**
@@ -46,8 +46,8 @@ class LoadingScreen extends Stage {
    */
   onDestroyEvent() {
     // cancel the callback
-    loader.unload({ name: 'gear', type: 'image' })
+    loader.unload({ name: "gear", type: "image" });
   }
 }
 
-export default LoadingScreen
+export default LoadingScreen;

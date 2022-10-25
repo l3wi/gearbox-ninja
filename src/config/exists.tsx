@@ -1,1 +1,1 @@
-export type Exists = 'UNKNOWN' | 'EXISTS' | 'NOT_EXISTS'
+export type Exists = "UNKNOWN" | "EXISTS" | "NOT_EXISTS";
