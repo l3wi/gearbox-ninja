@@ -1,20 +1,20 @@
-import React, { RefObject, useState } from 'react'
-import styled, { keyframes } from 'styled-components'
+import React, { RefObject, useState } from "react";
+import styled, { keyframes } from "styled-components";
 
 const Video = () => {
-  const [mute, setMute] = useState(true)
+  const [mute, setMute] = useState(true);
 
-  const [visible, setVisible] = useState(true)
-  const videoRef: any = React.createRef()
+  const [visible, setVisible] = useState(true);
+  const videoRef: any = React.createRef();
 
   const unmute = () => {
-    setMute(!mute)
-  }
+    setMute(!mute);
+  };
 
   const hide = () => {
-    videoRef.current.pause()
-    setVisible(false)
-  }
+    videoRef.current.pause();
+    setVisible(false);
+  };
 
   return (
     <Container visible={visible}>
@@ -32,8 +32,8 @@ const Video = () => {
         <Button onClick={() => hide()}>Skip</Button>
       </ButtonContainer>
     </Container>
-  )
-}
+  );
+};
 
 const VideoContainer = styled.video`
   position: absolute;
@@ -43,7 +43,7 @@ const VideoContainer = styled.video`
   width: 100%;
   height: 100%;
   object-fit: contain;
-`
+`;
 
 const ButtonContainer = styled.div`
   display: flex;
@@ -53,25 +53,25 @@ const ButtonContainer = styled.div`
   bottom: 20px;
   width: 100%;
   right: 0px;
-`
+`;
 const Mute = styled.button`
-  font-family: 'Press Start 2P';
+  font-family: "Press Start 2P";
   font-weight: 500;
   font-size: 2rem;
   font-style: normal;
   color: rgba(255, 255, 255, 0.5);
   background: none;
   border: none;
-`
+`;
 const Button = styled.button`
-  font-family: 'Press Start 2P';
+  font-family: "Press Start 2P";
   font-weight: 500;
   font-size: 2rem;
   font-style: normal;
   color: white;
   background: none;
   border: none;
-`
+`;
 
 const fadeOut = keyframes`
   from {
@@ -83,7 +83,7 @@ const fadeOut = keyframes`
     opacity: 0;
     visibility: hidden;
   }
-`
+`;
 
 const Container = styled.div<{ visible: boolean }>`
   position: absolute;
@@ -93,10 +93,10 @@ const Container = styled.div<{ visible: boolean }>`
   height: 100vh;
   overflow: hidden;
   opacity: 1;
-  visibility: ${(props) => (props.visible ? 'visible' : 'hidden')};
+  visibility: ${(props) => (props.visible ? "visible" : "hidden")};
   animation: ${(props) => !props.visible && fadeOut} 1s ease-out;
   transition: visibility 1s linear;
   background: black;
-`
+`;
 
-export default Video
+export default Video;

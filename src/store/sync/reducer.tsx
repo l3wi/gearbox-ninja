@@ -1,57 +1,58 @@
 /* eslint-disable default-param-last, @typescript-eslint/default-param-last */
-import { EventOrTx } from '@gearbox-protocol/sdk'
+import { EventOrTx } from "@gearbox-protocol/sdk";
 
-import type { SyncActions } from './index'
+import type { SyncActions } from "./index";
 
 export interface SyncState {
-  lastBlock: number
-  events: Record<string, Record<string, EventOrTx>>
-  lastPoolSync: Record<string, number>
-  lastCreditManagerSync: Record<string, number>
+  lastBlock: number;
+  events: Record<string, Record<string, EventOrTx>>;
+  lastPoolSync: Record<string, number>;
+  lastCreditManagerSync: Record<string, number>;
 }
 
 const initialState: SyncState = {
   lastBlock: 0,
   events: {},
   lastPoolSync: {},
-  lastCreditManagerSync: {}
-}
+  lastCreditManagerSync: {},
+};
 
 export function syncReducer(
   state: SyncState = initialState,
   action: SyncActions
 ): SyncState {
   switch (action.type) {
-    case 'SYNC_LASTBLOCK':
+    case "SYNC_LASTBLOCK":
       return {
         ...state,
-        lastBlock: action.payload
-      }
+        lastBlock: action.payload,
+      };
 
-    case 'EVENT_UPDATE': {
-      const existingEvents = state.events[action.payload.account] || {}
-      const newEvents = { ...existingEvents, ...action.payload.events }
-      const { account } = action.payload
+    case "EVENT_UPDATE": {
+      const existingEvents = state.events[action.payload.account] || {};
+      const newEvents = { ...existingEvents, ...action.payload.events };
+      const { account } = action.payload;
       return {
         ...state,
         events: {
           ...state.events,
-          [action.payload.account]: newEvents
+          [action.payload.account]: newEvents,
         },
         lastPoolSync: {
           ...state.lastPoolSync,
-          [account]: action.payload.poolSync || state.lastPoolSync[account] || 0
+          [account]:
+            action.payload.poolSync || state.lastPoolSync[account] || 0,
         },
         lastCreditManagerSync: {
           ...state.lastCreditManagerSync,
           [account]:
             action.payload.creditManagerSync ||
             state.lastCreditManagerSync[account] ||
-            0
-        }
-      }
+            0,
+        },
+      };
     }
     default:
-      return state
+      return state;
   }
 }

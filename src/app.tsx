@@ -1,10 +1,10 @@
-import Page from './components/page'
-import { Provider } from 'react-redux'
-import { store } from './store'
-import EnglishLocale from './locale/en'
+import { IntlProvider } from "react-intl";
+import { Provider } from "react-redux";
+import { createGlobalStyle } from "styled-components";
 
-import { createGlobalStyle } from 'styled-components'
-import { IntlProvider } from 'react-intl'
+import Page from "./components/page";
+import EnglishLocale from "./locale/en";
+import { store } from "./store";
 const GlobalStyle = createGlobalStyle`
   @font-face { 
     font-family: "Press Start 2P";
@@ -48,10 +48,10 @@ body {
   overflow: hidden;
 }
 
-`
+`;
 
 const App = () => {
-  const locale = 'en'
+  const locale = "en";
 
   return (
     <IntlProvider locale={locale} messages={EnglishLocale}>
@@ -60,7 +60,7 @@ const App = () => {
         <Page />
       </Provider>
     </IntlProvider>
-  )
-}
+  );
+};
 
-export default App
+export default App;

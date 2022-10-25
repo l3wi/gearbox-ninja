@@ -10,45 +10,44 @@ import {
   TxCloseAccount,
   TxIncreaseBorrowAmount,
   TxOpenMultitokenAccount,
-  TxRepayAccount
-} from '@gearbox-protocol/sdk'
-import { updateStatus } from '../operations'
-import { BigNumber, ethers, Signer } from 'ethers'
+  TxRepayAccount,
+} from "@gearbox-protocol/sdk";
+import { BigNumber, ethers, Signer } from "ethers";
 
-import { CHAIN_ID, PATHFINDER } from '../../config'
-import { AdapterManager } from '../../config/adapterManager'
-import { captureException } from '../../utils/errors'
+import { CHAIN_ID, PATHFINDER } from "../../config";
+import { AdapterManager } from "../../config/adapterManager";
+import { captureException } from "../../utils/errors";
 import {
   deleteByCreditManager,
   deleteInProgressByCreditManager,
   getByCreditManager,
   getList as caGetList,
   openInProgressByCreditManager,
-  removeOpenInProgressByCreditManager
-} from '../creditAccounts/actions'
-import { getError } from '../operations'
-import { getTokenBalances } from '../tokens/actions'
-import { getSignerOrThrow } from '../web3'
-import { addPendingTransaction } from '../web3/transactions'
-import { CreditManagerThunkAction, getCreditManagerOrThrow } from '.'
+  removeOpenInProgressByCreditManager,
+} from "../creditAccounts/actions";
+import { getError, updateStatus } from "../operations";
+import { getTokenBalances } from "../tokens/actions";
+import { getSignerOrThrow } from "../web3";
+import { addPendingTransaction } from "../web3/transactions";
+import { CreditManagerThunkAction, getCreditManagerOrThrow } from ".";
 
 export const getList =
   (provider: Signer | ethers.providers.Provider): CreditManagerThunkAction =>
   async (dispatch, getState) => {
     try {
-      const { dataCompressor, pathFinder } = getState().web3
-      if (!dataCompressor) throw new Error('dataCompressor is undefined')
-      if (!pathFinder) throw new Error('pathFinder is undefined')
+      const { dataCompressor, pathFinder } = getState().web3;
+      if (!dataCompressor) throw new Error("dataCompressor is undefined");
+      if (!pathFinder) throw new Error("pathFinder is undefined");
 
       const creditManagersPayload: Array<CreditManagerDataPayload> =
-        await callRepeater(() => dataCompressor.getCreditManagersList())
+        await callRepeater(() => dataCompressor.getCreditManagersList());
 
       const creditManagers = creditManagersPayload.reduce<
         Record<string, CreditManagerData>
       >((acc, payload) => {
-        acc[payload.addr.toLowerCase()] = new CreditManagerData(payload)
-        return acc
-      }, {})
+        acc[payload.addr.toLowerCase()] = new CreditManagerData(payload);
+        return acc;
+      }, {});
 
       const adaptersRes = await Promise.all(
         creditManagersPayload.map((payload) =>
@@ -56,37 +55,41 @@ export const getList =
             ? new AdapterManager({
                 creditManager: creditManagers[payload.addr.toLowerCase()],
                 signer: provider,
-                pathFinder: pathFinder
+                pathFinder: pathFinder,
               })
             : null
         )
-      )
+      );
 
       const adapterManagers = adaptersRes.reduce<
         Record<string, AdapterManager>
       >((acc, am) => {
-        if (am !== null) acc[am.creditManager.address] = am
+        if (am !== null) acc[am.creditManager.address] = am;
 
-        return acc
-      }, {})
+        return acc;
+      }, {});
 
       dispatch({
-        type: 'CREDIT_MANAGERS_SUCCESS',
-        payload: { creditManagers, adapterManagers }
-      })
+        type: "CREDIT_MANAGERS_SUCCESS",
+        payload: { creditManagers, adapterManagers },
+      });
     } catch (e: any) {
-      dispatch({ type: 'CREDIT_MANAGERS_ERROR', payload: new NetworkError() })
-      captureException('store/creditManagers/actions', 'CM: cant getList cm', e)
+      dispatch({ type: "CREDIT_MANAGERS_ERROR", payload: new NetworkError() });
+      captureException(
+        "store/creditManagers/actions",
+        "CM: cant getList cm",
+        e
+      );
     }
-  }
+  };
 
 export interface OpenCreditAccountMultiTokenProps {
-  creditManager: CreditManagerData
-  borrowedAmount: BigNumber
-  wrappedAssets: Array<Asset>
-  ethAmount: BigNumber
-  opHash: string
-  chainId?: number
+  creditManager: CreditManagerData;
+  borrowedAmount: BigNumber;
+  wrappedAssets: Array<Asset>;
+  ethAmount: BigNumber;
+  opHash: string;
+  chainId?: number;
 }
 
 export const openCreditAccountMultiToken =
@@ -95,29 +98,29 @@ export const openCreditAccountMultiToken =
     borrowedAmount,
     wrappedAssets,
     ethAmount,
-    opHash = '0',
-    chainId = CHAIN_ID
+    opHash = "0",
+    chainId = CHAIN_ID,
   }: OpenCreditAccountMultiTokenProps): CreditManagerThunkAction =>
   async (dispatch, getState) => {
     try {
-      dispatch(updateStatus(opHash, 'STATUS.WAITING'))
+      dispatch(updateStatus(opHash, "STATUS.WAITING"));
 
-      const signer = getSignerOrThrow(getState)
+      const signer = getSignerOrThrow(getState);
       const {
         creditFacade: creditFacadeAddress,
         address: creditManagerAddress,
-        underlyingToken
-      } = creditManager
+        underlyingToken,
+      } = creditManager;
       const creditFacade = ICreditFacade__factory.connect(
         creditFacadeAddress,
         signer
-      )
-      const account = await signer.getAddress()
+      );
+      const account = await signer.getAddress();
 
       const calls = wrappedAssets.map(
         ({ token: tokenAddress, balance: amount }) =>
           creditManager.encodeAddCollateral(account, tokenAddress, amount)
-      )
+      );
 
       const receipt = await creditFacade.openCreditAccountMulticall(
         borrowedAmount,
@@ -125,9 +128,9 @@ export const openCreditAccountMultiToken =
         calls,
         0,
         { value: ethAmount }
-      )
+      );
 
-      dispatch(openInProgressByCreditManager(creditManagerAddress))
+      dispatch(openInProgressByCreditManager(creditManagerAddress));
 
       const evmTx = new TxOpenMultitokenAccount({
         txHash: receipt.hash,
@@ -135,58 +138,58 @@ export const openCreditAccountMultiToken =
         timestamp: receipt.timestamp || 0,
         borrowedAmount,
         underlyingToken,
-        assets: wrappedAssets.map(({ token }) => token)
-      })
+        assets: wrappedAssets.map(({ token }) => token),
+      });
 
       dispatch(
         addPendingTransaction({
           chainId,
           tx: evmTx,
           callback: () => {
-            dispatch(getByCreditManager(creditManagerAddress, account))
+            dispatch(getByCreditManager(creditManagerAddress, account));
 
-            dispatch(caGetList())
-            dispatch(removeOpenInProgressByCreditManager(creditManagerAddress))
-            dispatch(getTokenBalances({ account }))
-            dispatch(updateStatus(opHash, 'STATUS.SUCCESS'))
-          }
+            dispatch(caGetList());
+            dispatch(removeOpenInProgressByCreditManager(creditManagerAddress));
+            dispatch(getTokenBalances({ account }));
+            dispatch(updateStatus(opHash, "STATUS.SUCCESS"));
+          },
         })
-      )
+      );
     } catch (e: any) {
-      dispatch(updateStatus(opHash, 'STATUS.FAILURE', getError(e)))
+      dispatch(updateStatus(opHash, "STATUS.FAILURE", getError(e)));
       captureException(
-        'store/creditManagers/actions',
-        'Cant openCreditAccountMultiToken',
+        "store/creditManagers/actions",
+        "Cant openCreditAccountMultiToken",
         creditManager.address,
         wrappedAssets.map(({ token }) => token).toString(),
         e
-      )
+      );
     }
-  }
+  };
 
 interface RepayAccountProps {
-  creditManager: string
-  isEth: boolean
-  opHash: string
-  chainId?: number
+  creditManager: string;
+  isEth: boolean;
+  opHash: string;
+  chainId?: number;
 }
 
 export const repayAccount =
   ({
     creditManager,
     isEth,
-    opHash = '0',
-    chainId = CHAIN_ID
+    opHash = "0",
+    chainId = CHAIN_ID,
   }: RepayAccountProps): CreditManagerThunkAction =>
   async (dispatch, getState) => {
     try {
-      dispatch(updateStatus(opHash, 'STATUS.WAITING'))
-      const signer = getSignerOrThrow(getState)
-      const cm = getCreditManagerOrThrow(getState, creditManager)
-      getSignerOrThrow(getState)
+      dispatch(updateStatus(opHash, "STATUS.WAITING"));
+      const signer = getSignerOrThrow(getState);
+      const cm = getCreditManagerOrThrow(getState, creditManager);
+      getSignerOrThrow(getState);
 
       if (isEth) {
-        return
+        return;
         /*
         !& no repayCreditAccountETH at WETHGateway
         const wethGateway = getWETHGatewayOrThrow(getState);
@@ -203,43 +206,43 @@ export const repayAccount =
       }
       const receipt = await cm
         .getContractETH(signer)
-        .repayCreditAccount(await signer.getAddress())
+        .repayCreditAccount(await signer.getAddress());
 
-      dispatch(deleteInProgressByCreditManager(creditManager))
+      dispatch(deleteInProgressByCreditManager(creditManager));
 
       const evmTx = new TxRepayAccount({
         txHash: receipt.hash,
         creditManager,
-        timestamp: 0
-      })
+        timestamp: 0,
+      });
 
       dispatch(
         addPendingTransaction({
           chainId,
           tx: evmTx,
           callback: () => {
-            dispatch(deleteByCreditManager(creditManager))
-          }
+            dispatch(deleteByCreditManager(creditManager));
+          },
         })
-      )
+      );
 
-      dispatch(updateStatus(opHash, 'STATUS.SUCCESS'))
+      dispatch(updateStatus(opHash, "STATUS.SUCCESS"));
     } catch (e: any) {
-      dispatch(updateStatus(opHash, 'STATUS.FAILURE', getError(e)))
+      dispatch(updateStatus(opHash, "STATUS.FAILURE", getError(e)));
       captureException(
-        'store/creditManagers/actions',
-        'Cant repayAccount',
+        "store/creditManagers/actions",
+        "Cant repayAccount",
         creditManager,
         e
-      )
+      );
     }
-  }
+  };
 export interface CloseCreditAccountProps {
-  account: string
-  creditManager: CreditManagerData
-  closePath: PathFinderCloseResult
-  opHash: string
-  chainId?: number
+  account: string;
+  creditManager: CreditManagerData;
+  closePath: PathFinderCloseResult;
+  opHash: string;
+  chainId?: number;
 }
 
 export const closeCreditAccount =
@@ -247,172 +250,172 @@ export const closeCreditAccount =
     account,
     creditManager,
     closePath,
-    opHash = '0',
-    chainId = CHAIN_ID
+    opHash = "0",
+    chainId = CHAIN_ID,
   }: CloseCreditAccountProps): CreditManagerThunkAction =>
   async (dispatch, getState) => {
     const { address: creditManagerAddress, creditFacade: creditFacadeAddress } =
-      creditManager
+      creditManager;
     try {
-      dispatch(updateStatus(opHash, 'STATUS.WAITING'))
+      dispatch(updateStatus(opHash, "STATUS.WAITING"));
 
-      const signer = getSignerOrThrow(getState)
+      const signer = getSignerOrThrow(getState);
       const creditFacade = ICreditFacade__factory.connect(
         creditFacadeAddress,
         signer
-      )
+      );
       const receipt = await creditFacade.closeCreditAccount(
         account,
         0,
         false,
         closePath.calls
-      )
+      );
 
-      dispatch(deleteInProgressByCreditManager(creditManagerAddress))
+      dispatch(deleteInProgressByCreditManager(creditManagerAddress));
 
       const evmTx = new TxCloseAccount({
         txHash: receipt.hash,
         creditManager: creditManagerAddress,
-        timestamp: 0
-      })
+        timestamp: 0,
+      });
       dispatch(
         addPendingTransaction({
           chainId,
           tx: evmTx,
-          callback: () => dispatch(deleteByCreditManager(creditManagerAddress))
+          callback: () => dispatch(deleteByCreditManager(creditManagerAddress)),
         })
-      )
-      dispatch(updateStatus(opHash, 'STATUS.SUCCESS'))
+      );
+      dispatch(updateStatus(opHash, "STATUS.SUCCESS"));
     } catch (e: any) {
-      dispatch(updateStatus(opHash, 'STATUS.FAILURE', getError(e)))
+      dispatch(updateStatus(opHash, "STATUS.FAILURE", getError(e)));
       captureException(
-        'store/creditManagers/actions',
-        'Cant closeCreditAccount',
+        "store/creditManagers/actions",
+        "Cant closeCreditAccount",
         creditManagerAddress,
         e
-      )
+      );
     }
-  }
+  };
 
 interface IncreaseBorrowProps {
-  creditManager: CreditManagerData
-  amount: BigNumber
-  opHash: string
-  chainId?: number
+  creditManager: CreditManagerData;
+  amount: BigNumber;
+  opHash: string;
+  chainId?: number;
 }
 
 export const increaseBorrow =
   ({
     creditManager,
     amount,
-    opHash = '0',
-    chainId = CHAIN_ID
+    opHash = "0",
+    chainId = CHAIN_ID,
   }: IncreaseBorrowProps): CreditManagerThunkAction =>
   async (dispatch, getState) => {
     try {
-      dispatch(updateStatus(opHash, 'STATUS.WAITING'))
+      dispatch(updateStatus(opHash, "STATUS.WAITING"));
 
-      const signer = getSignerOrThrow(getState)
+      const signer = getSignerOrThrow(getState);
       const { creditFacade: creditFacadeAddress, underlyingToken } =
-        creditManager
+        creditManager;
       const creditFacade = ICreditFacade__factory.connect(
         creditFacadeAddress,
         signer
-      )
-      const account = await signer.getAddress()
+      );
+      const account = await signer.getAddress();
 
-      const receipt = await creditFacade.increaseDebt(amount)
+      const receipt = await creditFacade.increaseDebt(amount);
 
       const evmTx = new TxIncreaseBorrowAmount({
         txHash: receipt.hash,
         amount,
         creditManager: creditManager.address,
         underlyingToken,
-        timestamp: 0
-      })
+        timestamp: 0,
+      });
 
       dispatch(
         addPendingTransaction({
           chainId,
           tx: evmTx,
           callback: () =>
-            dispatch(getByCreditManager(creditManager.address, account))
+            dispatch(getByCreditManager(creditManager.address, account)),
         })
-      )
+      );
 
-      dispatch(updateStatus(opHash, 'STATUS.SUCCESS'))
+      dispatch(updateStatus(opHash, "STATUS.SUCCESS"));
     } catch (e: any) {
-      dispatch(updateStatus(opHash, 'STATUS.FAILURE', getError(e)))
+      dispatch(updateStatus(opHash, "STATUS.FAILURE", getError(e)));
       captureException(
-        'store/creditManagers/actions',
-        'Cant increaseBorrow',
+        "store/creditManagers/actions",
+        "Cant increaseBorrow",
         creditManager.address,
         amount.toString(),
         e
-      )
+      );
     }
-  }
+  };
 
 export const decreaseBorrow =
   ({
     creditManager,
     amount,
-    opHash = '0',
-    chainId = CHAIN_ID
+    opHash = "0",
+    chainId = CHAIN_ID,
   }: IncreaseBorrowProps): CreditManagerThunkAction =>
   async (dispatch, getState) => {
     try {
-      dispatch(updateStatus(opHash, 'STATUS.WAITING'))
+      dispatch(updateStatus(opHash, "STATUS.WAITING"));
 
-      const signer = getSignerOrThrow(getState)
+      const signer = getSignerOrThrow(getState);
       const { creditFacade: creditFacadeAddress, underlyingToken } =
-        creditManager
+        creditManager;
       const creditFacade = ICreditFacade__factory.connect(
         creditFacadeAddress,
         signer
-      )
-      const account = await signer.getAddress()
+      );
+      const account = await signer.getAddress();
 
-      const receipt = await creditFacade.decreaseDebt(amount)
+      const receipt = await creditFacade.decreaseDebt(amount);
 
       const evmTx = new TxIncreaseBorrowAmount({
         txHash: receipt.hash,
         amount,
         creditManager: creditManager.address,
         underlyingToken,
-        timestamp: 0
-      })
+        timestamp: 0,
+      });
 
       dispatch(
         addPendingTransaction({
           chainId,
           tx: evmTx,
           callback: () => {
-            dispatch(getByCreditManager(creditManager.address, account))
-            dispatch(getTokenBalances({ account }))
-          }
+            dispatch(getByCreditManager(creditManager.address, account));
+            dispatch(getTokenBalances({ account }));
+          },
         })
-      )
+      );
 
-      dispatch(updateStatus(opHash, 'STATUS.SUCCESS'))
+      dispatch(updateStatus(opHash, "STATUS.SUCCESS"));
     } catch (e: any) {
-      dispatch(updateStatus(opHash, 'STATUS.FAILURE', getError(e)))
+      dispatch(updateStatus(opHash, "STATUS.FAILURE", getError(e)));
       captureException(
-        'store/creditManagers/actions',
-        'Cant decreaseBorrow',
+        "store/creditManagers/actions",
+        "Cant decreaseBorrow",
         creditManager.address,
         amount.toString(),
         e
-      )
+      );
     }
-  }
+  };
 
 interface AddCollateralProps {
-  creditManager: CreditManagerData
-  asset: Asset
-  ethAmount: BigNumber
-  opHash: string
-  chainId?: number
+  creditManager: CreditManagerData;
+  asset: Asset;
+  ethAmount: BigNumber;
+  opHash: string;
+  chainId?: number;
 }
 
 export const addCollateral =
@@ -420,56 +423,56 @@ export const addCollateral =
     creditManager,
     asset,
     ethAmount,
-    opHash = '0',
-    chainId = CHAIN_ID
+    opHash = "0",
+    chainId = CHAIN_ID,
   }: AddCollateralProps): CreditManagerThunkAction =>
   async (dispatch, getState) => {
     try {
-      dispatch(updateStatus(opHash, 'STATUS.WAITING'))
-      const { token: tokenAddress, balance: amount } = asset
+      dispatch(updateStatus(opHash, "STATUS.WAITING"));
+      const { token: tokenAddress, balance: amount } = asset;
 
-      const signer = getSignerOrThrow(getState)
-      const { creditFacade: creditFacadeAddress } = creditManager
+      const signer = getSignerOrThrow(getState);
+      const { creditFacade: creditFacadeAddress } = creditManager;
       const creditFacade = ICreditFacade__factory.connect(
         creditFacadeAddress,
         signer
-      )
-      const account = await signer.getAddress()
+      );
+      const account = await signer.getAddress();
 
       const receipt = await creditFacade.addCollateral(
         account,
         tokenAddress,
         amount,
         { value: ethAmount }
-      )
+      );
 
-      dispatch(updateStatus(opHash, 'STATUS.SUCCESS'))
+      dispatch(updateStatus(opHash, "STATUS.SUCCESS"));
 
       const evmTx = new TxAddCollateral({
         txHash: receipt.hash,
         amount,
         creditManager: creditManager.address,
         addedToken: tokenAddress,
-        timestamp: 0
-      })
+        timestamp: 0,
+      });
 
       dispatch(
         addPendingTransaction({
           chainId,
           tx: evmTx,
           callback: () => {
-            dispatch(getByCreditManager(creditManager.address, account))
-            dispatch(getTokenBalances({ account }))
-          }
+            dispatch(getByCreditManager(creditManager.address, account));
+            dispatch(getTokenBalances({ account }));
+          },
         })
-      )
+      );
     } catch (e: any) {
-      dispatch(updateStatus(opHash, 'STATUS.FAILURE', getError(e)))
+      dispatch(updateStatus(opHash, "STATUS.FAILURE", getError(e)));
       captureException(
-        'store/creditManagers/actions',
-        'Cant addCollateral',
+        "store/creditManagers/actions",
+        "Cant addCollateral",
         creditManager.address,
         e
-      )
+      );
     }
-  }
+  };

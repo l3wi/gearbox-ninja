@@ -5,26 +5,26 @@ import {
   PERCENTAGE_FACTOR,
   toSignificant,
   WAD_DECIMALS_POW,
-  YearnAPYResult
-} from '@gearbox-protocol/sdk'
+  YearnAPYResult,
+} from "@gearbox-protocol/sdk";
 
-export type YearnApy = Record<keyof YearnAPYResult, number>
+export type YearnApy = Record<keyof YearnAPYResult, number>;
 
 export async function getYearnAPY(): Promise<YearnApy> {
-  const yearn = await getYearnAPYSdk()
+  const yearn = await getYearnAPYSdk();
 
   const yearnMap = objectEntries(yearn).reduce<YearnApy>(
     (acc, [yearnSymbol, apy]) => {
-      const apyInPercent = apy.mul(PERCENTAGE_DECIMALS)
+      const apyInPercent = apy.mul(PERCENTAGE_DECIMALS);
       acc[yearnSymbol] = Math.round(
         Number(
           toSignificant(apyInPercent.mul(PERCENTAGE_FACTOR), WAD_DECIMALS_POW)
         )
-      )
-      return acc
+      );
+      return acc;
     },
     {} as YearnApy
-  )
+  );
 
-  return yearnMap
+  return yearnMap;
 }

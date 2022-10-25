@@ -1,18 +1,18 @@
-import { BigNumber } from 'ethers'
-import React, { RefObject, useState, useMemo, useEffect } from 'react'
-import styled, { keyframes } from 'styled-components'
-import { formatLeverage, LEVERAGE_DECIMALS } from '@gearbox-protocol/sdk'
+import { formatLeverage, LEVERAGE_DECIMALS } from "@gearbox-protocol/sdk";
+import { BigNumber } from "ethers";
+import React, { RefObject, useEffect, useMemo, useState } from "react";
+import styled, { keyframes } from "styled-components";
 
-const MIN_LEVERAGE = LEVERAGE_DECIMALS + 1
+const MIN_LEVERAGE = LEVERAGE_DECIMALS + 1;
 
 const Slider: React.FC<{
-  amount: BigNumber
-  minAmount: BigNumber
-  maxAmount: BigNumber
+  amount: BigNumber;
+  minAmount: BigNumber;
+  maxAmount: BigNumber;
 
-  maxLeverage: number
-  leverage: number
-  setLeverage: (v: number) => void
+  maxLeverage: number;
+  leverage: number;
+  setLeverage: (v: number) => void;
 }> = ({
   amount,
   minAmount,
@@ -20,34 +20,34 @@ const Slider: React.FC<{
 
   maxLeverage,
   leverage,
-  setLeverage
+  setLeverage,
 }) => {
   const maxLeverageFull = useMemo(
     () => maxLeverage + LEVERAGE_DECIMALS,
     [maxLeverage]
-  )
+  );
 
   const [availableStart, availableEnd] = useMemo(() => {
-    const max = getMaxLeverage(amount, maxAmount, maxLeverageFull)
-    const min = getMinLeverage(amount, minAmount)
+    const max = getMaxLeverage(amount, maxAmount, maxLeverageFull);
+    const min = getMinLeverage(amount, minAmount);
 
     return [
       limitLeverage(maxLeverageFull)(min),
-      limitLeverage(maxLeverageFull)(max)
-    ]
-  }, [amount, minAmount, maxAmount, maxLeverageFull])
+      limitLeverage(maxLeverageFull)(max),
+    ];
+  }, [amount, minAmount, maxAmount, maxLeverageFull]);
 
   const handleLeverageChange = (l: number) => {
     if (l >= availableEnd)
-      return setLeverage(defaultNextLeverage(availableEnd, maxLeverageFull))
+      return setLeverage(defaultNextLeverage(availableEnd, maxLeverageFull));
     if (availableStart >= l)
-      return setLeverage(defaultNextLeverage(availableStart, maxLeverageFull))
-    setLeverage(defaultNextLeverage(l, maxLeverageFull))
-  }
+      return setLeverage(defaultNextLeverage(availableStart, maxLeverageFull));
+    setLeverage(defaultNextLeverage(l, maxLeverageFull));
+  };
 
   useEffect(() => {
-    handleLeverageChange(leverage)
-  }, [amount, minAmount, maxAmount])
+    handleLeverageChange(leverage);
+  }, [amount, minAmount, maxAmount]);
   return (
     <Container>
       <Row>
@@ -69,22 +69,22 @@ const Slider: React.FC<{
         />
       </LineBox>
     </Container>
-  )
-}
+  );
+};
 
 const Box = styled.div`
   position: relative;
-`
+`;
 
 interface TitleProps {
-  readonly min: number
-  readonly max: number
+  readonly min: number;
+  readonly max: number;
 }
 
 const LineBox = styled.div<TitleProps>`
-  padding-left: ${(props) => props.min / 10 + '%'};
-  padding-right: ${(props) => props.max / 10 + '%'};
-`
+  padding-left: ${(props) => props.min / 10 + "%"};
+  padding-right: ${(props) => props.max / 10 + "%"};
+`;
 const Line = styled.div`
   position: absolute;
   background: white;
@@ -92,18 +92,18 @@ const Line = styled.div`
   height: 7px;
   top: 25px;
   left: 0px;
-`
+`;
 
 function defaultNextLeverage(l: number, maxLeverage: number) {
-  return limitLeverage(maxLeverage)(l)
+  return limitLeverage(maxLeverage)(l);
 }
 
 function limitLeverage(maxLeverage: number) {
   return (l: number) => {
-    if (l > maxLeverage) return maxLeverage
-    if (l < MIN_LEVERAGE) return MIN_LEVERAGE
-    return l
-  }
+    if (l > maxLeverage) return maxLeverage;
+    if (l < MIN_LEVERAGE) return MIN_LEVERAGE;
+    return l;
+  };
 }
 
 export const getMinLeverage = (amount: BigNumber, minAmount: BigNumber) => {
@@ -113,10 +113,10 @@ export const getMinLeverage = (amount: BigNumber, minAmount: BigNumber) => {
         .div(amount)
         .add(LEVERAGE_DECIMALS)
         .toNumber()
-    : MIN_LEVERAGE
+    : MIN_LEVERAGE;
 
-  return leverage
-}
+  return leverage;
+};
 
 export const getMaxLeverage = (
   amount: BigNumber,
@@ -129,24 +129,24 @@ export const getMaxLeverage = (
         .div(amount)
         .add(LEVERAGE_DECIMALS)
         .toNumber()
-    : maxLeverage
+    : maxLeverage;
 
-  return leverage
-}
+  return leverage;
+};
 
 const Row = styled.span`
   display: flex;
   width: 100%;
   justify-content: space-between;
   align-items: center;
-`
+`;
 
 const Container = styled.div`
   position: relative;
   display: block;
   font-size: 14px;
   width: 100%;
-`
+`;
 
 const Input = styled.input`
   outline: none;
@@ -166,6 +166,6 @@ const Input = styled.input`
     appearance: none;
     top: -50%;
   }
-`
+`;
 
-export default Slider
+export default Slider;

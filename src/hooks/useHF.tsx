@@ -1,13 +1,13 @@
-import { calcHealthFactor, CalcHealthFactorProps } from '@gearbox-protocol/sdk'
-import { BigNumber } from 'ethers'
-import { useMemo } from 'react'
+import { calcHealthFactor, CalcHealthFactorProps } from "@gearbox-protocol/sdk";
+import { BigNumber } from "ethers";
+import { useMemo } from "react";
 
 export function useHF({
   assets,
   prices,
   liquidationThresholds,
   underlyingToken,
-  borrowed
+  borrowed,
 }: CalcHealthFactorProps): number {
   const result = useMemo(() => {
     return calcHealthFactor({
@@ -15,23 +15,23 @@ export function useHF({
       prices,
       liquidationThresholds,
       underlyingToken,
-      borrowed
-    })
-  }, [assets, prices, liquidationThresholds, underlyingToken, borrowed])
+      borrowed,
+    });
+  }, [assets, prices, liquidationThresholds, underlyingToken, borrowed]);
 
-  return result
+  return result;
 }
 
 export function useValueTo<T extends BigNumber | number>(
   value: T,
   condition: boolean
 ): T | undefined {
-  const dep = BigNumber.isBigNumber(value) ? value.toHexString() : value
+  const dep = BigNumber.isBigNumber(value) ? value.toHexString() : value;
 
   const valueOut = useMemo(
     () => (condition ? value : undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [condition, dep]
-  )
-  return valueOut
+  );
+  return valueOut;
 }

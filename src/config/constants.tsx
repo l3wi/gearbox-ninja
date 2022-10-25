@@ -1,7 +1,7 @@
-import { BigNumber } from 'ethers'
+import { BigNumber } from "ethers";
 
-export const EMPTY_OBJECT = {}
-//@ts-ignore
-export const EMPTY_ARRAY = []
+export const EMPTY_OBJECT = {};
+// @ts-ignore
+export const EMPTY_ARRAY = [];
 
-export const ZERO = BigNumber.from(0)
+export const ZERO = BigNumber.from(0);

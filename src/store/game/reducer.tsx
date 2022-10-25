@@ -1,22 +1,23 @@
-import { game, Container } from 'melonjs'
-import { GameActions, GameThunkAction } from './index'
-export type Stages = Record<string, any>
+import { Container, game } from "melonjs";
+
+import { GameActions, GameThunkAction } from "./index";
+export type Stages = Record<string, any>;
 
 export interface Notification {
-  value: string
-  duration: number
+  value: string;
+  duration: number;
 }
 
 export interface GameState {
-  isInit: boolean
-  isPaused: boolean
-  isIllegal: boolean
-  signRejected: boolean
-  notification: Notification | null
-  stages: Stages // Need to fix (Stage Class)
-  lastPosition: { x: number; y: number }
-  currentStage: keyof Stages
-  pause: string | null
+  isInit: boolean;
+  isPaused: boolean;
+  isIllegal: boolean;
+  signRejected: boolean;
+  notification: Notification | null;
+  stages: Stages; // Need to fix (Stage Class)
+  lastPosition: { x: number; y: number };
+  currentStage: keyof Stages;
+  pause: string | null;
 }
 
 const initialState: GameState = {
@@ -27,66 +28,66 @@ const initialState: GameState = {
   notification: null,
   stages: {},
   lastPosition: { x: 2670, y: 0 },
-  currentStage: 'MENU',
-  pause: null
-}
+  currentStage: "MENU",
+  pause: null,
+};
 
 export function gameReducer(
   state: GameState = initialState,
   action: GameActions
 ): GameState {
   switch (action.type) {
-    case 'INIT_GAME':
+    case "INIT_GAME":
       return {
         ...state,
-        isInit: true
-      }
-    case 'PAUSE_GAME':
+        isInit: true,
+      };
+    case "PAUSE_GAME":
       return {
         ...state,
         isPaused: true,
-        pause: action.payload.pause
-      }
-    case 'RESUME_GAME':
+        pause: action.payload.pause,
+      };
+    case "RESUME_GAME":
       return {
         ...state,
         isPaused: false,
-        pause: null
-      }
-    case 'BEGIN_STAGE':
-      return {
-        ...state
-      }
-    case 'UPDATE_NOTIFICATION':
+        pause: null,
+      };
+    case "BEGIN_STAGE":
       return {
         ...state,
-        notification: action.payload.notification
-      }
-    case 'UPDATE_PAUSE':
+      };
+    case "UPDATE_NOTIFICATION":
       return {
         ...state,
-        pause: action.payload.pause
-      }
-    case 'CHANGE_STAGE':
+        notification: action.payload.notification,
+      };
+    case "UPDATE_PAUSE":
+      return {
+        ...state,
+        pause: action.payload.pause,
+      };
+    case "CHANGE_STAGE":
       return {
         ...state,
         currentStage: action.payload.currentStage,
         lastPosition: action.payload.lastPosition
           ? action.payload.lastPosition
-          : state.lastPosition
-      }
-    case 'REGISTER_STAGE':
+          : state.lastPosition,
+      };
+    case "REGISTER_STAGE":
       return {
         ...state,
-        stages: { ...state.stages, [action.payload.key]: action.payload.stage }
-      }
-    case 'SIGNED_MESSAGE':
+        stages: { ...state.stages, [action.payload.key]: action.payload.stage },
+      };
+    case "SIGNED_MESSAGE":
       return {
         ...state,
         isIllegal: action.payload.isIllegal,
-        signRejected: action.payload.signRejected
-      }
+        signRejected: action.payload.signRejected,
+      };
   }
 
-  return state
+  return state;
 }
