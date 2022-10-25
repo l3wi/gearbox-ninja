@@ -35,7 +35,7 @@ module.exports = {
     new ForkTsCheckerWebpackPlugin(),
     new HtmlWebpackPlugin({
       filename: './index.html',
-      template: './public/index.html',
+      template: './src/index.html',
       hash: true
     }),
     new CopyWebpackPlugin({
