@@ -17,7 +17,7 @@ const Lives = () => {
   const lives = nftBalance ? nftBalance : 0
 
   const total = nftAmount ? nftAmount : 0
-  if (stage === 'PLAY' && account) {
+  if (stage === 'PLAY' && account && lives > 0) {
     return (
       <Container>
         LIVES:
