@@ -4,6 +4,7 @@ import actions from '../store/actions'
 
 import { Wallets, walletsToConnectors } from '../config/connectors'
 import { BigNumber } from 'ethers'
+import { Web3Provider } from '@ethersproject/providers'
 
 type EthProvider = {
   isCoinbaseWallet?: boolean
@@ -44,7 +45,7 @@ export const connect = async () => {
 export const activate = async (w: Wallets) => {
   const isInjectedWallet = w === 'metamask' // removed coinbase
 
-  let connector
+  let connector: Web3Provider
   if (isInjectedWallet) {
     // MM uses propmts prior to provider setup
     await window.ethereum?.enable()
