@@ -108,7 +108,9 @@ export const activate = async (w: Wallets) => {
             3000,
           ),
         );
+
         store.dispatch(actions.web3.disconnectSigner());
+        /// Activate Wallet again and go through wallet flow
         setTimeout(async () => {
           await activate(w);
         }, 500);
