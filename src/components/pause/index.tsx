@@ -28,7 +28,7 @@ const Pause = () => {
   };
 
   const toggleMusic = (b: boolean) =>
-    store.dispatch({ type: "TOGGLE_MUSIC", payload: b });
+    store.dispatch(actions.game.ToggleMusic());
 
   const prior = window.localStorage.getItem("declared");
   return (

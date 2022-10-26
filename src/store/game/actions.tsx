@@ -123,6 +123,21 @@ export const RegisterScreen =
     }
   };
 
+export const ToggleMusic =
+  (text?: string): GameThunkAction =>
+  async (dispatch, getState) => {
+    try {
+      let { track } = getState().game;
+      if (track) {
+        audio.pauseTrack();
+        audio.stopTrack();
+      }
+      store.dispatch({ type: "TOGGLE_MUSIC", payload: !track });
+    } catch (e: any) {
+      console.error("Error PauseGame(): " + e);
+    }
+  };
+
 export const PauseGame =
   (text?: string): GameThunkAction =>
   async (dispatch, getState) => {
