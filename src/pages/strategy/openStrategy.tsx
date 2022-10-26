@@ -214,14 +214,26 @@ const OpenStrategyDialog: React.FC<Props> = ({
   }, [unwrappedCollateral]);
 
   // index 0
-  const updateValue = (index: number, input: string) => {
+  const updateValue = (index: number, input: BigNumberish) => {
     const func = handleChangeAmount(index);
-    const token = tokensList[unwrappedCollateral[0].token];
-    if (isNumeric(input)) {
+    const token = tokensList[unwrappedCollateral[index].token];
+    if (isNumeric(input) && typeof input === "string") {
       const bn = utils.parseUnits(input, token.decimals);
       return func(bn, input.toString());
     }
-    func(unwrappedCollateral[index].balance, input.toString());
+    if (input instanceof BigNumber) {
+      return func(
+        input,
+        input
+          .div(
+            BigNumber.from(10).pow(
+              tokensList[unwrappedCollateral[index].token].decimals,
+            ),
+          )
+          .toString(),
+      );
+    }
+    return func(unwrappedCollateral[index].balance, input.toString());
   };
 
   return (
@@ -268,7 +280,10 @@ const OpenStrategyDialog: React.FC<Props> = ({
                 </Asset>
                 <MaxButton
                   onClick={() =>
-                    updateValue(i, balancesWithETH[collateral.token].toString())
+                    updateValue(
+                      i,
+                      BigNumber.from(balancesWithETH[collateral.token]),
+                    )
                   }
                 >
                   max

@@ -3,7 +3,7 @@ import { BigNumber, BigNumberish } from "ethers";
 export const nFormatter = (
   bn: BigNumberish,
   decimals: number,
-  fixed: number
+  fixed: number,
 ) => {
   const currency = new Intl.NumberFormat("en-US", {
     minimumFractionDigits: 2,
@@ -25,12 +25,12 @@ export const nFormatter = (
   let item = lookup
     .slice()
     .reverse()
-    .find((item) => {
+    .find(item => {
       return num >= item.value;
     });
   return item
     ? currency.format(
-        parseFloat((num / item.value).toFixed(fixed).replace(rx, "$1"))
+        parseFloat((num / item.value).toFixed(fixed).replace(rx, "$1")),
       ) + item.symbol
     : "0";
 };
@@ -39,11 +39,11 @@ export const bnToFloat = (bn: BigNumberish, decimals: number) => {
   return parseFloat(
     BigNumber.from(bn)
       .div(BigNumber.from("10").pow(BigNumber.from(decimals)))
-      .toString()
+      .toString(),
   );
 };
 
-export function isNumeric(str: string) {
+export function isNumeric(str: BigNumberish) {
   if (typeof str !== "string") return false; // we only process strings!
   return (
     // @ts-ignore

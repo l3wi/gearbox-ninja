@@ -58,7 +58,9 @@ export const activate = async (w: Wallets) => {
     connector = walletsToConnectors[w];
 
     if (parseInt(window.ethereum?.networkVersion) !== CHAIN_ID) {
-      store.dispatch(actions.game.AddNotification("Wrong Network", 2000));
+      store.dispatch(
+        actions.game.AddNotification("Wrong Network Dectected", 2000),
+      );
       try {
         const chainId = "0x" + BigNumber.from(CHAIN_ID).toString();
         await window.ethereum?.request({
@@ -105,21 +107,26 @@ export const activate = async (w: Wallets) => {
     );
 
     if (window.ethereum && isInjectedWallet) {
-      window.ethereum.on("chainChanged", () => {
+      window.ethereum.on("chainChanged", async () => {
         (window.ethereum as any).removeAllListeners("chainChanged");
+        store.dispatch(
+          actions.game.AddNotification(
+            "Network Changed to Wrong Network",
+            3000,
+          ),
+        );
+
         store.dispatch(actions.web3.disconnectSigner());
+        /// Activate Wallet again and go through wallet flow
+        setTimeout(async () => {
+          await activate(w);
+        }, 500);
       });
 
       window.ethereum.on("accountsChanged", async () => {
         console.log("Account changed");
         (window.ethereum as any).removeAllListeners("accountsChanged");
-        await store.dispatch(
-          actions.web3.connectSigner({
-            library: connector,
-            dataCompressor,
-            chainId,
-          }),
-        );
+        activate(w);
         store.dispatch(actions.web3.setWalletType(w));
       });
     }
