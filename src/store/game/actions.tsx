@@ -36,7 +36,7 @@ export const InitGame =
 
       // Load & Init the loading screen
       store.dispatch(
-        actions.game.RegisterScreen("LOADING", new LoadingScreen())
+        actions.game.RegisterScreen("LOADING", new LoadingScreen()),
       );
       store.dispatch(actions.game.ChangeStage("LOADING"));
 
@@ -48,7 +48,7 @@ export const InitGame =
         store.dispatch(actions.game.RegisterScreen("MENU", new TitleScreen()));
         store.dispatch(actions.game.RegisterScreen("PLAY", new PlayScreen()));
         store.dispatch(
-          actions.game.RegisterScreen("CREDITS", new Web3Screen())
+          actions.game.RegisterScreen("CREDITS", new Web3Screen()),
         );
 
         // add our player entity in the entity pool
@@ -65,7 +65,7 @@ export const ChangeStage =
   (key: keyof Stages, pos?: { x: number; y: number }): GameThunkAction =>
   async (dispatch, getState) => {
     try {
-      const { stages, currentStage, lastPosition } = getState().game;
+      const { stages, currentStage, lastPosition, track } = getState().game;
       if (!stages[key]) return console.error("Error: Stage doesn't exist");
 
       // If PLAY & pos, save player pos
@@ -77,7 +77,7 @@ export const ChangeStage =
           payload: { currentStage: key, lastPosition: { x: pos.x, y: pos.y } },
         });
       } else {
-        if (currentStage === "MENU" && key === "PLAY")
+        if (currentStage === "MENU" && key === "PLAY" && track)
           audio.playTrack("background_8bit", 0.5);
 
         // @ts-ignore
@@ -127,10 +127,10 @@ export const PauseGame =
   (text?: string): GameThunkAction =>
   async (dispatch, getState) => {
     try {
-      let { isPaused, pause } = getState().game;
+      let { isPaused, track } = getState().game;
       if (isPaused && !text) {
         state.resume();
-        audio.resume("background_8bit");
+        if (track) audio.resume("background_8bit");
         dispatch({ type: "RESUME_GAME" });
       } else {
         state.pause();

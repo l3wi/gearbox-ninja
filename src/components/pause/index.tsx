@@ -9,9 +9,10 @@ import { activate, declare } from "../../utils/web3";
 import ExitButton from "../exitButton";
 
 const Pause = () => {
-  const { game, web3 } = useSelector((state: RootState) => state);
-  const { account } = web3;
-  const { isPaused, pause, isIllegal } = game;
+  const { account } = useSelector((state: RootState) => state.web3);
+  const { isPaused, pause, isIllegal, track } = useSelector(
+    (state: RootState) => state.game,
+  );
 
   const exit = () => {
     store.dispatch(actions.game.PauseGame());
@@ -26,9 +27,19 @@ const Pause = () => {
     store.dispatch(actions.web3.disconnectSigner());
   };
 
+  const toggleMusic = (b: boolean) =>
+    store.dispatch({ type: "TOGGLE_MUSIC", payload: b });
+
   const prior = window.localStorage.getItem("declared");
   return (
     <PauseBG paused={isPaused}>
+      <SoundToggle onClick={() => toggleMusic(!track)}>
+        {track ? (
+          <img src={"/data/img/on.png"} />
+        ) : (
+          <img src={"/data/img/off.png"} />
+        )}
+      </SoundToggle>
       {/* <ExitButton text="Back" func={exit} /> */}
       <Title>{isPaused && !pause ? "GAME PAUSED" : pause}</Title>
 
@@ -91,6 +102,15 @@ const Pause = () => {
     </PauseBG>
   );
 };
+
+const SoundToggle = styled.button`
+  outline: none;
+  border: none;
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: transparent;
+`;
 
 const Col = styled.div`
   display: flex;

@@ -40,6 +40,10 @@ export type GameActions =
   | {
       type: "UPDATE_PAUSE";
       payload: { pause: string };
+    }
+  | {
+      type: "TOGGLE_MUSIC";
+      payload: boolean;
     };
 
 export type GameThunkAction = ThunkAction<

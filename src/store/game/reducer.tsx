@@ -18,11 +18,13 @@ export interface GameState {
   lastPosition: { x: number; y: number };
   currentStage: keyof Stages;
   pause: string | null;
+  track: boolean;
 }
 
 const initialState: GameState = {
   isInit: false,
   isPaused: false,
+  track: true,
   isIllegal: true,
   signRejected: true,
   notification: null,
@@ -34,7 +36,7 @@ const initialState: GameState = {
 
 export function gameReducer(
   state: GameState = initialState,
-  action: GameActions
+  action: GameActions,
 ): GameState {
   switch (action.type) {
     case "INIT_GAME":
@@ -86,6 +88,11 @@ export function gameReducer(
         ...state,
         isIllegal: action.payload.isIllegal,
         signRejected: action.payload.signRejected,
+      };
+    case "TOGGLE_MUSIC":
+      return {
+        ...state,
+        track: action.payload,
       };
   }
 
