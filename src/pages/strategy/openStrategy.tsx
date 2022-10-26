@@ -57,7 +57,7 @@ const OpenStrategyDialog: React.FC<Props> = ({
   balances,
 }) => {
   const dispatch = useDispatch();
-  const { balance } = useSelector((state: RootState) => state.web3);
+  const { balance, nftBalance } = useSelector((state: RootState) => state.web3);
   const [picker, setPicker] = useState(false);
   const prices = usePrices();
 
@@ -102,7 +102,7 @@ const OpenStrategyDialog: React.FC<Props> = ({
 
   const maxLeverageFactor = useMaxLeverage(lpTokenAddress, creditManager);
   const [leverage, setLeverage] = useState(
-    maxLeverageFactor + LEVERAGE_DECIMALS
+    maxLeverageFactor + LEVERAGE_DECIMALS,
   );
   const totalAmount = useTotalAmountInTarget({
     assets: wrappedCollateral,
@@ -113,7 +113,7 @@ const OpenStrategyDialog: React.FC<Props> = ({
 
   const [amountOnAccount, borrowedAmount] = useLeveragedAmount(
     totalAmount,
-    leverage
+    leverage,
   );
 
   const borrowedAsset = useSingleAsset(underlyingTokenAddress, borrowedAmount);
@@ -122,7 +122,7 @@ const OpenStrategyDialog: React.FC<Props> = ({
   const strategyPath = useOpenStrategy(
     creditManager,
     collateralAndBorrow,
-    lpTokenAddress
+    lpTokenAddress,
   );
 
   const assetsAfterOpen = strategyPath?.balances || EMPTY_ARRAY;
@@ -190,6 +190,11 @@ const OpenStrategyDialog: React.FC<Props> = ({
   const allAssetsSelected = allowedTokens.length === wrappedCollateral.length;
 
   const handleSubmit = () => {
+    if (nftBalance === 0)
+      return dispatch(
+        actions.game.AddNotification("You have used all you DEGEN NFTs!", 2000),
+      );
+
     const opHash = generateNewHash("OAS-ACT-");
     dispatch(
       actions.strategy.openStrategy({
@@ -199,7 +204,7 @@ const OpenStrategyDialog: React.FC<Props> = ({
         borrowedAmount,
         ethAmount,
         opHash,
-      })
+      }),
     );
   };
 
@@ -235,7 +240,7 @@ const OpenStrategyDialog: React.FC<Props> = ({
                           tokensList[collateral.token]
                             ? tokensList[collateral.token].decimals
                             : 18,
-                          3
+                          3,
                         )} 
                         ${
                           tokensList[collateral.token] &&
@@ -250,7 +255,7 @@ const OpenStrategyDialog: React.FC<Props> = ({
                 <Input
                   placeholder="0.0"
                   value={collateral.balanceView}
-                  onChange={(e) => updateValue(i, e.target.value)}
+                  onChange={e => updateValue(i, e.target.value)}
                 />
 
                 <Asset>
@@ -325,8 +330,8 @@ const OpenStrategyDialog: React.FC<Props> = ({
             parseFloat(
               lpAmount
                 .div(BigNumber.from("10").pow(BigNumber.from(18)))
-                .toString()
-            )
+                .toString(),
+            ),
           )} ${lpSymbol.toUpperCase()}`}</span>
         </Group>
         <Group>
@@ -344,7 +349,7 @@ const OpenStrategyDialog: React.FC<Props> = ({
               <ExecuteButton onClick={() => handleSubmit()}>
                 <>{`Open a  ${formatLeverage(
                   leverage,
-                  2
+                  2,
                 )}x position with ${lpSymbol}`}</>
               </ExecuteButton>
             </ApproveButton>
