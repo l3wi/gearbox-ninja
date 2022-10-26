@@ -9,6 +9,8 @@ import { ApproveButton } from "../../components/approvalButton";
 import ExitButton from "../../components/exitButton";
 import { unwrapTokenAddress, WSTETH_ADDRESS } from "../../config/tokens";
 import { useAssets, useWrapETH } from "../../hooks/useAssets";
+import { usePoolAPY } from "../../hooks/usePools";
+import { usePrices } from "../../hooks/usePrices";
 import {
   useTokenBalances,
   useTokensDataListWithETH,
@@ -56,9 +58,13 @@ const poolData = (
 };
 
 const Form = () => {
+  const prices = usePrices();
+
   const state = useSelector((state: RootState) => state);
   const [, balancesWithETH] = useTokenBalances();
   const tokensListWithETH = useTokensDataListWithETH();
+
+  const { price } = state;
 
   const { symbol, token, pool, balance } = poolData(
     state.form.symbol,
@@ -66,7 +72,23 @@ const Form = () => {
     tokensListWithETH,
     balancesWithETH,
   );
+
+  const {
+    dieselRateRay,
+    underlyingToken: underlyingTokenAddress,
+    dieselToken: dieselTokenAddress,
+    address,
+    expectedLiquidity,
+    expectedLiquidityLimit,
+    dieselRate,
+    depositAPY,
+  } = pool;
+
   const web3 = useSelector((state: RootState) => state.web3);
+
+  const underlyingToken = tokensListWithETH[underlyingTokenAddress];
+  const { symbol: underlyingTokenSymbol, decimals: underlyingDecimals = 18 } =
+    underlyingToken;
 
   const collateralAssetsState = useAssets([
     {
@@ -82,6 +104,22 @@ const Form = () => {
   } = collateralAssetsState;
 
   const [wrappedCollateral, ethAmount] = useWrapETH(unwrappedCollateral);
+
+  const underlyingPrice = prices[underlyingTokenAddress];
+  const dieselPrice = prices[dieselTokenAddress];
+
+  const [totalAPY, poolAPY, farmAPY] = usePoolAPY({
+    depositAPY,
+    underlying: {
+      amount: expectedLiquidity,
+      decimals: underlyingDecimals,
+      price: underlyingPrice,
+    },
+    diesel: { token: dieselTokenAddress },
+    gear: {
+      price: dieselPrice,
+    },
+  });
 
   const disableSubmit = () => {
     if (
@@ -153,8 +191,14 @@ const Form = () => {
               </MaxButton>
             </InputGroup>
             <APYGroup>
-              <span>Deposit Fee: 1%</span>
-              <span>{`Yield (APY): ${pool?.depositAPY.toFixed(2)}%`}</span>
+              <span>{`Deposit Fee: `}</span>
+              <span>{`1%`}</span>
+            </APYGroup>
+            <APYGroup>
+              <span>{`APY: `}</span>
+              <span>{`${poolAPY.toFixed(2)}% ${symbol} + ${(
+                farmAPY / 10000
+              ).toFixed(2)}% GEAR`}</span>
             </APYGroup>
             <SufficientAmountGuard
               amount={unwrappedCollateral[0].balance}
