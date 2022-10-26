@@ -140,6 +140,7 @@ const Form = () => {
             </InputSuper>
             <InputGroup>
               <Input
+                placeholder="0.00"
                 value={unwrappedCollateral[0].balanceView}
                 onChange={e => updateValue(e.target.value)}
               />
