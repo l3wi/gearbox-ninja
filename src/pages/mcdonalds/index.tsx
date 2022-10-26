@@ -17,14 +17,14 @@ const McDonalds = () => {
   const handleClick = async () => {
     if (web3.noWhitelist) {
       store.dispatch(
-        actions.game.AddNotification("You are incapable of ninja-dom!")
+        actions.game.AddNotification("You are incapable of ninja-dom!"),
       );
       window.open("https://discord.com/invite/gearbox", "_blank");
       return;
     }
     if (web3.nftClaimed)
       return store.dispatch(
-        actions.game.AddNotification("You are already a ninja!")
+        actions.game.AddNotification("You are already a ninja!"),
       );
     if (!web3.account) await activate("metamask");
     if (game.isIllegal) await declare();
@@ -36,7 +36,7 @@ const McDonalds = () => {
   const toMcDonalds = () => {
     window.open(
       "https://www.mcdonalds.com/us/en-us/mcdonalds-careers.html",
-      "_blank"
+      "_blank",
     );
   };
 
@@ -74,7 +74,7 @@ const McDonalds = () => {
                 </ButtonText>
               )}
               {web3.nftClaimed && !web3.noWhitelist ? (
-                <ButtonText>YOU ARE ALREADY A NINJA!</ButtonText>
+                <ButtonText>GO APE IN STRATEGIES</ButtonText>
               ) : null}
             </Button>
           )}

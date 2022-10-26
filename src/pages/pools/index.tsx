@@ -30,25 +30,25 @@ const poolData = (
   symbol: string,
   pools: Record<string, PoolData>,
   tokens: Record<string, TokenData>,
-  balances: any
+  balances: any,
 ) => {
   const token = Object.values(tokens).find(
-    (item: TokenData) => item.symbol === symbol
+    (item: TokenData) => item.symbol === symbol,
   );
   const balance = balances[token.id];
   let pool: PoolData;
   if (symbol === "ETH") {
     const weth = Object.values(tokens).find(
-      (item: TokenData) => item.symbol === "WETH"
+      (item: TokenData) => item.symbol === "WETH",
     );
     pool = Object.values(pools).find(
       (item: PoolData) =>
-        item.underlyingToken.toLowerCase() === weth.address.toLowerCase()
+        item.underlyingToken.toLowerCase() === weth.address.toLowerCase(),
     );
   } else {
     pool = Object.values(pools).find(
       (item: PoolData) =>
-        item.underlyingToken.toLowerCase() === token.address.toLowerCase()
+        item.underlyingToken.toLowerCase() === token.address.toLowerCase(),
     );
   }
 
@@ -64,7 +64,7 @@ const Form = () => {
     state.form.symbol,
     state.pools.data,
     tokensListWithETH,
-    balancesWithETH
+    balancesWithETH,
   );
   const web3 = useSelector((state: RootState) => state.web3);
 
@@ -101,7 +101,7 @@ const Form = () => {
         ethAmount,
         amount: unwrappedCollateral[0].balance,
         opHash,
-      })
+      }),
     );
   };
 
@@ -140,8 +140,9 @@ const Form = () => {
             </InputSuper>
             <InputGroup>
               <Input
+                placeholder="0.00"
                 value={unwrappedCollateral[0].balanceView}
-                onChange={(e) => updateValue(e.target.value)}
+                onChange={e => updateValue(e.target.value)}
               />
               <Asset>
                 <img width={20} src={token.icon} />
@@ -152,8 +153,8 @@ const Form = () => {
               </MaxButton>
             </InputGroup>
             <APYGroup>
-              <span>Deposit APY</span>
-              <span>{pool?.depositAPY.toFixed(2)}%</span>
+              <span>Deposit Fee: 1%</span>
+              <span>{`Yield (APY): ${pool?.depositAPY.toFixed(2)}%`}</span>
             </APYGroup>
             <SufficientAmountGuard
               amount={unwrappedCollateral[0].balance}
