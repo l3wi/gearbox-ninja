@@ -1,8 +1,13 @@
 import { Web3Provider } from "@ethersproject/providers";
+import WalletConnectProvider from "@walletconnect/web3-provider";
 import { BigNumber } from "ethers";
 
 import { BLOCK_UPDATE_DELAY, CHAIN_ID } from "../config";
-import { Wallets, walletsToConnectors } from "../config/connectors";
+import {
+  walletconnect,
+  Wallets,
+  walletsToConnectors,
+} from "../config/connectors";
 import { store } from "../store";
 import actions from "../store/actions";
 
@@ -43,6 +48,7 @@ export const connect = async () => {
 // 3. Activate Listeners for changes
 // X. Throw if errors
 export const activate = async (w: Wallets) => {
+  store.dispatch(actions.game.AddNotification("Connecting Wallet...", 1000));
   const isInjectedWallet = w === "metamask"; // removed coinbase
 
   let connector: Web3Provider;
@@ -70,9 +76,10 @@ export const activate = async (w: Wallets) => {
     }
   } else {
     // WC uses propmts post to provider setup
+    await walletconnect.enable();
     connector = walletsToConnectors[w];
-    // @ts-ignore
-    await connector.enable(); // need to extend Web3Provider interface
+    console.log(connector);
+    console.log(await connector.getBlockNumber());
   }
   const { dataCompressor } = store.getState().web3;
   const chainId = CHAIN_ID;
@@ -141,12 +148,16 @@ export const activate = async (w: Wallets) => {
         }
       } catch (e: any) {
         console.error("Cant useWeb3" + e);
+
         // e.code === 4902 - chain not added
         // e.code === -32002 - request already pending
       }
     }
 
     store.dispatch(actions.web3.setWalletType(undefined));
+    store.dispatch(
+      actions.game.AddNotification("Unable to connect wallet", 2000),
+    );
     console.error("Cant Web3" + eo);
   }
 };

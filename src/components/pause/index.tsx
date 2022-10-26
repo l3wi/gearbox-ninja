@@ -39,7 +39,7 @@ const Pause = () => {
               <WalletButton onClick={() => activate("metamask")}>
                 <img src="/data/img/metamask.png" height={200} />
               </WalletButton>
-              <WalletButton>
+              <WalletButton onClick={() => activate("walletConnect")}>
                 <img src="/data/img/wallet-connect.png" height={250} />
               </WalletButton>
             </Row>
@@ -212,7 +212,7 @@ const PauseBG = styled.div<{ paused: boolean }>`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  visibility: ${(props) => (props.paused ? "visible" : "hidden")};
-  animation: ${(props) => (props.paused ? fadeIn : fadeOut)} 0.5s ease-out;
+  visibility: ${props => (props.paused ? "visible" : "hidden")};
+  animation: ${props => (props.paused ? fadeIn : fadeOut)} 0.5s ease-out;
 `;
 export default Pause;
