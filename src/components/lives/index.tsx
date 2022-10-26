@@ -15,8 +15,7 @@ const Lives = () => {
   const lives = nftBalance ? nftBalance : 0;
 
   const total = nftAmount ? nftAmount : 0;
-  console.log(CAs);
-  if (stage === "PLAY" && account && Object.keys(CAs).length > 0) {
+  if (stage === "PLAY" && account && CAs && Object.keys(CAs).length > 0) {
     return (
       <Container>
         LIVES:
