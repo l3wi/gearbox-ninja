@@ -8,19 +8,20 @@ import { RootState } from "../../store/reducer";
 
 const Lives = () => {
   const { account, nftBalance, nftAmount } = useSelector(
-    (state: RootState) => state.web3
+    (state: RootState) => state.web3,
   );
   const CAs = useSelector((state: RootState) => state.creditAccounts.list);
   const stage = useSelector((state: RootState) => state.game.currentStage);
   const lives = nftBalance ? nftBalance : 0;
 
   const total = nftAmount ? nftAmount : 0;
-  if (stage === "PLAY" && account && lives > 0) {
+  console.log(CAs);
+  if (stage === "PLAY" && account && Object.keys(CAs).length > 0) {
     return (
       <Container>
         LIVES:
         {CAs &&
-          Array(lives)
+          Array(total - lives)
             .fill("x")
             .map((_, i) => (
               <Life key={i} style={{ opacity: 0.3 }}>
@@ -28,7 +29,7 @@ const Lives = () => {
               </Life>
             ))}
         {CAs
-          ? Array(total - lives)
+          ? Array(lives)
               .fill("x")
               .map((_, i) => (
                 <Life key={"io" + i}>

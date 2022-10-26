@@ -18,6 +18,7 @@ import { CHAIN_ID } from "../../config";
 import { strategiesPayload } from "../../config/strategy";
 import { captureException } from "../../utils/errors";
 import { generateNewHash } from "../../utils/opHash";
+import actions from "../actions";
 import {
   getByCreditManager,
   getList as caGetList,
@@ -48,9 +49,9 @@ export const getApy =
   (
     provider: ethers.providers.JsonRpcProvider,
     prices: Record<string, BigNumber>,
-    lpTokensDataList: Record<string, LPTokenDataI>
+    lpTokensDataList: Record<string, LPTokenDataI>,
   ): StrategyThunkAction =>
-  async (dispatch) => {
+  async dispatch => {
     try {
       const networkType = getNetworkType(CHAIN_ID);
       const providePrice = memoProvidePrice(prices);
@@ -75,7 +76,7 @@ export const getApy =
           acc[symbol] = getAPYValue(tokenDetails, { crv, cvx, yearn });
           return acc;
         },
-        {} as Record<LPTokens, number>
+        {} as Record<LPTokens, number>,
       );
 
       dispatch({
@@ -89,14 +90,14 @@ export const getApy =
 
 export const getStrategies =
   (apys: LpTokensAPY): StrategyThunkAction =>
-  async (dispatch) => {
+  async dispatch => {
     try {
       const strategies = strategiesPayload.reduce<Record<string, Strategy>>(
         (acc, payload) => {
           const symbol = tokenSymbolByAddress[payload.lpToken];
           if (!isTokenWithAPY(symbol)) {
             console.error(
-              `Strategy LP token has no apy: ${payload.lpToken} ${symbol}`
+              `Strategy LP token has no apy: ${payload.lpToken} ${symbol}`,
             );
             return acc;
           }
@@ -107,7 +108,7 @@ export const getStrategies =
           });
           return acc;
         },
-        {}
+        {},
       );
 
       dispatch({
@@ -156,7 +157,7 @@ export const getOpenStrategyPath =
         creditManager,
         record,
         targetTokenAddress,
-        slippage
+        slippage,
       );
 
       const resultAssets = Object.entries(balances).reduce<Array<Asset>>(
@@ -164,7 +165,7 @@ export const getOpenStrategyPath =
           acc.push({ token, balance });
           return acc;
         },
-        []
+        [],
       );
 
       dispatch({
@@ -209,6 +210,7 @@ export const openStrategy =
   async (dispatch, getState) => {
     try {
       dispatch(updateStatus(opHash, "STATUS.WAITING"));
+      dispatch(actions.game.AddNotification("Waiting for approval", 2000));
 
       const signer = getSignerOrThrow(getState);
       const {
@@ -218,13 +220,13 @@ export const openStrategy =
       } = creditManager;
       const creditFacade = ICreditFacade__factory.connect(
         creditFacadeAddress,
-        signer
+        signer,
       );
       const account = await signer.getAddress();
 
       const collateralCalls = wrappedCollateral.map(
         ({ token: tokenAddress, balance: amount }) =>
-          creditManager.encodeAddCollateral(account, tokenAddress, amount)
+          creditManager.encodeAddCollateral(account, tokenAddress, amount),
       );
 
       const receipt = await creditFacade.openCreditAccountMulticall(
@@ -232,7 +234,7 @@ export const openStrategy =
         account,
         [...collateralCalls, ...strategyPath.calls],
         0,
-        { value: ethAmount }
+        { value: ethAmount },
       );
 
       dispatch(openInProgressByCreditManager(creditManagerAddress));
@@ -247,6 +249,7 @@ export const openStrategy =
           .filter(({ balance }) => balance.gt(1))
           .map(({ token: tokenAddress }) => tokenAddress),
       });
+      dispatch(actions.game.AddNotification("Deploying Strategy...."));
 
       dispatch(
         addPendingTransaction({
@@ -259,11 +262,18 @@ export const openStrategy =
             dispatch(removeOpenInProgressByCreditManager(creditManagerAddress));
             dispatch(getTokenBalances({ account }));
             dispatch(updateStatus(opHash, "STATUS.SUCCESS"));
+            dispatch(
+              actions.game.AddNotification(
+                "Strategy successfully opened!",
+                2000,
+              ),
+            );
           },
-        })
+        }),
       );
     } catch (e: any) {
       dispatch(updateStatus(opHash, "STATUS.FAILURE", getError(e)));
       captureException("store/strategy/actions", "Cant openStrategy", e);
+      dispatch(actions.game.AddNotification("Deploying Strategy Failed", 2000));
     }
   };
