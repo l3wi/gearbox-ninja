@@ -109,12 +109,12 @@ class PlayerEntity extends Sprite {
       this.body.vel.y -= this.body.maxVel.y * 1.6;
       game.world.removeChild(this);
       game.viewport.fadeIn("#000000", 500, () => {
-        store.dispatch(actions.game.ChangeStage("PLAY", { x: 2375, y: 0 }));
+        store.dispatch(actions.game.ChangeStage("PLAY", { x: 2670, y: 0 }));
         store.dispatch(actions.game.BeginStage());
         store.dispatch(
           actions.game.AddNotification(
-            "Game Over! You should go to McDonalds first"
-          )
+            "Game Over! You should go to McDonalds first",
+          ),
         );
       });
     }
@@ -138,7 +138,7 @@ class PlayerEntity extends Sprite {
           this.isEntrance = Date.now();
           if (this.isEntrance > Date.now() - 50) {
             store.dispatch(
-              actions.game.AddNotification("Press DOWN to enter", 100)
+              actions.game.AddNotification("Press DOWN to enter", 100),
             );
           }
           if (input.isKeyPressed("down") && !this.debounce) {
@@ -153,7 +153,7 @@ class PlayerEntity extends Sprite {
               actions.game.ChangeStage("CREDITS", {
                 x: Number(currentPos._x.toFixed(2)),
                 y: Number((currentPos._y - 1).toFixed(2)),
-              })
+              }),
             );
 
             setTimeout(() => {
@@ -230,7 +230,7 @@ class PlayerEntity extends Sprite {
           this.isEntrance = Date.now();
           if (this.isEntrance > Date.now() - 50) {
             store.dispatch(
-              actions.game.AddNotification("Press UP to enter", 100)
+              actions.game.AddNotification("Press UP to enter", 100),
             );
           }
 
@@ -247,7 +247,7 @@ class PlayerEntity extends Sprite {
               actions.game.ChangeStage("CREDITS", {
                 x: Number(currentPos._x.toFixed(2)),
                 y: Number((currentPos._y - 1).toFixed(2)),
-              })
+              }),
             );
             setTimeout(() => {
               const type = other.type.split("-")[0];

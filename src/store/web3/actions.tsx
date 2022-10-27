@@ -337,80 +337,82 @@ interface MerkleDistributorInfo {
 }
 
 export const checkNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
-  import("../../config/merkle.json").then(
-    async (merkle: MerkleDistributorInfo) => {
-      try {
-        const { claims } = merkle;
-        const signer = getSignerOrThrow(getState);
-        const signerAddress = await signer.getAddress();
+  (IS_TEST_NETWORK
+    ? import("../../config/merkle_testnet.json")
+    : import("../../config/merkle_mainnet.json")
+  ).then(async (merkle: MerkleDistributorInfo) => {
+    try {
+      const { claims } = merkle;
+      const signer = getSignerOrThrow(getState);
+      const signerAddress = await signer.getAddress();
 
-        if (!claims[signerAddress]) {
-          dispatch({ type: "NO_NFT_WHITELIST" });
-          return dispatch({ type: "NFT_BALANCE_SUCCESS", payload: 0 });
-        }
-
-        const degenNFT = IERC721Metadata__factory.connect(DEGEN_NFT, signer);
-        const nftDistributor = IDegenDistributor__factory.connect(
-          DEGEN_DISTRIBUTOR,
-          signer,
-        );
-
-        const { index, amount } = claims[signerAddress];
-        dispatch({ type: "NFT_CLAIMABLE_BALANCE", payload: parseInt(amount) });
-
-        const claimed = await nftDistributor.isClaimed(index);
-        if (claimed) game.world.getChildByName("bridge")[0].setOpacity(1);
-        dispatch({ type: "NFT_CLAIMED_SUCCESS", payload: claimed });
-
-        const nfts = await degenNFT.balanceOf(signerAddress);
-        dispatch({ type: "NFT_BALANCE_SUCCESS", payload: nfts.toNumber() });
-      } catch (e) {
-        console.error("store/web3/actions", "Cant check if NFT is claimed", e);
+      if (!claims[signerAddress]) {
+        dispatch({ type: "NO_NFT_WHITELIST" });
+        return dispatch({ type: "NFT_BALANCE_SUCCESS", payload: 0 });
       }
-    },
-  );
+
+      const degenNFT = IERC721Metadata__factory.connect(DEGEN_NFT, signer);
+      const nftDistributor = IDegenDistributor__factory.connect(
+        DEGEN_DISTRIBUTOR,
+        signer,
+      );
+
+      const { index, amount } = claims[signerAddress];
+      dispatch({ type: "NFT_CLAIMABLE_BALANCE", payload: parseInt(amount) });
+
+      const claimed = await nftDistributor.isClaimed(index);
+      if (claimed) game.world.getChildByName("bridge")[0].setOpacity(1);
+      dispatch({ type: "NFT_CLAIMED_SUCCESS", payload: claimed });
+
+      const nfts = await degenNFT.balanceOf(signerAddress);
+      dispatch({ type: "NFT_BALANCE_SUCCESS", payload: nfts.toNumber() });
+    } catch (e) {
+      console.error("store/web3/actions", "Cant check if NFT is claimed", e);
+    }
+  });
 };
 
 export const mintNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
-  import("../../config/merkle.json").then(
-    async (merkle: MerkleDistributorInfo) => {
-      try {
-        const signer = getSignerOrThrow(getState);
-        const signerAddress = await signer.getAddress();
+  (IS_TEST_NETWORK
+    ? import("../../config/merkle_testnet.json")
+    : import("../../config/merkle_mainnet.json")
+  ).then(async (merkle: MerkleDistributorInfo) => {
+    try {
+      const signer = getSignerOrThrow(getState);
+      const signerAddress = await signer.getAddress();
 
-        const nftDistributor = IDegenDistributor__factory.connect(
-          DEGEN_DISTRIBUTOR,
-          signer,
-        );
-        updateStatus("0", "STATUS.WAITING");
-        dispatch(actions.game.AddNotification("Waiting for user", 500));
+      const nftDistributor = IDegenDistributor__factory.connect(
+        DEGEN_DISTRIBUTOR,
+        signer,
+      );
+      updateStatus("0", "STATUS.WAITING");
+      dispatch(actions.game.AddNotification("Waiting for user", 500));
 
-        const { index, amount, proof } = merkle.claims[signerAddress];
-        const receipt = await nftDistributor.claim(
-          index,
-          signerAddress,
-          amount,
-          proof,
-        );
+      const { index, amount, proof } = merkle.claims[signerAddress];
+      const receipt = await nftDistributor.claim(
+        index,
+        signerAddress,
+        amount,
+        proof,
+      );
 
-        updateStatus("0", "STATUS.LOADING");
-        const amnt = BigNumber.from(amount).toNumber();
-        dispatch(actions.game.AddNotification(`Minting ${amnt}x NFTs`, 0));
-        await receipt.wait();
+      updateStatus("0", "STATUS.LOADING");
+      const amnt = BigNumber.from(amount).toNumber();
+      dispatch(actions.game.AddNotification(`Minting ${amnt}x NFTs`, 0));
+      await receipt.wait();
 
-        dispatch(actions.game.AddNotification("Mint successful!"));
-        dispatch({ type: "NFT_CLAIMED_SUCCESS", payload: true });
-        updateStatus("0", "STATUS.SUCCESS");
-        return true;
-      } catch (e) {
-        updateStatus("0", "STATUS.FAILURE", e);
-        console.error("store/web3/actions", "Cant  mintNFT", e);
-        dispatch(actions.game.AddNotification("Minting Failed :("));
+      dispatch(actions.game.AddNotification("Mint successful!"));
+      dispatch({ type: "NFT_CLAIMED_SUCCESS", payload: true });
+      updateStatus("0", "STATUS.SUCCESS");
+      return true;
+    } catch (e) {
+      updateStatus("0", "STATUS.FAILURE", e);
+      console.error("store/web3/actions", "Cant  mintNFT", e);
+      dispatch(actions.game.AddNotification("Minting Failed :("));
 
-        return false;
-      }
-    },
-  );
+      return false;
+    }
+  });
 };
 
 export const getEthBalance =

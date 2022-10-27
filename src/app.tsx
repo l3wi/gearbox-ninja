@@ -52,7 +52,6 @@ body {
 
 const App = () => {
   const locale = "en";
-
   return (
     <IntlProvider locale={locale} messages={EnglishLocale}>
       <Provider store={store}>
