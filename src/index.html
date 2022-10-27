@@ -17,11 +17,30 @@
       crossorigin
     />
     <title>Stealthy Ninja Game</title>
+    <style>
+      body {
+        margin: 0px;
+        background: black;
+      }
+      #gear {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: -1;
+      }
+    </style>
   </head>
   <body>
     <!-- App Root -->
     <div id="root"></div>
     <!-- Game Root -->
     <div id="screen"></div>
+
+    <div id="gear"><img src="/data/img/gear.png" /></div>
   </body>
 </html>
