@@ -8,7 +8,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
-const { ProvidePlugin, DefinePlugin } = require("webpack");
+const { ProvidePlugin, DefinePlugin, optimize } = require("webpack");
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
@@ -43,7 +43,7 @@ module.exports = {
         {
           from: "./src/game/data",
           to: "./data",
-          filter: async (resourcePath) => {
+          filter: async resourcePath => {
             const data = await fs.promises.readFile(resourcePath);
 
             // add your custom extension here if not listed
