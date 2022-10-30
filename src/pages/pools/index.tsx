@@ -1,15 +1,19 @@
-import { PoolData, TokenData } from "@gearbox-protocol/sdk";
+import { getPoolTokens, PoolData, TokenData } from "@gearbox-protocol/sdk";
 import { BigNumber, utils } from "ethers";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 
 import { SufficientAmountGuard } from "../../components/amountButton";
 import { ApproveButton } from "../../components/approvalButton";
 import ExitButton from "../../components/exitButton";
-import { unwrapTokenAddress, WSTETH_ADDRESS } from "../../config/tokens";
+import {
+  currentTokenData,
+  unwrapTokenAddress,
+  WSTETH_ADDRESS,
+} from "../../config/tokens";
 import { useAssets, useWrapETH } from "../../hooks/useAssets";
-import { usePoolAPY } from "../../hooks/usePools";
+import { usePool, usePoolAPY, usePools } from "../../hooks/usePools";
 import { usePrices } from "../../hooks/usePrices";
 import {
   useTokenBalances,
@@ -17,9 +21,8 @@ import {
 } from "../../hooks/useTokens";
 import { store } from "../../store";
 import actions from "../../store/actions";
-import { PoolsState } from "../../store/pools/reducer";
+import { usePoolAllowedTokens } from "../../hooks/usePools";
 import { RootState } from "../../store/reducer";
-import { syncReducer } from "../../store/sync/reducer";
 import { bnToFloat, isNumeric, nFormatter } from "../../utils/format";
 import { generateNewHash } from "../../utils/opHash";
 
@@ -32,69 +35,53 @@ const poolData = (
   symbol: string,
   pools: Record<string, PoolData>,
   tokens: Record<string, TokenData>,
-  balances: any,
 ) => {
   const token = Object.values(tokens).find(
-    (item: TokenData) => item.symbol === symbol,
+    (item: TokenData) => item.symbol === (symbol === "ETH" ? "WETH" : symbol),
   );
-  const balance = balances[token.id];
-  let pool: PoolData;
-  if (symbol === "ETH") {
-    const weth = Object.values(tokens).find(
-      (item: TokenData) => item.symbol === "WETH",
-    );
-    pool = Object.values(pools).find(
-      (item: PoolData) =>
-        item.underlyingToken.toLowerCase() === weth.address.toLowerCase(),
-    );
-  } else {
-    pool = Object.values(pools).find(
-      (item: PoolData) =>
-        item.underlyingToken.toLowerCase() === token.address.toLowerCase(),
-    );
-  }
-
-  return { symbol, token, pool, balance };
+  return Object.values(pools).find(
+    (item: PoolData) =>
+      item.underlyingToken.toLowerCase() === token.address.toLowerCase(),
+  );
 };
 
 const Form = () => {
+  const [index, setIndex] = useState(0);
   const prices = usePrices();
-
-  const state = useSelector((state: RootState) => state);
+  const unsafePools = usePools();
+  const pools = unsafePools instanceof Error ? undefined : unsafePools;
   const [, balancesWithETH] = useTokenBalances();
   const tokensListWithETH = useTokensDataListWithETH();
 
-  const { price } = state;
+  const { form, web3 } = useSelector((state: RootState) => state);
 
-  const { symbol, token, pool, balance } = poolData(
-    state.form.symbol,
-    state.pools.data,
-    tokensListWithETH,
-    balancesWithETH,
-  );
+  const pool = poolData(form.symbol, pools, tokensListWithETH);
 
   const {
-    dieselRateRay,
-    underlyingToken: underlyingTokenAddress,
-    dieselToken: dieselTokenAddress,
-    address,
+    underlyingToken,
+    dieselToken,
     expectedLiquidity,
-    expectedLiquidityLimit,
-    dieselRate,
     depositAPY,
+    address,
   } = pool;
 
-  const web3 = useSelector((state: RootState) => state.web3);
+  const underlying = tokensListWithETH[underlyingToken];
+  const diesel = tokensListWithETH[dieselToken];
 
-  const underlyingToken = tokensListWithETH[underlyingTokenAddress];
   const { symbol: underlyingTokenSymbol, decimals: underlyingDecimals = 18 } =
-    underlyingToken;
+    underlying;
+
+  const allowedTokens = usePoolAllowedTokens(underlyingToken);
+
+  const isWSTETH = underlyingToken === currentTokenData.wstETH;
+  const wrapFrom = isWSTETH ? currentTokenData.STETH : undefined;
+  const wrapTo = isWSTETH ? currentTokenData.wstETH : undefined;
 
   const collateralAssetsState = useAssets([
     {
       balance: BigNumber.from(0),
       balanceView: "",
-      token: unwrapTokenAddress(pool.underlyingToken),
+      token: unwrapTokenAddress(underlyingToken),
     },
   ]);
 
@@ -104,9 +91,15 @@ const Form = () => {
   } = collateralAssetsState;
 
   const [wrappedCollateral, ethAmount] = useWrapETH(unwrappedCollateral);
+  const [, stethAmount] = useWrapETH(unwrappedCollateral, wrapFrom, wrapTo);
 
-  const underlyingPrice = prices[underlyingTokenAddress];
-  const dieselPrice = prices[dieselTokenAddress];
+  const collateralAsset = unwrappedCollateral[0];
+  const collateralBalance = balancesWithETH[collateralAsset.token];
+  const collateralToken = tokensListWithETH[collateralAsset.token];
+
+  const underlyingPrice =
+    prices[isWSTETH ? currentTokenData.STETH : underlyingToken];
+  const dieselPrice = prices[dieselToken];
 
   const [totalAPY, poolAPY, farmAPY] = usePoolAPY({
     depositAPY,
@@ -115,28 +108,37 @@ const Form = () => {
       decimals: underlyingDecimals,
       price: underlyingPrice,
     },
-    diesel: { token: dieselTokenAddress },
+    diesel: {
+      token: dieselToken,
+    },
     gear: {
       price: dieselPrice,
     },
   });
 
+  const token = tokensListWithETH[unwrappedCollateral[index].token];
+  const balance = balancesWithETH[unwrappedCollateral[index].token];
+
+  const collateralIsSTETH = collateralAsset.token === currentTokenData.STETH;
+
   const disableSubmit = () => {
     if (
-      unwrappedCollateral[0].balance.gt(balance) ||
-      unwrappedCollateral[0].balance.isZero()
+      unwrappedCollateral[index].balance.gt(
+        balancesWithETH[unwrappedCollateral[index].token],
+      ) ||
+      unwrappedCollateral[index].balance.isZero()
     )
       return true;
     return false;
   };
 
   const handleSubmit = () => {
-    if (!pool || !web3.account || !token || !pool) return;
+    if (!pool || !web3.account || !pool) return;
     const opHash = generateNewHash("POOL-ADD-");
     store.dispatch(
       actions.pools.addLiquidity({
         pool,
-        ethAmount,
+        ethAmount: isWSTETH ? stethAmount : ethAmount,
         amount: unwrappedCollateral[0].balance,
         opHash,
       }),
@@ -148,7 +150,7 @@ const Form = () => {
     store.dispatch(actions.game.ChangeStage("PLAY"));
   };
 
-  const updateValue = (input: string) => {
+  const updateValue = (input: string, i: number) => {
     const func = handleChangeAmount(0);
     if (isNumeric(input)) {
       const bn = utils.parseUnits(input, token.decimals);
@@ -163,7 +165,7 @@ const Form = () => {
         <ExitButton text="Back" func={exit} />
         <Row>
           <Content>
-            <h2>{`Deposit ${symbol.toUpperCase()} to Gearbox`}</h2>
+            <h2>{`Deposit ${token.symbol.toUpperCase()} to Gearbox`}</h2>
             <p>{depositLPDescription}</p>
           </Content>
 
@@ -173,22 +175,31 @@ const Form = () => {
               <span>
                 {`BALANCE: 
               ${nFormatter(balance, token.decimals, 3)} 
-              ${symbol.toUpperCase()}`}
+              ${token.symbol.toUpperCase()}`}
               </span>
             </InputSuper>
             <InputGroup>
               <Input
                 placeholder="0.00"
-                value={unwrappedCollateral[0].balanceView}
-                onChange={e => updateValue(e.target.value)}
+                value={unwrappedCollateral[index].balanceView}
+                onChange={e => updateValue(e.target.value, index)}
               />
+              {/* <AssetSelector
+                i={index}
+                assets={allowedTokens}
+                tokens={tokensListWithETH}
+                func={setIndex}
+              /> */}
               <Asset>
-                <img width={20} src={token.icon} />
+                <img width={20} src={token.icon} style={{ borderRadius: 20 }} />
                 <span>{token.symbol.toUpperCase()}</span>
               </Asset>
               <MaxButton
                 onClick={() =>
-                  updateValue(bnToFloat(balance, token.decimals).toString())
+                  updateValue(
+                    bnToFloat(balance, token.decimals).toString(),
+                    index,
+                  )
                 }
               >
                 max
@@ -200,20 +211,20 @@ const Form = () => {
             </APYGroup>
             <APYGroup>
               <span>{`APY: `}</span>
-              <span>{`${poolAPY.toFixed(2)}% ${symbol} + ${(
+              <span>{`${poolAPY.toFixed(2)}% ${collateralToken.symbol} + ${(
                 farmAPY / 10000
               ).toFixed(2)}% GEAR`}</span>
             </APYGroup>
             <SufficientAmountGuard
-              amount={unwrappedCollateral[0].balance}
-              balance={balance}
+              amount={collateralAsset.balance}
+              balance={collateralBalance}
             >
               <ApproveButton
                 assets={wrappedCollateral}
                 to={
-                  pool.underlyingToken === WSTETH_ADDRESS
+                  isWSTETH && collateralIsSTETH
                     ? web3.wstethGateway?.address
-                    : pool.address
+                    : address
                 }
               >
                 <SubmitButton onClick={() => handleSubmit()}>
@@ -227,6 +238,52 @@ const Form = () => {
     </FormBg>
   );
 };
+
+const AssetSelector: React.FC<{
+  i: number;
+  assets: string[];
+  tokens: Record<string, TokenData>;
+  func: React.Dispatch<React.SetStateAction<number>>;
+}> = ({ i, tokens, assets, func }) => {
+  const [open, setOpen] = useState(false);
+  const token = tokens[assets[i]];
+
+  const click = (i: number) => {
+    func(i);
+    setOpen(false);
+  };
+  return (
+    <AssetButton onClick={() => setOpen(true)}>
+      <Asset>
+        <img width={20} src={token.icon} style={{ borderRadius: 20 }} />
+        <span>{token.symbol.toUpperCase()}</span>
+      </Asset>
+      {open ? (
+        <AssetList>
+          {assets.map((address, i) => {
+            const item = tokens[address];
+            return (
+              <Asset onClick={() => click(i)}>
+                <img width={20} src={item.icon} style={{ borderRadius: 20 }} />
+                <span>{item.symbol.toUpperCase()}</span>
+              </Asset>
+            );
+          })}
+        </AssetList>
+      ) : null}
+    </AssetButton>
+  );
+};
+
+const AssetButton = styled.div`
+  position: relative;
+`;
+
+const AssetList = styled.div`
+  position: absolute;
+  background: black;
+  padding: 10px;
+`;
 
 const APYGroup = styled.div`
   display: flex;
