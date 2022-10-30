@@ -1,48 +1,59 @@
 import {
   calcTotalPrice,
+  DieselTokenTypes,
   PERCENTAGE_DECIMALS,
   PERCENTAGE_FACTOR,
+  tokenSymbolByAddress,
   toSignificant,
   WAD,
-  WAD_DECIMALS_POW
-} from '@gearbox-protocol/sdk'
-import { BigNumber } from 'ethers'
+  WAD_DECIMALS_POW,
+} from "@gearbox-protocol/sdk";
+import { GEAR_PER_BLOCK } from "@gearbox-protocol/sdk/lib/rewards/poolRewardParams";
+import { BigNumber } from "ethers";
 
-const BLOCKS_IN_YEAR = (365 * 24 * 60 * 60) / 12
-const GEARS_PER_BLOCK = 1
-
-const GEAR_AMOUNT = BigNumber.from(BLOCKS_IN_YEAR).mul(GEARS_PER_BLOCK)
+const BLOCKS_IN_YEAR = BigNumber.from((365 * 24 * 60 * 60) / 12);
 
 interface GetFarmingAPYProps {
   gear: {
-    price: BigNumber
-  }
+    price: BigNumber;
+  };
+  diesel: {
+    token: string;
+  };
   underlying: {
-    price: BigNumber
-    decimals: number
-    amount: BigNumber
-  }
+    price: BigNumber;
+    decimals: number;
+    amount: BigNumber;
+  };
 }
 
-export function getFarmingAPY({ underlying, gear }: GetFarmingAPYProps) {
+export function getFarmingAPY({
+  underlying,
+  gear,
+  diesel,
+}: GetFarmingAPYProps) {
   const supply = calcTotalPrice(
     underlying.price,
     underlying.amount,
-    underlying.decimals
-  )
+    underlying.decimals,
+  );
+  if (supply.lte(0)) return 0;
 
-  if (supply.lte(0)) return 0
+  const dieselSymbol = tokenSymbolByAddress[diesel.token] as DieselTokenTypes;
+  if (!dieselSymbol) return 0;
 
-  const gearAmount = calcTotalPrice(gear.price, GEAR_AMOUNT, 0)
+  const GEAR = GEAR_PER_BLOCK[dieselSymbol] || 0;
 
-  const apyBn = gearAmount.mul(WAD).div(supply)
+  const gearAmount = calcTotalPrice(gear.price, BLOCKS_IN_YEAR.mul(GEAR), 2);
+
+  const apyBn = gearAmount.mul(WAD).div(supply);
 
   return Math.round(
     Number(
       toSignificant(
         apyBn.mul(PERCENTAGE_FACTOR).mul(PERCENTAGE_DECIMALS),
-        WAD_DECIMALS_POW
-      )
-    )
-  )
+        WAD_DECIMALS_POW,
+      ),
+    ),
+  );
 }

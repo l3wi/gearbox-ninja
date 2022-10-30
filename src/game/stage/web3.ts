@@ -1,15 +1,15 @@
 import {
-  Stage,
+  BitmapText,
+  ColorLayer,
+  event,
   game,
   input,
+  Stage,
   state,
-  event,
-  ColorLayer,
-  BitmapText
-} from 'melonjs/dist/melonjs.module.js'
+} from "melonjs/dist/melonjs.module.js";
 
-import { store } from '../../store'
-import actions from '../../store/actions'
+import { store } from "../../store";
+import actions from "../../store/actions";
 
 class Web3Screen extends Stage {
   /**
@@ -17,26 +17,26 @@ class Web3Screen extends Stage {
    */
   onResetEvent() {
     // add a gray background to the default Stage
-    game.world.addChild(new ColorLayer('background', '#202020'))
+    game.world.addChild(new ColorLayer("background", "#202020"));
 
     // Cancel out of screen
-    input.bindKey(input.KEY.ESC, 'esc', true)
-    event.on(event.KEYDOWN, function (action: string) {
-      if (action === 'esc') {
-        store.dispatch(actions.game.PauseGame())
+    input.bindKey(input.KEY.ESC, "esc", true);
+    event.on(event.KEYDOWN, (action: string) => {
+      if (action === "esc") {
+        store.dispatch(actions.game.PauseGame());
       }
-    })
+    });
   }
 
   /**
    *  action to perform when leaving this screen (state change)
    */
   onDestroyEvent() {
-    input.unbindKey(input.KEY.ESC)
+    input.unbindKey(input.KEY.ESC);
   }
 
-  input: any
-  inputFunction: any
+  input: any;
+  inputFunction: any;
 }
 
-export default Web3Screen
+export default Web3Screen;

@@ -3,17 +3,17 @@ import {
   useValidateCA,
   useValidateHF,
   useValidateStrategy,
-  ValidateCAProps
-} from './useValidators'
+  ValidateCAProps,
+} from "./useValidators";
 import {
   ValidateBalancesProps,
   ValidateHFProps,
-  ValidateStrategyOpenPathProps
-} from './validators'
+  ValidateStrategyOpenPathProps,
+} from "./validators";
 
 type ValidateOpenAccountProps = ValidateCAProps &
   ValidateBalancesProps &
-  ValidateHFProps
+  ValidateHFProps;
 
 export function useValidateOpenAccount({
   balances,
@@ -24,31 +24,31 @@ export function useValidateOpenAccount({
   amount,
   debt,
 
-  hf
+  hf,
 }: ValidateOpenAccountProps) {
   const caErrorString = useValidateCA({
     tokensList,
     cm,
     amount,
-    debt
-  })
+    debt,
+  });
 
   const assetsAmountErrorString = useValidateAssetsAmount({
     balances,
     assets,
-    tokensList
-  })
+    tokensList,
+  });
 
   const hfErrorString = useValidateHF({
-    hf
-  })
+    hf,
+  });
 
-  return assetsAmountErrorString || caErrorString || hfErrorString
+  return assetsAmountErrorString || caErrorString || hfErrorString;
 }
 
 type ValidateOpenStrategyProps = ValidateOpenAccountProps &
   ValidateStrategyOpenPathProps &
-  ValidateHFProps
+  ValidateHFProps;
 
 export function useValidateOpenStrategy({
   balances,
@@ -61,33 +61,33 @@ export function useValidateOpenStrategy({
 
   strategyPath,
 
-  hf
+  hf,
 }: ValidateOpenStrategyProps) {
   const caErrorString = useValidateCA({
     tokensList,
     cm,
     amount,
-    debt
-  })
+    debt,
+  });
 
   const assetsAmountErrorString = useValidateAssetsAmount({
     balances,
     assets,
-    tokensList
-  })
+    tokensList,
+  });
 
   const openStrategyErrorString = useValidateStrategy({
-    strategyPath
-  })
+    strategyPath,
+  });
 
   const hfErrorString = useValidateHF({
-    hf
-  })
+    hf,
+  });
 
   return (
     assetsAmountErrorString ||
     caErrorString ||
     openStrategyErrorString ||
     hfErrorString
-  )
+  );
 }

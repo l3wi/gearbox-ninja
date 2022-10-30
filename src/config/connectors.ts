@@ -1,31 +1,19 @@
-import { Web3Provider } from '@ethersproject/providers'
-// import WalletConnectProvider from '@walletconnect/web3-provider'
+import { Web3Provider, ExternalProvider } from "@ethersproject/providers";
+import WalletConnectProvider from "@walletconnect/web3-provider";
+import { CHAIN_ID, JSON_RPC_PROVIDER } from "../config";
 
-import { CHAIN_ID, JSON_RPC_PROVIDER } from '../config'
+export const injected = new Web3Provider(window?.ethereum);
 
-const currentRpcString = JSON_RPC_PROVIDER as string
+export const walletconnect = new WalletConnectProvider({
+  rpc: { [CHAIN_ID]: JSON_RPC_PROVIDER },
+  pollingInterval: 5000,
+});
 
-const activeRpcUrl = {
-  [CHAIN_ID]: currentRpcString
-}
-
-export const injected = new Web3Provider(
-  (window as any).ethereum, // Haaaaacky
-  'any'
-)
-
-// Duplicate to keep TS happy
-export const walletconnect = new Web3Provider(
-  (window as any).ethereum // Haaaaacky
-)
-
-// export const walletconnect = new Web3Provider(
-//   new WalletConnectProvider({ rpc: activeRpcUrl[CHAIN_ID] })
-// )
+const wcProvider = new Web3Provider(walletconnect);
 
 export const walletsToConnectors = {
   metamask: injected,
-  walletConnect: walletconnect
-}
+  walletConnect: wcProvider,
+};
 
-export type Wallets = keyof typeof walletsToConnectors
+export type Wallets = keyof typeof walletsToConnectors;

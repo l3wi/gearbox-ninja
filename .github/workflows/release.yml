@@ -1,7 +1,6 @@
 name: Release
 
 on:
-  workflow_dispatch:
   push:
     branches:
       - "main"
@@ -40,14 +39,12 @@ jobs:
           REACT_APP_JSON_RPC_MAINNET: ${{ secrets.REACT_APP_JSON_RPC_MAINNET }}
           REACT_APP_ADDRESS_PROVIDER: ${{ github.ref_name == 'main' && '0xcF64698AFF7E5f27A11dff868AF228653ba53be0' || '0x95f4cea53121b8A2Cb783C6BFB0915cEc44827D3' }}
           # TODO: currently, not existing on mainnet, using goerli value
-          REACT_APP_DEGEN_DISTRIBUTOR: ${{ github.ref_name == 'main' && '0x7cBc200cecbe1ca5Df8416cE4fa70088b9080167' || '0x7cBc200cecbe1ca5Df8416cE4fa70088b9080167' }}
+          REACT_APP_DEGEN_DISTRIBUTOR: ${{ github.ref_name == 'main' && '0x7CECf6A7457a60A16c8D1ABfdc649F140114078d' || '0x9591ac95aBabf197eC67E2B7226e8A174b2A672D' }}
           # TODO: currently, not existing on mainnet, using goerli value
-          REACT_APP_DEGEN_NFT: ${{ github.ref_name == 'main' && '0x28B321F2c68FcC4F543b3c99bAe82b9330711118' || '0x28B321F2c68FcC4F543b3c99bAe82b9330711118' }}
+          REACT_APP_DEGEN_NFT: ${{ github.ref_name == 'main' && '0xB829a5b349b01fc71aFE46E50dD6Ec0222A6E599' || '0x28B321F2c68FcC4F543b3c99bAe82b9330711118' }}
           REACT_APP_COMMIT_SHA: ${{ github.sha }}
 
       - name: Publish to Cloudflare Pages
-        # On main branch, run this only manually
-        if: ${{ github.event_name == 'workflow_dispatch' && github.ref_name == 'main' || github.event_name == 'push' && github.ref_name != 'main' }}
         uses: cloudflare/pages-action@1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_TOKEN }}

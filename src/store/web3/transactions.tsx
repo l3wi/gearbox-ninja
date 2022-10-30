@@ -1,41 +1,41 @@
-import { EVMTx, TxSerializer } from '@gearbox-protocol/sdk'
-import { providers } from 'ethers'
+import { EVMTx, TxSerializer } from "@gearbox-protocol/sdk";
+import { providers } from "ethers";
 
-import { ETHERSCAN_ADDR } from '../../config'
-import { ThunkWeb3Action } from './index'
+import { ETHERSCAN_ADDR } from "../../config";
+import { ThunkWeb3Action } from "./index";
 
 interface RemoveTxProps {
-  account: string
-  chainId: number
-  txHash: string
+  account: string;
+  chainId: number;
+  txHash: string;
 }
 
 export const removeTransactionFromList =
   ({ account, chainId, txHash }: RemoveTxProps): ThunkWeb3Action =>
   async (dispatch, getState) => {
-    const { transactions } = getState().web3
+    const { transactions } = getState().web3;
 
-    const accTxs = transactions[account] || []
+    const accTxs = transactions[account] || [];
     const txs = accTxs.filter(
       (tx) => tx.txHash.toLowerCase() !== txHash.toLowerCase()
-    )
+    );
 
     if (txs.length !== accTxs.length) {
       localStorage.setItem(
         `txs_${chainId}_${account.toLowerCase()}`,
         TxSerializer.serialize(txs)
-      )
+      );
       dispatch({
-        type: 'UPDATE_ALL_TX',
-        payload: { account, txs }
-      })
+        type: "UPDATE_ALL_TX",
+        payload: { account, txs },
+      });
     }
-  }
+  };
 
 interface RestoreTxProps {
-  account: string
-  chainId: number
-  provider: providers.Web3Provider
+  account: string;
+  chainId: number;
+  provider: providers.Web3Provider;
 }
 
 export const restoreTransactions =
@@ -43,86 +43,86 @@ export const restoreTransactions =
   async (dispatch) => {
     const storedTxs = localStorage.getItem(
       `txs_${chainId}_${account.toLowerCase()}`
-    )
+    );
     if (storedTxs !== null) {
-      const txs = TxSerializer.deserialize(storedTxs)
+      const txs = TxSerializer.deserialize(storedTxs);
 
       const awaitedTxes = await Promise.all(
         txs.map(async (tx) => {
-          const txFromChain = await provider.getTransactionReceipt(tx.txHash)
+          const txFromChain = await provider.getTransactionReceipt(tx.txHash);
 
           if (txFromChain) {
             if (txFromChain.logs.length > 0) {
-              tx.success(txFromChain.blockNumber)
+              tx.success(txFromChain.blockNumber);
             } else {
-              tx.revert(txFromChain.blockNumber)
+              tx.revert(txFromChain.blockNumber);
             }
           } else {
-            tx.revert(0)
+            tx.revert(0);
           }
 
-          return tx
+          return tx;
         })
-      )
+      );
 
       dispatch({
-        type: 'UPDATE_ALL_TX',
-        payload: { account, txs: awaitedTxes }
-      })
+        type: "UPDATE_ALL_TX",
+        payload: { account, txs: awaitedTxes },
+      });
     }
-  }
+  };
 
 export const clearPendingTransactions =
   (): ThunkWeb3Action => async (dispatch, getState) => {
-    const { account } = getState().web3
+    const { account } = getState().web3;
     if (account)
-      dispatch({ type: 'UPDATE_ALL_TX', payload: { account, txs: [] } })
-  }
+      dispatch({ type: "UPDATE_ALL_TX", payload: { account, txs: [] } });
+  };
 
 interface PendingTxProps {
-  tx: EVMTx
-  callback: () => void
-  chainId: number
+  tx: EVMTx;
+  callback: () => void;
+  chainId: number;
 }
 
 export const addPendingTransaction =
   ({ tx, callback, chainId }: PendingTxProps): ThunkWeb3Action =>
   async (dispatch, getState) => {
-    const { provider, account, transactions } = getState().web3
+    const { provider, account, transactions } = getState().web3;
 
-    if (!provider || !account) throw new Error('Prov is empty')
+    if (!provider || !account) throw new Error("Prov is empty");
 
-    const txForSaving = [...(transactions[account] || []), tx]
+    const txForSaving = [...(transactions[account] || []), tx];
 
     dispatch({
-      type: 'UPSERT_PENDING_TX',
-      payload: { account, tx }
-    })
+      type: "UPSERT_PENDING_TX",
+      payload: { account, tx },
+    });
 
     localStorage.setItem(
       `txs_${chainId}_${account.toLowerCase()}`,
       TxSerializer.serialize(txForSaving)
-    )
+    );
 
-    const receipt = await provider.waitForTransaction(tx.txHash)
-    callback()
+    const receipt = await provider.waitForTransaction(tx.txHash);
+    callback();
 
     const txFromChain = await provider.getTransactionReceipt(
       receipt.transactionHash
-    )
+    );
 
-    const tokens = getState().tokens.details
+    const tokens = getState().tokens.details;
 
     if (txFromChain.blockNumber) {
       if (txFromChain.logs.length > 0) {
-        tx.success(txFromChain.blockNumber)
+        tx.success(txFromChain.blockNumber);
         // toast.success(tx.toString(tokens), {
         //   style: { background: '#111927', color: 'white' },
         //   onClick: () => openInNewWindow(`${ETHERSCAN_ADDR}/tx/${tx.txHash}`),
         //   autoClose: 7500
         // })
       } else {
-        tx.revert(txFromChain.blockNumber)
+        tx.revert(txFromChain.blockNumber);
         // toast.error(tx.toString(tokens), {
         //   style: { background: '#111927', color: 'white' },
         //   onClick: () => openInNewWindow(`${ETHERSCAN_ADDR}/tx/${tx.txHash}`),
@@ -130,8 +130,8 @@ export const addPendingTransaction =
         // })
       }
       dispatch({
-        type: 'UPSERT_PENDING_TX',
-        payload: { account, tx }
-      })
+        type: "UPSERT_PENDING_TX",
+        payload: { account, tx },
+      });
     }
-  }
+  };
