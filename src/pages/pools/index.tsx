@@ -20,7 +20,7 @@ import actions from "../../store/actions";
 import { PoolsState } from "../../store/pools/reducer";
 import { RootState } from "../../store/reducer";
 import { syncReducer } from "../../store/sync/reducer";
-import { isNumeric, nFormatter } from "../../utils/format";
+import { bnToFloat, isNumeric, nFormatter } from "../../utils/format";
 import { generateNewHash } from "../../utils/opHash";
 
 const depositLPDescription = `Deposit your assets to Gearbox 
@@ -186,7 +186,11 @@ const Form = () => {
                 <img width={20} src={token.icon} />
                 <span>{token.symbol.toUpperCase()}</span>
               </Asset>
-              <MaxButton onClick={() => updateValue(balance.toString())}>
+              <MaxButton
+                onClick={() =>
+                  updateValue(bnToFloat(balance, token.decimals).toString())
+                }
+              >
                 max
               </MaxButton>
             </InputGroup>
