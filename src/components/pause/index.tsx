@@ -35,9 +35,9 @@ const Pause = () => {
     <PauseBG paused={isPaused}>
       <SoundToggle onClick={() => toggleMusic(!track)}>
         {track ? (
-          <img src={"/data/img/on.png"} />
+          <img src={"/data/img/on.png"} width={75} />
         ) : (
-          <img src={"/data/img/off.png"} />
+          <img src={"/data/img/off.png"} width={75} />
         )}
       </SoundToggle>
       {/* <ExitButton text="Back" func={exit} /> */}
@@ -171,6 +171,9 @@ const Title = styled.h1`
   font-size: 48px;
   margin: 80px 0px 0px;
   font-family: "Press Start 2P";
+  @media (max-width: 1200px) {
+    font-size: 36px;
+  }
 `;
 const Button = styled.button`
   font-family: "Courier New", Courier, monospace;

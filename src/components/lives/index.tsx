@@ -53,6 +53,9 @@ const Container = styled.div`
   font-size: 1.5rem;
   font-style: normal;
   min-height: 64px;
+  @media (max-width: 1200px) {
+    font-size: 1rem;
+  }
 `;
 
 const Life = styled.div`

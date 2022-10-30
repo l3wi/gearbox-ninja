@@ -19,7 +19,7 @@ import Video from "../video";
 
 const Page = () => {
   const currentStage = useSelector(
-    (state: RootState) => state.game.currentStage
+    (state: RootState) => state.game.currentStage,
   );
   const isPaused = useSelector((state: RootState) => state.game.isPaused);
   const form = useSelector((state: RootState) => state.form);
@@ -81,7 +81,6 @@ const Container = styled.div`
   position: fixed;
   top: 0px;
   right: 0px;
-  padding: 20px 10px;
   font-family: "Press Start 2P";
   font-weight: 500;
   font-size: 2rem;
