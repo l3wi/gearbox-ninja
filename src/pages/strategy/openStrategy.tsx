@@ -440,7 +440,7 @@ const Input = styled.input`
   outline: none;
   background: none;
   color: white;
-  width: 150px;
+  width: 180px;
   padding: 5px 8px 0px;
   font-size: 18px;
 `;
