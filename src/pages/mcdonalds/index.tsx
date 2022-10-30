@@ -56,11 +56,11 @@ const McDonalds = () => {
           </Button>
           {minter ? (
             <Button style={{ background: "#FF0000" }} onClick={() => mint()}>
-              <h2>MINT {web3.nftAmount} NFTs</h2>
-              <span>
-                Each time you open a Credit Account, you burn a DEGEN NFT
-              </span>
-              <p>Choose Wisely</p>
+              <h2 style={{ margin: "20px 0px" }}>MINT {web3.nftAmount} NFTs</h2>
+              <Explainer>
+                Each time you open a Credit Account, you burn a DEGEN NFT.
+              </Explainer>
+              <Explainer>Choose Wisely.</Explainer>
             </Button>
           ) : (
             <Button onClick={() => handleClick()}>
@@ -83,6 +83,14 @@ const McDonalds = () => {
     </FormBg>
   );
 };
+
+const Explainer = styled.span`
+  font-size: 28px;
+  @media (max-width: 1350px) {
+    font-size: 20px;
+  }
+`;
+
 const Button = styled.button`
   width: 40.5%;
   height: 50.5%;
@@ -91,6 +99,7 @@ const Button = styled.button`
   border: none;
   display: flex;
   flex-direction: column;
+  justify-content: center;
   align-items: center;
   line-height: 35px;
   font-family: "MERCURY115";
