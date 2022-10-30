@@ -13,7 +13,7 @@ export const nFormatter = (
   const num = bnToFloat(bn, decimals);
 
   const lookup = [
-    { value: 1, symbol: "" },
+    // { value: 1, symbol: "" },
     // { value: 1e3, symbol: 'k' },
     // { value: 1e6, symbol: 'M' },
     { value: 1e9, symbol: "G" },
@@ -32,15 +32,11 @@ export const nFormatter = (
     ? currency.format(
         parseFloat((num / item.value).toFixed(fixed).replace(rx, "$1")),
       ) + item.symbol
-    : "0";
+    : num.toFixed(fixed);
 };
 
 export const bnToFloat = (bn: BigNumberish, decimals: number) => {
-  return parseFloat(
-    BigNumber.from(bn)
-      .div(BigNumber.from("10").pow(BigNumber.from(decimals)))
-      .toString(),
-  );
+  return parseFloat(BigNumber.from(bn).toString()) / Math.pow(10, decimals);
 };
 
 export function isNumeric(str: BigNumberish) {
