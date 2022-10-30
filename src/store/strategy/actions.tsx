@@ -256,12 +256,16 @@ export const openStrategy =
           chainId,
           tx: evmTx,
           callback: () => {
+            const { nftBalance } = getState().web3;
+
             dispatch(getByCreditManager(creditManagerAddress, account));
 
             dispatch(caGetList());
             dispatch(removeOpenInProgressByCreditManager(creditManagerAddress));
             dispatch(getTokenBalances({ account }));
             dispatch(updateStatus(opHash, "STATUS.SUCCESS"));
+            dispatch({ type: "NFT_BALANCE_SUCCESS", payload: nftBalance - 1 });
+
             dispatch(
               actions.game.AddNotification(
                 "Strategy successfully opened!",

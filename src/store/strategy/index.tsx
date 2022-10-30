@@ -4,6 +4,7 @@ import { ThunkAction } from "redux-thunk";
 import { CreditAccountsAction } from "../creditAccounts";
 import type { RootState } from "../index";
 import { OperationActions } from "../operations";
+import { Web3Actions } from "../web3";
 
 export interface StrategyPath {
   balances: Array<Asset>;
@@ -34,7 +35,7 @@ export type StrategyThunkAction = ThunkAction<
   void,
   RootState,
   unknown,
-  StrategyAction | OperationActions | CreditAccountsAction
+  StrategyAction | OperationActions | CreditAccountsAction | Web3Actions
 >;
 
 export const strategiesSelector = (state: RootState) =>
