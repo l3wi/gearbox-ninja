@@ -403,6 +403,8 @@ export const mintNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
 
       dispatch(actions.game.AddNotification("Mint successful!"));
       dispatch({ type: "NFT_CLAIMED_SUCCESS", payload: true });
+      dispatch({ type: "NFT_BALANCE_SUCCESS", payload: amnt });
+
       updateStatus("0", "STATUS.SUCCESS");
       return true;
     } catch (e) {

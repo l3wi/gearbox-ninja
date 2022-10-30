@@ -167,12 +167,12 @@
   </object>
   <object id="71" x="5344.01" y="336.957" width="14.0015" height="60.9332">
    <properties>
-    <property name="type" value="entrance-lido"/>
+    <property name="type" value="entrance-steth"/>
    </properties>
   </object>
   <object id="72" x="5617.07" y="346.189" width="14.0011" height="51.6124">
    <properties>
-    <property name="type" value="entrance-susd3crv"/>
+    <property name="type" value="entrance-Convex Curve"/>
    </properties>
   </object>
   <object id="73" x="4283.9" y="-175.739" width="14.245" height="573.572">
@@ -214,7 +214,7 @@
    </properties>
    <polyline points="0,0 135.62,0"/>
   </object>
-  <object id="85" x="3912.45" y="405.97" width="370.329" height="20.1959">
+  <object id="85" x="3905.7" y="404.22" width="379.829" height="20.1959">
    <properties>
     <property name="type" value="bridge"/>
    </properties>

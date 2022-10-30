@@ -129,12 +129,7 @@ const TextCol = styled.div`
   display: flex;
   flex-direction: column;
   max-width: 1124px;
-  font-size: inherit;
-  & p {
-    @media (max-height: 900px) {
-      font-size: smaller;
-    }
-  }
+  font-size: smaller;
 `;
 
 const Declare = styled.button`

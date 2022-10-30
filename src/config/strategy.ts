@@ -9,7 +9,7 @@ const lidoStETHPayload: StrategyPayload = {
   unleveragableCollateral: [currentTokenData.USDC, currentTokenData.DAI],
   leveragableCollateral: [currentTokenData.STETH, currentTokenData.WETH],
 
-  pools: [currentTokenData.WETH],
+  pools: [currentTokenData.WETH, currentTokenData.wstETH],
   baseAssets: [currentTokenData.WETH],
 };
 
@@ -58,20 +58,20 @@ const yearnWETHPayload: StrategyPayload = {
   baseAssets: [currentTokenData.WETH],
 };
 
-// const yearnWBTCPayload: StrategyPayload = {
-//   name: "Yearn WBTC",
-//   lpToken: currentTokenData.yvWBTC,
+const yearnWBTCPayload: StrategyPayload = {
+  name: "Yearn WBTC",
+  lpToken: currentTokenData.yvWBTC,
 
-//   unleveragableCollateral: [
-//     currentTokenData.WETH,
-//     currentTokenData.USDC,
-//     currentTokenData.DAI,
-//   ],
-//   leveragableCollateral: [currentTokenData.WBTC],
+  unleveragableCollateral: [
+    currentTokenData.WETH,
+    currentTokenData.USDC,
+    currentTokenData.DAI,
+  ],
+  leveragableCollateral: [currentTokenData.WBTC],
 
-//   pools: [currentTokenData.WBTC],
-//   baseAssets: [currentTokenData.WBTC],
-// };
+  pools: [currentTokenData.WBTC],
+  baseAssets: [currentTokenData.WBTC],
+};
 
 const yearnStETHCrvPayload: StrategyPayload = {
   name: "Yearn stETHCrv",
@@ -88,7 +88,7 @@ const yearnStETHCrvPayload: StrategyPayload = {
     currentTokenData.yvCurve_stETH,
   ],
 
-  pools: [currentTokenData.WETH],
+  pools: [currentTokenData.WETH, currentTokenData.wstETH],
   baseAssets: [currentTokenData.WETH, currentTokenData.STETH],
 };
 
@@ -131,7 +131,7 @@ const curveStETHCrvPayload: StrategyPayload = {
     currentTokenData.steCRV,
   ],
 
-  pools: [currentTokenData.WETH],
+  pools: [currentTokenData.WETH, currentTokenData.wstETH],
   baseAssets: [currentTokenData.WETH, currentTokenData.STETH],
 };
 
@@ -258,7 +258,7 @@ const convexStETHCrvPayload: StrategyPayload = {
     currentTokenData.steCRV,
   ],
 
-  pools: [currentTokenData.WETH],
+  pools: [currentTokenData.WETH, currentTokenData.wstETH],
   baseAssets: [currentTokenData.WETH, currentTokenData.STETH],
 };
 
@@ -370,6 +370,38 @@ const convexGusd3CrvPayload: StrategyPayload = {
   ],
 };
 
+const curveFRAXUSDC: StrategyPayload = {
+  name: "Curve FRAXUSDC",
+  lpToken: currentTokenData.crvFRAX,
+
+  unleveragableCollateral: [currentTokenData.WBTC, currentTokenData.WETH],
+  leveragableCollateral: [
+    currentTokenData.FRAX,
+    currentTokenData.DAI,
+    currentTokenData.USDC,
+    currentTokenData.crvFRAX,
+  ],
+
+  pools: [currentTokenData.USDC, currentTokenData.DAI],
+  baseAssets: [currentTokenData.FRAX, currentTokenData.USDC],
+};
+
+const convexFRAXUSDC: StrategyPayload = {
+  name: "Convex FRAXUSDC",
+  lpToken: currentTokenData.stkcvxcrvFRAX,
+
+  unleveragableCollateral: [currentTokenData.WBTC, currentTokenData.WETH],
+  leveragableCollateral: [
+    currentTokenData.FRAX,
+    currentTokenData.DAI,
+    currentTokenData.USDC,
+    currentTokenData.crvFRAX,
+  ],
+
+  pools: [currentTokenData.USDC, currentTokenData.DAI],
+  baseAssets: [currentTokenData.FRAX, currentTokenData.USDC],
+};
+
 export const strategiesPayload = [
   convexStETHCrvPayload,
   convexFrax3CrvPayload,
@@ -380,6 +412,8 @@ export const strategiesPayload = [
 
   yearnDAIPayload,
   yearnWETHPayload,
+  yearnWBTCPayload,
+
   yearnFrax3CrvPayload,
   curveStETHCrvPayload,
   curveFrax3CrvPayload,
@@ -390,6 +424,9 @@ export const strategiesPayload = [
   convex3CrvPayload,
   convexCurveSUSDPayload,
   convexGusd3CrvPayload,
+
+  curveFRAXUSDC,
+  convexFRAXUSDC,
 ];
 
 export const DEFAULT_STRATEGIES = strategiesPayload.reduce<

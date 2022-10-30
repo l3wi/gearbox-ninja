@@ -52,7 +52,7 @@ export function ApproveButton({
           to,
           account,
           opHash,
-        })
+        }),
       );
     }
   };
@@ -85,7 +85,7 @@ export type SkipApprovalList = Record<string, true>;
 function useApproveNext(
   assets: Array<Asset>,
   to: string,
-  skipApprovalList: SkipApprovalList
+  skipApprovalList: SkipApprovalList,
 ) {
   const [virtualAllowances] = useVirtualTokenAllowances();
   const { account } = useSelector((state: RootState) => state).web3;
@@ -139,7 +139,7 @@ const Button = styled.div<ButtonProps>`
   background: gray;
   border: none;
   color: white;
-  padding: 15px 8px;
+  padding: 15px 0px;
   font-family: "Courier New", Courier, monospace;
   font-weight: 800;
   text-transform: uppercase;

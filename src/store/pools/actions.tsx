@@ -30,7 +30,7 @@ export const getList = (): PoolThunkAction => async (dispatch, getState) => {
     }
 
     const poolsPayload: Array<PoolDataPayload> = await callRepeater(() =>
-      dataCompressor.getPoolsList()
+      dataCompressor.getPoolsList(),
     );
 
     const result: Record<string, PoolData> = {};
@@ -43,7 +43,7 @@ export const getList = (): PoolThunkAction => async (dispatch, getState) => {
             tokenAddress: p.underlying,
             to: p.addr,
             account,
-          })
+          }),
         );
     }
 
@@ -59,6 +59,10 @@ export const getList = (): PoolThunkAction => async (dispatch, getState) => {
     console.error("store/pools/actions", "Pools: cant getList", e);
   }
 };
+
+function gasLimit(gas: BigNumber) {
+  return gas.mul(12).div(10);
+}
 
 export interface AddLiquidityProps {
   pool: PoolData;
@@ -78,6 +82,7 @@ export const addLiquidity =
   }: AddLiquidityProps): ThunkTokenAction =>
   async (dispatch, getState) => {
     try {
+      const referralCode = 0;
       dispatch(updateStatus(opHash, "STATUS.WAITING"));
       const signer = getSignerOrThrow(getState);
       const signerAddress = await signer.getAddress();
@@ -94,11 +99,23 @@ export const addLiquidity =
           });
         dispatch(actions.operations.updateStatus(opHash, "STATUS.LOADING"));
         dispatch(actions.game.AddNotification("Deposit Pending", 0));
-      } else if (pool.underlyingToken === WSTETH_ADDRESS) {
+      } else if (pool.underlyingToken === WSTETH_ADDRESS && ethAmount.gt(0)) {
         const wstethGateway = getWSTETHGatewayOrThrow(getState);
-        receipt = await wstethGateway
-          .connect(signer)
-          .addLiquidity(amount, signerAddress, 0);
+        const withSigner = wstethGateway.connect(signer);
+        const gas = await withSigner.estimateGas.addLiquidity(
+          amount,
+          signerAddress,
+          referralCode,
+        );
+
+        receipt = await withSigner.addLiquidity(
+          amount,
+          signerAddress,
+          referralCode,
+          {
+            gasLimit: gasLimit(gas),
+          },
+        );
         dispatch(updateStatus(opHash, "STATUS.LOADING"));
       } else {
         const tx = await pool
@@ -120,7 +137,7 @@ export const addLiquidity =
             timestamp: 0,
           }),
           callback: () => dispatch(getList()),
-        })
+        }),
       );
       await receipt.wait();
 
@@ -128,7 +145,7 @@ export const addLiquidity =
       dispatch(updateStatus(opHash, "STATUS.SUCCESS"));
     } catch (e: any) {
       dispatch(
-        actions.operations.updateStatus(opHash, "STATUS.FAILURE", getError(e))
+        actions.operations.updateStatus(opHash, "STATUS.FAILURE", getError(e)),
       );
       dispatch(actions.game.AddNotification("Deposit failed!"));
 
@@ -137,7 +154,7 @@ export const addLiquidity =
         "Cant addLiquidity",
         pool.address,
         amount.toString(),
-        e
+        e,
       );
     }
   };
@@ -147,7 +164,7 @@ export const removeLiquidity =
     pool: PoolData,
     amount: BigNumber,
     opHash?: string,
-    chainId = CHAIN_ID
+    chainId = CHAIN_ID,
   ): ThunkTokenAction =>
   async (dispatch, getState) => {
     try {
@@ -184,20 +201,20 @@ export const removeLiquidity =
               timestamp: 0,
             }),
             callback: () => dispatch(getList()),
-          })
+          }),
         );
       }
       dispatch(actions.operations.updateStatus(opHash, "STATUS.SUCCESS"));
     } catch (e: any) {
       dispatch(
-        actions.operations.updateStatus(opHash, "STATUS.FAILURE", getError(e))
+        actions.operations.updateStatus(opHash, "STATUS.FAILURE", getError(e)),
       );
       console.error(
         "store/pools/actions",
         "Cant removeLiquidity",
         pool.address,
         amount.toString(),
-        e
+        e,
       );
     }
   };
