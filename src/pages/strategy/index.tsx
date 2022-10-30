@@ -11,6 +11,11 @@ import {
   useStrategyCreditManagers,
   useStrategyList,
 } from "../../hooks/useStrategy";
+import {
+  useTokenBalances,
+  useTokensDataList,
+  useTokensDataListWithETH,
+} from "../../hooks/useTokens";
 import { store } from "../../store";
 import actions from "../../store/actions";
 import { RootState } from "../../store/reducer";
@@ -18,8 +23,8 @@ import OpenStrategyDialog from "./openStrategy";
 
 const getStrategy = (state: RootState) => {
   const { symbol } = state.form;
-  const strategy = Object.values(state.strategy.strategies).find((strat) =>
-    strat.name.toLowerCase().includes(symbol)
+  const strategy = Object.values(state.strategy.strategies).find(strat =>
+    strat.name.toLowerCase().includes(symbol.toLowerCase()),
   );
   return strategy;
 };
@@ -32,13 +37,19 @@ const Form = () => {
   const [strategies, creditManagers] = useStrategyList();
 
   const state = useSelector((state: RootState) => state);
-  const { tokens, form } = state;
+  const { form } = state;
   const { symbol } = form;
 
   const strategy = getStrategy(state);
   const strategyCms = useStrategyCreditManagers(strategy, creditManagers);
 
+  const tokens = useTokensDataListWithETH();
+  const [, balancesWithETH] = useTokenBalances();
+
+  const lpToken = tokens[strategy.lpToken];
+
   const availablePools = useMemo(() => Object.keys(strategyCms), [strategyCms]);
+  console.log(availablePools);
   const [selectedPool, setSelectedPool] = useState(availablePools[0]);
 
   const creditManager = creditManagers[selectedPool];
@@ -63,16 +74,14 @@ const Form = () => {
         {!isLoading ? (
           <>
             <h1 style={{ fontSize: "52px" }}>
-              {`Invest in ${symbol.toUpperCase()} `}
-              <img
-                width={30}
-                src={`https://static.gearbox.fi/tokens/${symbol.toLowerCase()}.svg`}
-              />
+              {`Invest in ${strategy.name} `}
+              <img width={30} src={lpToken.icon} />
             </h1>
             <OpenStrategyDialog
               strategy={strategy}
               creditManager={creditManager}
-              balances={tokens.balances}
+              balances={balancesWithETH}
+              tokensList={tokens}
             />
           </>
         ) : (

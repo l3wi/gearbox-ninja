@@ -48,21 +48,20 @@ import Slider from "./slider";
 interface Props {
   strategy: Strategy;
   creditManager: CreditManagerData;
-  balances: Record<string, BigNumber>;
+  balances: Record<string, BigNumberish>;
+  tokensList: Record<string, TokenData>;
 }
 
 const OpenStrategyDialog: React.FC<Props> = ({
   strategy,
   creditManager,
   balances,
+  tokensList,
 }) => {
   const dispatch = useDispatch();
   const { balance, nftBalance } = useSelector((state: RootState) => state.web3);
   const [picker, setPicker] = useState(false);
   const prices = usePrices();
-
-  const [, balancesWithETH] = useTokenBalances();
-  const tokensList = useTokensDataListWithETH();
 
   const { underlyingToken: cmUnderlyingToken } = creditManager || {};
   const allowedTokens = useAllowedTokensWithETH(creditManager);
@@ -87,8 +86,8 @@ const OpenStrategyDialog: React.FC<Props> = ({
     liquidationThresholds,
   } = creditManager;
   const { lpToken: lpTokenAddress, apy, baseAssets } = strategy;
+
   const underlyingToken = tokensList[underlyingTokenAddress];
-  const { symbol: underlyingSymbol } = underlyingToken || {};
 
   const lpToken = tokensList[lpTokenAddress];
   const { symbol: lpSymbol = "" } = lpToken || {};
@@ -125,7 +124,9 @@ const OpenStrategyDialog: React.FC<Props> = ({
     lpTokenAddress,
   );
 
-  const assetsAfterOpen = strategyPath?.balances || EMPTY_ARRAY;
+  const unsafeAssetsAfterOpen = strategyPath?.balances;
+  const assetsAfterOpen = unsafeAssetsAfterOpen || EMPTY_ARRAY;
+
   const hfFrom =
     useHF({
       assets: assetsAfterOpen,
@@ -180,14 +181,14 @@ const OpenStrategyDialog: React.FC<Props> = ({
     lpToken: lpTokenAddress,
   });
 
-  //   const liquidationAssets = useLiquidationAssets(
-  //     baseAssets,
-  //     underlyingTokenAddress,
-  //     tokensList
-  //   )
+  const liquidationAssets = useLiquidationAssets(
+    baseAssets,
+    underlyingTokenAddress,
+    tokensList,
+  );
 
-  // const totalAmountFormatted = tokenTemplate(totalAmount, underlyingToken);
   const allAssetsSelected = allowedTokens.length === wrappedCollateral.length;
+  const apyLoading = !unsafeAssetsAfterOpen || apy === undefined;
 
   const handleSubmit = () => {
     if (nftBalance === 0)
@@ -248,7 +249,7 @@ const OpenStrategyDialog: React.FC<Props> = ({
                 <span>
                   {`BALANCE: 
                         ${nFormatter(
-                          balancesWithETH[collateral.token],
+                          balances[collateral.token],
                           tokensList[collateral.token]
                             ? tokensList[collateral.token].decimals
                             : 18,
@@ -280,10 +281,7 @@ const OpenStrategyDialog: React.FC<Props> = ({
                 </Asset>
                 <MaxButton
                   onClick={() =>
-                    updateValue(
-                      i,
-                      BigNumber.from(balancesWithETH[collateral.token]),
-                    )
+                    updateValue(i, BigNumber.from(balances[collateral.token]))
                   }
                 >
                   max
@@ -305,7 +303,7 @@ const OpenStrategyDialog: React.FC<Props> = ({
               <Picker
                 selected={unwrappedCollateral}
                 tokensList={tokensList}
-                balances={balancesWithETH}
+                balances={balances}
                 allowedTokens={allowedTokens}
                 addAsset={handleAdd}
               />
@@ -497,5 +495,25 @@ const Row = styled.span`
   align-items: flex-start;
   background: rgba(0, 0, 0, 0.4);
 `;
+
+function useLiquidationAssets(
+  assets: Array<string>,
+  underlyingToken: string,
+  tokensList: Record<string, TokenData>,
+): Array<string> {
+  const liquidationAssets = useMemo(
+    () =>
+      assets
+        .filter(address => address !== underlyingToken)
+        .map(address => {
+          const { symbol } = tokensList[address] || {};
+
+          return symbol;
+        })
+        .filter(symbol => symbol),
+    [assets, underlyingToken, tokensList],
+  );
+  return liquidationAssets;
+}
 
 export default OpenStrategyDialog;
