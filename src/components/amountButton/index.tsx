@@ -1,10 +1,10 @@
-import { BigNumber } from "ethers";
+import { BigNumber, BigNumberish } from "ethers";
 import React from "react";
 import styled from "styled-components";
 
 interface SufficientAmountGuardProps {
   amount: BigNumber | undefined;
-  balance: BigNumber | undefined;
+  balance: BigNumberish | undefined;
 }
 
 export function SufficientAmountGuard({
@@ -12,14 +12,10 @@ export function SufficientAmountGuard({
   balance,
   children,
 }: React.PropsWithChildren<SufficientAmountGuardProps>) {
+  const bn = BigNumber.from(balance);
   return (
     <Guard
-      showGuard={
-        !balance ||
-        balance.lt(amount) ||
-        balance.isZero() ||
-        balance.isNegative()
-      }
+      showGuard={!bn || bn.lt(amount) || bn.isZero() || bn.isNegative()}
       guard={<Button disabled>insufficient funds</Button>}
     >
       {children}
