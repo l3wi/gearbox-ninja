@@ -47,7 +47,7 @@ const Button = styled.div<ButtonProps>`
   background: gray;
   border: none;
   color: white;
-  padding: 15px 8px;
+  padding: 15px 0px;
   font-family: "Courier New", Courier, monospace;
   font-weight: 800;
   text-transform: uppercase;
