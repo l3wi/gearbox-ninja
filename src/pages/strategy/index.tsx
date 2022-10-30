@@ -49,7 +49,6 @@ const Form = () => {
   const lpToken = tokens[strategy.lpToken];
 
   const availablePools = useMemo(() => Object.keys(strategyCms), [strategyCms]);
-  console.log(availablePools);
   const [selectedPool, setSelectedPool] = useState(availablePools[0]);
 
   const creditManager = creditManagers[selectedPool];
@@ -82,6 +81,8 @@ const Form = () => {
               creditManager={creditManager}
               balances={balancesWithETH}
               tokensList={tokens}
+              pools={availablePools}
+              poolChange={handleChangePool}
             />
           </>
         ) : (

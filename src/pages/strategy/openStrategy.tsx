@@ -50,6 +50,8 @@ interface Props {
   creditManager: CreditManagerData;
   balances: Record<string, BigNumberish>;
   tokensList: Record<string, TokenData>;
+  pools: string[];
+  poolChange: (address: string) => void;
 }
 
 const OpenStrategyDialog: React.FC<Props> = ({
@@ -57,10 +59,11 @@ const OpenStrategyDialog: React.FC<Props> = ({
   creditManager,
   balances,
   tokensList,
+  pools,
+  poolChange,
 }) => {
   const dispatch = useDispatch();
   const { balance, nftBalance } = useSelector((state: RootState) => state.web3);
-  const [picker, setPicker] = useState(false);
   const prices = usePrices();
 
   const { underlyingToken: cmUnderlyingToken } = creditManager || {};
@@ -209,11 +212,6 @@ const OpenStrategyDialog: React.FC<Props> = ({
     );
   };
 
-  // Reset Picker on select
-  useEffect(() => {
-    setPicker(false);
-  }, [unwrappedCollateral]);
-
   // index 0
   const updateValue = (index: number, input: BigNumberish) => {
     const func = handleChangeAmount(index);
@@ -292,30 +290,32 @@ const OpenStrategyDialog: React.FC<Props> = ({
         })}
 
         <Group>
-          <>
-            {!allAssetsSelected && 3 > unwrappedCollateral.length ? (
-              <PickerButton onClick={() => setPicker(true)}>
-                add asset
-              </PickerButton>
-            ) : null}
-
-            {picker && (
-              <Picker
-                selected={unwrappedCollateral}
-                tokensList={tokensList}
-                balances={balances}
-                allowedTokens={allowedTokens}
-                addAsset={handleAdd}
-              />
-            )}
-          </>
+          <Picker
+            selected={unwrappedCollateral}
+            tokensList={tokensList}
+            balances={balances}
+            allowedTokens={allowedTokens}
+            func={handleAdd}
+          >
+            <>
+              {!allAssetsSelected && 3 > unwrappedCollateral.length ? (
+                <PickerButton>add asset</PickerButton>
+              ) : null}
+            </>
+          </Picker>
         </Group>
         <Group>
-          <span>Borrowed Asset: </span>
-          <Asset>
-            <img width={25} src={underlyingToken.icon} />
-            <span>{underlyingToken.symbol.toUpperCase()}</span>
-          </Asset>
+          <Picker
+            tokensList={tokensList}
+            allowedTokens={pools}
+            func={poolChange}
+          >
+            <span>Borrowed Asset: </span>
+            <Asset>
+              <img width={25} src={underlyingToken.icon} />
+              <span>{underlyingToken.symbol.toUpperCase()}</span>
+            </Asset>
+          </Picker>
         </Group>
       </FormContainer>
       <FormContainer>
@@ -461,8 +461,8 @@ const MaxButton = styled.div`
 const FormContainer = styled.div`
   font-size: 18px;
   width: 100%;
-  min-width: 350px;
-  max-width: 350px;
+  min-width: 400px;
+  max-width: 400px;
   padding: 10px 20px;
 `;
 
