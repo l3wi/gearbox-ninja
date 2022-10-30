@@ -214,7 +214,7 @@
    </properties>
    <polyline points="0,0 135.62,0"/>
   </object>
-  <object id="85" x="3912.45" y="405.97" width="370.329" height="20.1959">
+  <object id="85" x="3905.7" y="404.22" width="379.829" height="20.1959">
    <properties>
     <property name="type" value="bridge"/>
    </properties>
