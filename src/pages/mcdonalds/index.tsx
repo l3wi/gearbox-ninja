@@ -69,8 +69,8 @@ const McDonalds = () => {
               ) : null}
               {web3.noWhitelist && (
                 <ButtonText>
-                  {`YOU AREN'T A NINJA!`} <br />
-                  GO TO DISCORD
+                  <Explainer>{`YOU AREN'T A NINJA!`}</Explainer>
+                  <Explainer>GO TO DISCORD</Explainer>
                 </ButtonText>
               )}
               {web3.nftClaimed && !web3.noWhitelist ? (
