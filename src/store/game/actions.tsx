@@ -1,3 +1,4 @@
+import axios from "axios";
 import {
   audio,
   game,
@@ -7,6 +8,7 @@ import {
   Vector2d,
   video,
 } from "melonjs/dist/melonjs.module.js";
+import { getAuthUrl } from "../../config";
 
 import DataManifest from "../../game/manifest";
 import PlayerEntity from "../../game/renderables/player";
@@ -182,6 +184,11 @@ export const AddNotification =
     }
   };
 
+export interface AgreementResponse {
+  access: string;
+}
+export const ENDPOINT_USER = "/api";
+
 export const signDeclaration =
   (): GameThunkAction => async (dispatch, getState) => {
     try {
@@ -189,15 +196,25 @@ export const signDeclaration =
       if (!account || !signer) throw new Error("No account selected");
 
       const agreement =
+        "By accessing or using Gearbox App, I agree to the Terms of Service (https://gearbox.fi/terms) and confirm that I have read and understood the Privacy Notice (https://gearbox.fi/privacy) and Risk Disclosure Statement (https://gearbox.fi/risks).\n" +
         "I hereby further represent and warrant that:\n" +
-        "- I’m not a resident of or located in the United States of America (including its territories: American Samoa, Guam, Puerto Rico, the Northern Mariana Islands and the U.S. Virgin Islands) or any other Restricted Jurisdiction (as defined in the Terms of Service).\n" +
-        "- I’m not a Prohibited Person (as defined in the Terms of Service) nor acting on behalf of a Prohibited Person.\n" +
-        "- I understand that if I fail to maintain sufficient collateral when using the Gearbox Protocol, my credit account(s) may be liquidated, in which case a penalty may be charged by the protocol.\n" +
+        "- I’m not a resident of or located in the United States of America (including its territories: American Samoa, Guam, Puerto Rico, the Northern Mariana Islands and the U.S. Virgin Islands) or any other Restricted Jurisdiction (as defined in the Terms of Service);\n" +
+        "- I’m not a Prohibited Person (as defined in the Terms of Service) nor acting on behalf of a Prohibited Person;\n" +
+        "- I understand that if I fail to maintain sufficient collateral when using the Gearbox Protocol, my credit account(s) may be liquidated, in which case a penalty may be charged by the protocol;\n" +
         "- I acknowledge that Gearbox App and related software are experimental, and that the use of experimental software may result in complete loss of my funds.";
+      dispatch(actions.game.AddNotification("Waiting for Signer"));
 
-      // @ts-ignore
       const signature = await signer.signMessage(agreement);
-      dispatch(actions.game.AddNotification("Signed Declaration"));
+      dispatch(actions.game.AddNotification("Signed Declaration", 2000));
+
+      try {
+        const result = await axios.post<AgreementResponse>(
+          getAuthUrl(`${ENDPOINT_USER}/signup/`),
+          { account, signature },
+        );
+      } catch (error) {
+        console.log(error);
+      }
 
       dispatch({
         type: "SIGNED_MESSAGE",
