@@ -401,10 +401,13 @@ export const mintNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
       dispatch(actions.game.AddNotification(`Minting ${amnt}x NFTs`, 0));
       await receipt.wait();
 
-      dispatch(actions.game.AddNotification("Mint successful!"));
+      dispatch(
+        actions.game.AddNotification("Mint successful. Go forth & APE!"),
+      );
       dispatch({ type: "NFT_CLAIMED_SUCCESS", payload: true });
       dispatch({ type: "NFT_BALANCE_SUCCESS", payload: amnt });
-
+      dispatch(actions.form.toggleForm("", ""));
+      dispatch(actions.game.ChangeStage("PLAY"));
       updateStatus("0", "STATUS.SUCCESS");
       return true;
     } catch (e) {
