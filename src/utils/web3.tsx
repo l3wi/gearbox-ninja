@@ -65,7 +65,9 @@ export const activate = async (w: Wallets) => {
       try {
         const chainId = "0x" + BigNumber.from(CHAIN_ID).toString();
         window.ethereum.once("chainChanged", async () => {
-          await activate(w);
+          setTimeout(async () => {
+            await activate(w);
+          }, 500);
         });
         await window.ethereum?.request({
           method: "wallet_switchEthereumChain",
@@ -74,7 +76,7 @@ export const activate = async (w: Wallets) => {
         return;
       } catch (error) {
         store.dispatch(
-          actions.game.AddNotification("Network Change Failed", 3000),
+          actions.game.AddNotification("Network change Failed", 3000),
         );
         return;
       }
@@ -120,45 +122,37 @@ export const activate = async (w: Wallets) => {
             3000,
           ),
         );
-
-        store.dispatch(actions.web3.disconnectSigner());
         /// Activate Wallet again and go through wallet flow
-        setTimeout(async () => {
-          await activate(w);
-        }, 500);
+        const connectAgain = () => {
+          store.dispatch(actions.web3.disconnectSigner());
+          setTimeout(async () => {
+            await activate(w);
+          }, 500);
+        };
+
+        if (document.hasFocus()) {
+          connectAgain();
+        } else {
+          let count = 0;
+          window.onfocus = function () {
+            if (count === 0) {
+              connectAgain();
+              count++;
+            }
+          };
+        }
       });
 
       window.ethereum.on("accountsChanged", async () => {
         console.log("Account changed");
         (window.ethereum as any).removeAllListeners("accountsChanged");
-        activate(w);
-        store.dispatch(actions.web3.setWalletType(w));
+        await activate(w);
       });
     }
 
     // Set Wallet type
     await store.dispatch(actions.web3.setWalletType(w));
   } catch (eo: any) {
-    if (window.ethereum && isInjectedWallet) {
-      try {
-        await window.ethereum.request({
-          method: "wallet_switchEthereumChain",
-          params: [{ chainId: `0x${CHAIN_ID.toString(16)}` }],
-        });
-
-        if (w === "metamask") {
-          window.ethereum.once("chainChanged", async () => {
-            await activate(w);
-          });
-        }
-      } catch (e: any) {
-        console.error("Cant useWeb3" + e);
-
-        // e.code === 4902 - chain not added
-        // e.code === -32002 - request already pending
-      }
-    }
-
     store.dispatch(actions.web3.setWalletType(undefined));
     store.dispatch(
       actions.game.AddNotification("Unable to connect wallet", 2000),
