@@ -22,10 +22,12 @@ const McDonalds = () => {
       window.open("https://discord.com/invite/gearbox", "_blank");
       return;
     }
-    if (web3.nftClaimed)
-      return store.dispatch(
-        actions.game.AddNotification("You are already a ninja!"),
-      );
+    if (web3.nftClaimed) {
+      store.dispatch(actions.game.AddNotification("Go forth & APE!"));
+      exit();
+      return;
+    }
+
     if (!web3.account) await activate("metamask");
     if (game.isIllegal) await declare();
     setMinter(true);
@@ -74,7 +76,7 @@ const McDonalds = () => {
                 </ButtonText>
               )}
               {web3.nftClaimed && !web3.noWhitelist ? (
-                <ButtonText>GO APE IN STRATEGIES</ButtonText>
+                <ButtonText>APE STRATEGIES ACROSS THE BRIDGE</ButtonText>
               ) : null}
             </Button>
           )}

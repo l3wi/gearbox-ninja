@@ -353,20 +353,26 @@ const OpenStrategyDialog: React.FC<Props> = ({
         </Group>
 
         <ButtonGroup>
-          <ErrorButtonGuard errorString={errString}>
-            <ApproveButton
-              assets={wrappedCollateral}
-              to={creditManager.address}
-              skipApprovalsFor={EMPTY_OBJECT}
-            >
-              <ExecuteButton onClick={() => handleSubmit()}>
-                <>{`Open a  ${formatLeverage(
-                  leverage,
-                  2,
-                )}x position with ${lpSymbol}`}</>
-              </ExecuteButton>
-            </ApproveButton>
-          </ErrorButtonGuard>
+          {nftBalance === 0 ? (
+            <ExecuteButton>
+              <>{`You've used all your NFTs`}</>
+            </ExecuteButton>
+          ) : (
+            <ErrorButtonGuard errorString={errString}>
+              <ApproveButton
+                assets={wrappedCollateral}
+                to={creditManager.address}
+                skipApprovalsFor={EMPTY_OBJECT}
+              >
+                <ExecuteButton onClick={() => handleSubmit()}>
+                  <>{`Open a  ${formatLeverage(
+                    leverage,
+                    2,
+                  )}x position with ${lpSymbol}`}</>
+                </ExecuteButton>
+              </ApproveButton>
+            </ErrorButtonGuard>
+          )}
         </ButtonGroup>
       </FormContainer>
     </Row>
