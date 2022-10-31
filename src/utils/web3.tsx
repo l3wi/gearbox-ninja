@@ -32,6 +32,7 @@ declare global {
       setSelectedProvider: (provider: any) => void;
     };
     web3?: Record<string, unknown>;
+    logging?: () => void;
   }
 }
 
@@ -63,10 +64,14 @@ export const activate = async (w: Wallets) => {
       );
       try {
         const chainId = "0x" + BigNumber.from(CHAIN_ID).toString();
+        window.ethereum.once("chainChanged", async () => {
+          await activate(w);
+        });
         await window.ethereum?.request({
           method: "wallet_switchEthereumChain",
           params: [{ chainId }],
         });
+        return;
       } catch (error) {
         store.dispatch(
           actions.game.AddNotification("Network Change Failed", 3000),

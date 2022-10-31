@@ -3,6 +3,7 @@ import {
   PoolData,
   PRICE_DECIMALS,
   PRICE_DECIMALS_POW,
+  RAY,
   toBN,
 } from "@gearbox-protocol/sdk";
 import { BigNumber } from "ethers";
@@ -11,6 +12,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { getFarmingAPY } from "../config/pool";
 import {
+  currentTokenData,
   ETH_ADDRESS,
   STETH_ADDRESS,
   WETH_ADDRESS,
@@ -109,4 +111,35 @@ export function usePoolAPY({
   }, [farmAPY, underlyingPrice, depositAPY]);
 
   return [totalAPY, depositAPY, farmAPY];
+}
+
+export interface useConversionRateProps {
+  prices: Record<string, BigNumber>;
+  isWSTETH: boolean;
+  collateralIsSTETH: boolean;
+  dieselRate: BigNumber;
+}
+
+export function useConversionRate({
+  prices,
+  isWSTETH,
+  collateralIsSTETH,
+  dieselRate,
+}: useConversionRateProps) {
+  const rate = useMemo(() => {
+    const stethPrice = prices[currentTokenData.STETH] || BigNumber.from(0);
+    const replacer = stethPrice.gt(0) ? stethPrice : BigNumber.from(1);
+    const wstETHPrice = prices[currentTokenData.wstETH] || replacer;
+    const safeWstETHPrice = wstETHPrice.isZero()
+      ? BigNumber.from(1)
+      : wstETHPrice;
+
+    const r =
+      isWSTETH && collateralIsSTETH
+        ? stethPrice.mul(RAY).div(safeWstETHPrice)
+        : dieselRate;
+    return r;
+  }, [prices, collateralIsSTETH, dieselRate, isWSTETH]);
+
+  return rate;
 }

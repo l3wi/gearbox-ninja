@@ -30,7 +30,7 @@ export function useAssets(initialState: Array<AssetWithView> = []) {
         },
       ]);
     },
-    [assets]
+    [assets],
   );
 
   const handleRemove = useCallback(
@@ -40,7 +40,7 @@ export function useAssets(initialState: Array<AssetWithView> = []) {
         ...assets.slice(removePosition + 1),
       ]);
     },
-    [assets]
+    [assets],
   );
 
   const handleChangeAmount = useCallback(
@@ -51,7 +51,7 @@ export function useAssets(initialState: Array<AssetWithView> = []) {
         ...assets.slice(changePosition + 1),
       ]);
     },
-    [assets]
+    [assets],
   );
 
   const handleChangeToken = useCallback(
@@ -67,7 +67,7 @@ export function useAssets(initialState: Array<AssetWithView> = []) {
         ...assets.slice(changePosition + 1),
       ]);
     },
-    [assets]
+    [assets],
   );
 
   return {
@@ -85,13 +85,13 @@ export function useAssetsWithAmountInTarget<T extends Asset>(
   assets: Array<T>,
   targetToken: string,
   prices: Record<string, BigNumber>,
-  tokensList: Record<string, TokenData>
+  tokensList: Record<string, TokenData>,
 ) {
   const assetsWithAmountInTarget = useMemo(() => {
     const { decimals: toDecimals = 18 } = tokensList[targetToken] || {};
     const toPrice = prices[targetToken];
 
-    const withAmount = assets.map((asset) => {
+    const withAmount = assets.map(asset => {
       const { balance: fromAmount, token: fromToken } = asset;
       const { decimals: fromDecimals = 18, address: fromAddress } =
         tokensList[fromToken] || {};
@@ -102,7 +102,7 @@ export function useAssetsWithAmountInTarget<T extends Asset>(
         {
           price: toPrice,
           decimals: toDecimals,
-        }
+        },
       );
 
       return { ...asset, amountInTarget: inTarget };
@@ -116,7 +116,7 @@ export function useAssetsWithAmountInTarget<T extends Asset>(
 
 export function useSingleAsset<
   T extends AssetWithView["balanceView"] | undefined = undefined,
-  C = T extends string ? [AssetWithView] : [Asset]
+  C = T extends string ? [AssetWithView] : [Asset],
 >(tokenAddress: Asset["token"], amount: Asset["balance"], balanceView?: T): C {
   const hexAmount = amount.toHexString();
 
@@ -126,7 +126,7 @@ export function useSingleAsset<
         ? [{ token: tokenAddress, balance: amount }]
         : [{ token: tokenAddress, balance: amount, balanceView }],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [tokenAddress, hexAmount, balanceView]
+    [tokenAddress, hexAmount, balanceView],
   ) as unknown as C;
 
   return assets;
@@ -134,14 +134,21 @@ export function useSingleAsset<
 
 export type AssetsState = ReturnType<typeof useAssets>;
 
-export function useWrapETH<T extends Asset>(assets: Array<T>): WrapResult<T> {
-  const wrappedAssets = useMemo(() => wrapETH(assets), [assets]);
+export function useWrapETH<T extends Asset>(
+  assets: Array<T>,
+  from = ETH_ADDRESS,
+  to = WETH_ADDRESS,
+): WrapResult<T> {
+  const wrappedAssets = useMemo(() => {
+    const wrapped = memoWrapETH(from, to)(assets);
+    return wrapped;
+  }, [assets, from, to]);
   return wrappedAssets;
 }
 
 export function useSumAssets<A extends Asset, B extends Asset>(
   a: Array<A>,
-  b: Array<B>
+  b: Array<B>,
 ): Array<A | B> {
   const assetsSum = useMemo(() => sumAssets(a, b), [a, b]);
   return assetsSum;
@@ -149,7 +156,7 @@ export function useSumAssets<A extends Asset, B extends Asset>(
 
 export function useSubAssets<A extends Asset, B extends Asset>(
   a: Array<A>,
-  b: Array<B>
+  b: Array<B>,
 ): Array<A> {
   const assetsSub = useMemo(() => subAssets(a, b), [a, b]);
   return assetsSub;
@@ -157,11 +164,11 @@ export function useSubAssets<A extends Asset, B extends Asset>(
 
 export function useBalanceLimitedAssets<A extends Asset>(
   a: Array<A>,
-  balances: Record<string, BigNumber>
+  balances: Record<string, BigNumber>,
 ): Array<A> {
   const assetsLimited = useMemo(
     () =>
-      a.map((asset) => {
+      a.map(asset => {
         const balanceOnAccount = balances[asset.token] || BigNumber.from(0);
 
         return {
@@ -171,7 +178,7 @@ export function useBalanceLimitedAssets<A extends Asset>(
             : asset.balance,
         };
       }),
-    [a, balances]
+    [a, balances],
   );
 
   return assetsLimited;

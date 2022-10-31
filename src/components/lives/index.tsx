@@ -7,7 +7,7 @@ import { useTokensDataListWithETH } from "../../hooks/useTokens";
 import { RootState } from "../../store/reducer";
 
 const Lives = () => {
-  const { account, nftBalance, nftAmount } = useSelector(
+  const { account, nftBalance, nftAmount, nftClaimed } = useSelector(
     (state: RootState) => state.web3,
   );
   const CAs = useSelector((state: RootState) => state.creditAccounts.list);
@@ -15,11 +15,11 @@ const Lives = () => {
   const lives = nftBalance ? nftBalance : 0;
 
   const total = nftAmount ? nftAmount : 0;
-  if (stage === "PLAY" && account && CAs && Object.keys(CAs).length > 0) {
+  if (stage === "PLAY" && account && nftClaimed) {
     return (
       <Container>
         LIVES:
-        {CAs &&
+        {nftClaimed &&
           Array(total - lives)
             .fill("x")
             .map((_, i) => (
@@ -27,7 +27,7 @@ const Lives = () => {
                 <img src="/data/img/ninja.png" height={64} />
               </Life>
             ))}
-        {CAs
+        {nftClaimed
           ? Array(lives)
               .fill("x")
               .map((_, i) => (
@@ -52,6 +52,10 @@ const Container = styled.div`
   font-weight: 500;
   font-size: 1.5rem;
   font-style: normal;
+  min-height: 64px;
+  @media (max-width: 1200px) {
+    font-size: 1rem;
+  }
 `;
 
 const Life = styled.div`
