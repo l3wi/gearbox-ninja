@@ -143,7 +143,6 @@ export const PauseGame =
       let { isPaused, track } = getState().game;
       if (isPaused && !text) {
         state.resume();
-        console.log(audio);
         if (track) audio.unmuteAll();
         dispatch({ type: "RESUME_GAME" });
       } else {
