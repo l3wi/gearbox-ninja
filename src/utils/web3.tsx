@@ -32,6 +32,7 @@ declare global {
       setSelectedProvider: (provider: any) => void;
     };
     web3?: Record<string, unknown>;
+    logging?: () => void;
   }
 }
 
