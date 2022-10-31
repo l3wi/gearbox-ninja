@@ -120,12 +120,25 @@ export const activate = async (w: Wallets) => {
             3000,
           ),
         );
-
-        store.dispatch(actions.web3.disconnectSigner());
         /// Activate Wallet again and go through wallet flow
-        setTimeout(async () => {
-          await activate(w);
-        }, 500);
+        const connectAgain = () => {
+          store.dispatch(actions.web3.disconnectSigner());
+          setTimeout(async () => {
+            await activate(w);
+          }, 500);
+        };
+
+        if (document.hasFocus()) {
+          connectAgain();
+        } else {
+          let count = 0;
+          window.onfocus = function () {
+            if (count === 0) {
+              connectAgain();
+              count++;
+            }
+          };
+        }
       });
 
       window.ethereum.on("accountsChanged", async () => {
