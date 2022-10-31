@@ -47,7 +47,6 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   padding: 0px 10px;
-  margin: 20px 0px;
   font-family: "Press Start 2P";
   font-weight: 500;
   font-size: 1.5rem;

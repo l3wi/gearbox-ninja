@@ -130,10 +130,6 @@ export const ToggleMusic =
   async (dispatch, getState) => {
     try {
       let { track } = getState().game;
-      if (track) {
-        audio.pauseTrack();
-        audio.stopTrack();
-      }
       store.dispatch({ type: "TOGGLE_MUSIC", payload: !track });
     } catch (e: any) {
       console.error("Error PauseGame(): " + e);
@@ -147,11 +143,11 @@ export const PauseGame =
       let { isPaused, track } = getState().game;
       if (isPaused && !text) {
         state.resume();
-        if (track) audio.resume("background_8bit");
+        if (track) audio.unmuteAll();
         dispatch({ type: "RESUME_GAME" });
       } else {
         state.pause();
-        audio.pauseTrack();
+        audio.muteAll();
         dispatch({ type: "PAUSE_GAME", payload: { pause: text } });
       }
     } catch (e: any) {

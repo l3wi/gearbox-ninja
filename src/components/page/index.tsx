@@ -85,6 +85,7 @@ const Container = styled.div`
   font-weight: 500;
   font-size: 2rem;
   font-style: normal;
+  padding: 10px 0px;
 `;
 
 const Layout = styled.main`
