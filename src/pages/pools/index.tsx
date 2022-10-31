@@ -206,7 +206,7 @@ const Form = () => {
               </MaxButton>
             </InputGroup>
             <APYGroup>
-              <span>{`Deposit Fee: `}</span>
+              <span>{`Withdrawal Fee: `}</span>
               <span>{`1%`}</span>
             </APYGroup>
             <APYGroup>
