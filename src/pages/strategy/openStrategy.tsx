@@ -172,24 +172,6 @@ const OpenStrategyDialog: React.FC<Props> = ({
     );
   }, [lpTokenAddress, assetsAfterOpen]);
 
-  const liquidationPrice = strategy.liquidationPrice({
-    assets: wrappedCollateral,
-    prices,
-    liquidationThresholds,
-
-    borrowed: borrowedAmount,
-    underlyingToken: underlyingTokenAddress,
-
-    lpAmount,
-    lpToken: lpTokenAddress,
-  });
-
-  const liquidationAssets = useLiquidationAssets(
-    baseAssets,
-    underlyingTokenAddress,
-    tokensList,
-  );
-
   const allAssetsSelected = allowedTokens.length === wrappedCollateral.length;
   const apyLoading = !unsafeAssetsAfterOpen || apy === undefined;
 
