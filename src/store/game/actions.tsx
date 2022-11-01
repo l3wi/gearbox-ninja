@@ -87,7 +87,8 @@ export const ChangeStage =
         };
 
         window.onfocus = function () {
-          audio.playTrack("background_8bit", 0.5);
+          if (currentStage === "PLAY" || currentStage === "CREDITS")
+            audio.playTrack("background_8bit", 0.5);
         };
         // @ts-ignore
         state.change(state[key], false); // pls fix
