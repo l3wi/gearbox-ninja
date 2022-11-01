@@ -32,6 +32,7 @@ import {
 } from "../../config";
 import { Wallets } from "../../config/connectors";
 import { captureException } from "../../utils/errors";
+import { toLowerKeys } from "../../utils/format";
 import actions from "../actions";
 import {
   clearCreditAccounts,
@@ -343,6 +344,7 @@ export const checkNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
   ).then(async (merkle: MerkleDistributorInfo) => {
     try {
       const { claims } = merkle;
+      const lowerClaims = toLowerKeys(claims);
       const signer = getSignerOrThrow(getState);
       const signerAddress = await signer.getAddress();
 
@@ -374,13 +376,12 @@ export const checkNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
       // }
 
       // Exit if they haven't claimed
-      if (!claims[signerAddress.toLowerCase()]) {
-        console.log("No whitelist");
+      if (!lowerClaims[signerAddress.toLowerCase()]) {
         dispatch({ type: "NO_NFT_WHITELIST" });
         return dispatch({ type: "NFT_BALANCE_SUCCESS", payload: 0 });
       }
 
-      const { index, amount } = claims[signerAddress.toLowerCase()];
+      const { index, amount } = lowerClaims[signerAddress.toLowerCase()];
       if (parseInt(amount) > 0) {
         const claimed = await nftDistributor.isClaimed(index);
         dispatch({
