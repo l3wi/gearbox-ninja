@@ -1,9 +1,5 @@
-import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
-
-import { IS_TEST_NETWORK, TEST_APP_ADDR } from "../../config";
-import { useTokensDataListWithETH } from "../../hooks/useTokens";
 import { RootState } from "../../store/reducer";
 
 const Lives = () => {
@@ -19,14 +15,6 @@ const Lives = () => {
     return (
       <Container>
         LIVES:
-        {nftClaimed &&
-          Array(total - lives)
-            .fill("x")
-            .map((_, i) => (
-              <Life key={i} style={{ opacity: 0.3 }}>
-                <img src="/data/img/ninja.png" height={64} />
-              </Life>
-            ))}
         {nftClaimed
           ? Array(lives)
               .fill("x")
