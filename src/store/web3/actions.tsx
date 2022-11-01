@@ -420,8 +420,9 @@ export const mintNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
       );
       updateStatus("0", "STATUS.WAITING");
       dispatch(actions.game.AddNotification("Waiting for user", 500));
+      const lowerClaims = toLowerKeys(merkle.claims);
 
-      const { index, amount, proof } = merkle.claims[signerAddress];
+      const { index, amount, proof } = lowerClaims[signerAddress];
       const receipt = await nftDistributor.claim(
         index,
         signerAddress,
