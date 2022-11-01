@@ -82,6 +82,14 @@ export const ChangeStage =
         if (currentStage === "MENU" && key === "PLAY" && track)
           audio.playTrack("background_8bit", 0.5);
 
+        window.onblur = function () {
+          audio.stopTrack();
+        };
+
+        window.onfocus = function () {
+          if (currentStage === "PLAY" || currentStage === "CREDITS")
+            audio.playTrack("background_8bit", 0.5);
+        };
         // @ts-ignore
         state.change(state[key], false); // pls fix
         dispatch({

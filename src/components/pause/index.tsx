@@ -123,6 +123,9 @@ const Col = styled.div`
   span {
     margin-bottom: 30px;
   }
+  @media (max-height: 700px) {
+    padding: 10px 0px;
+  }
 `;
 
 const TextCol = styled.div`
@@ -130,6 +133,9 @@ const TextCol = styled.div`
   flex-direction: column;
   max-width: 1124px;
   font-size: smaller;
+  @media (max-height: 700px) {
+    font-size: 14px;
+  }
 `;
 
 const Declare = styled.button`
@@ -141,10 +147,13 @@ const Declare = styled.button`
   color: white;
   background: none;
   padding: 15px;
+  @media (max-height: 700px) {
+    font-size: 1rem;
+  }
 `;
 
 const Content = styled.div`
-  min-height: 600px;
+  min-height: 500px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -174,6 +183,9 @@ const Title = styled.h1`
   @media (max-width: 1200px) {
     font-size: 36px;
   }
+  @media (max-height: 700px) {
+    font-size: 24px;
+  }
 `;
 const Button = styled.button`
   font-family: "Courier New", Courier, monospace;
@@ -191,11 +203,13 @@ const Row = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-width: 400px;
   font-size: 24px;
   font-family: "Press Start 2P";
   min-width: 800px;
   margin-top: 40px;
+  @media (max-height: 700px) {
+    margin-top: 0px;
+  }
 `;
 
 const fadeIn = keyframes`
