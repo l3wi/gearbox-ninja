@@ -58,3 +58,10 @@ export function shortenString(str: string, maxLength: number): string {
   }
   return str;
 }
+
+export function toLowerKeys(obj: any) {
+  return Object.keys(obj).reduce((accumulator: any, key: any) => {
+    accumulator[key.toLowerCase()] = obj[key];
+    return accumulator;
+  }, {});
+}
