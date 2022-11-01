@@ -375,6 +375,7 @@ export const checkNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
       }
 
       const { index, amount } = lowerClaims[signerAddress.toLowerCase()];
+
       if (parseInt(amount) > 0) {
         // //@ts-ignore
         const filter = nftDistributor.filters.Claimed();
@@ -388,6 +389,12 @@ export const checkNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
           type: "NFT_CLAIMED_SUCCESS",
           payload: claimedViaLogs ? true : false,
         });
+
+        dispatch({
+          type: "NFT_CLAIMABLE_BALANCE",
+          payload: amount,
+        });
+
         if (claimedViaLogs)
           game.world.getChildByName("bridge")[0].setOpacity(1);
       } else {
@@ -425,7 +432,7 @@ export const mintNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
       updateStatus("0", "STATUS.WAITING");
       dispatch(actions.game.AddNotification("Waiting for user", 500));
 
-      const { index, amount, proof } = lowerClaims[signerAddress];
+      const { index, amount, proof } = lowerClaims[signerAddress.toLowerCase()];
       const receipt = await nftDistributor.claim(
         index,
         signerAddress,
