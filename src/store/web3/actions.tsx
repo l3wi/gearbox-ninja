@@ -387,11 +387,13 @@ export const checkNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
           type: "NFT_CLAIMED_SUCCESS",
           payload: claimed,
         });
+        if (claimed) game.world.getChildByName("bridge")[0].setOpacity(1);
       } else {
         dispatch({
           type: "NFT_CLAIMED_SUCCESS",
           payload: true,
         });
+        game.world.getChildByName("bridge")[0].setOpacity(1);
       }
 
       const nfts = await degenNFT.balanceOf(signerAddress);
