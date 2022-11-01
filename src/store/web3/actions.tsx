@@ -346,23 +346,53 @@ export const checkNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
       const signer = getSignerOrThrow(getState);
       const signerAddress = await signer.getAddress();
 
-      if (!claims[signerAddress]) {
-        dispatch({ type: "NO_NFT_WHITELIST" });
-        return dispatch({ type: "NFT_BALANCE_SUCCESS", payload: 0 });
-      }
-
       const degenNFT = IERC721Metadata__factory.connect(DEGEN_NFT, signer);
       const nftDistributor = IDegenDistributor__factory.connect(
         DEGEN_DISTRIBUTOR,
         signer,
       );
 
-      const { index, amount } = claims[signerAddress];
-      dispatch({ type: "NFT_CLAIMABLE_BALANCE", payload: parseInt(amount) });
+      // //@ts-ignore
+      // const filter = nftDistributor.filters.Claimed();
+      // const events = await nftDistributor.queryFilter(filter);
+      // const claimedViaLogs = events.find(
+      //   e => e.args[1].toLowerCase() === signerAddress.toLowerCase(),
+      // );
 
-      const claimed = await nftDistributor.isClaimed(index);
-      if (claimed) game.world.getChildByName("bridge")[0].setOpacity(1);
-      dispatch({ type: "NFT_CLAIMED_SUCCESS", payload: claimed });
+      /// Check logs to see if old contract is used
+      // let oldClaimViaLogs = null;
+      // if (!IS_TEST_NETWORK) {
+      //   const oldNftDistributor = IDegenDistributor__factory.connect(
+      //     "0x7CECf6A7457a60A16c8D1ABfdc649F140114078d",
+      //     signer,
+      //   );
+      //   const filter = oldNftDistributor.filters.Claimed();
+      //   const events = await oldNftDistributor.queryFilter(filter);
+      //   oldClaimViaLogs = events.find(
+      //     e => e.args[1].toLowerCase() === signerAddress.toLowerCase(),
+      //   );
+      // }
+
+      // Exit if they haven't claimed
+      if (!claims[signerAddress.toLowerCase()]) {
+        console.log("No whitelist");
+        dispatch({ type: "NO_NFT_WHITELIST" });
+        return dispatch({ type: "NFT_BALANCE_SUCCESS", payload: 0 });
+      }
+
+      const { index, amount } = claims[signerAddress.toLowerCase()];
+      if (parseInt(amount) > 0) {
+        const claimed = await nftDistributor.isClaimed(index);
+        dispatch({
+          type: "NFT_CLAIMED_SUCCESS",
+          payload: claimed,
+        });
+      } else {
+        dispatch({
+          type: "NFT_CLAIMED_SUCCESS",
+          payload: true,
+        });
+      }
 
       const nfts = await degenNFT.balanceOf(signerAddress);
       dispatch({ type: "NFT_BALANCE_SUCCESS", payload: nfts.toNumber() });
