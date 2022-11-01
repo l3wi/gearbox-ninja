@@ -354,13 +354,6 @@ export const checkNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
         signer,
       );
 
-      // //@ts-ignore
-      // const filter = nftDistributor.filters.Claimed();
-      // const events = await nftDistributor.queryFilter(filter);
-      // const claimedViaLogs = events.find(
-      //   e => e.args[1].toLowerCase() === signerAddress.toLowerCase(),
-      // );
-
       /// Check logs to see if old contract is used
       // let oldClaimViaLogs = null;
       // if (!IS_TEST_NETWORK) {
@@ -383,12 +376,20 @@ export const checkNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
 
       const { index, amount } = lowerClaims[signerAddress.toLowerCase()];
       if (parseInt(amount) > 0) {
-        const claimed = await nftDistributor.isClaimed(index);
+        // //@ts-ignore
+        const filter = nftDistributor.filters.Claimed();
+        const events = await nftDistributor.queryFilter(filter);
+        const claimedViaLogs = events.find(
+          e => e.args[1].toLowerCase() === signerAddress.toLowerCase(),
+        );
+
+        // const claimed = await nftDistributor.claimed(signerAddress);
         dispatch({
           type: "NFT_CLAIMED_SUCCESS",
-          payload: claimed,
+          payload: claimedViaLogs ? true : false,
         });
-        if (claimed) game.world.getChildByName("bridge")[0].setOpacity(1);
+        if (claimedViaLogs)
+          game.world.getChildByName("bridge")[0].setOpacity(1);
       } else {
         dispatch({
           type: "NFT_CLAIMED_SUCCESS",
@@ -411,6 +412,9 @@ export const mintNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
     : import("../../config/merkle_mainnet.json")
   ).then(async (merkle: MerkleDistributorInfo) => {
     try {
+      const { claims } = merkle;
+      const lowerClaims = toLowerKeys(claims);
+
       const signer = getSignerOrThrow(getState);
       const signerAddress = await signer.getAddress();
 
@@ -420,7 +424,6 @@ export const mintNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
       );
       updateStatus("0", "STATUS.WAITING");
       dispatch(actions.game.AddNotification("Waiting for user", 500));
-      const lowerClaims = toLowerKeys(merkle.claims);
 
       const { index, amount, proof } = lowerClaims[signerAddress];
       const receipt = await nftDistributor.claim(
