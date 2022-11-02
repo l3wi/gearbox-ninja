@@ -354,20 +354,6 @@ export const checkNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
         signer,
       );
 
-      /// Check logs to see if old contract is used
-      // let oldClaimViaLogs = null;
-      // if (!IS_TEST_NETWORK) {
-      //   const oldNftDistributor = IDegenDistributor__factory.connect(
-      //     "0x7CECf6A7457a60A16c8D1ABfdc649F140114078d",
-      //     signer,
-      //   );
-      //   const filter = oldNftDistributor.filters.Claimed();
-      //   const events = await oldNftDistributor.queryFilter(filter);
-      //   oldClaimViaLogs = events.find(
-      //     e => e.args[1].toLowerCase() === signerAddress.toLowerCase(),
-      //   );
-      // }
-
       // Exit if they haven't claimed
       if (!lowerClaims[signerAddress.toLowerCase()]) {
         dispatch({ type: "NO_NFT_WHITELIST" });
@@ -377,26 +363,19 @@ export const checkNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
       const { index, amount } = lowerClaims[signerAddress.toLowerCase()];
 
       if (parseInt(amount) > 0) {
-        // //@ts-ignore
-        const filter = nftDistributor.filters.Claimed();
-        const events = await nftDistributor.queryFilter(filter);
-        const claimedViaLogs = events.find(
-          e => e.args[1].toLowerCase() === signerAddress.toLowerCase(),
-        );
+        const claimed = await nftDistributor.claimed(signerAddress);
 
-        // const claimed = await nftDistributor.claimed(signerAddress);
         dispatch({
           type: "NFT_CLAIMED_SUCCESS",
-          payload: claimedViaLogs ? true : false,
+          payload: claimed ? true : false,
         });
 
         dispatch({
           type: "NFT_CLAIMABLE_BALANCE",
-          payload: amount,
+          payload: parseInt(amount),
         });
 
-        if (claimedViaLogs)
-          game.world.getChildByName("bridge")[0].setOpacity(1);
+        if (claimed) game.world.getChildByName("bridge")[0].setOpacity(1);
       } else {
         dispatch({
           type: "NFT_CLAIMED_SUCCESS",
