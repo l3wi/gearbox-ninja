@@ -40,12 +40,12 @@ export const DISCORD_ADDR = "https://discord.com/invite/gearbox";
 export const LANDING_ADDR = "https://gearbox.fi";
 export const DOCS_DOMAIN = "https://docs.gearbox.fi";
 export const FAUCET_ADDR =
-  process.env.REACT_APP_FAUCET_ADDR || "https://faucet.gearbox-api.com";
+  process.env.REACT_APP_FAUCET_ADDR || "https://faucet.gearbox.foundation";
 export const TEST_APP_ADDR =
   process.env.REACT_APP_TEST_APP_ADDR || "https://app.goerli.gearbox.fi";
 
 export const AUTH_ADDR =
-  process.env.REACT_APP_AUTH_ADDR || "https://auth.gearbox-api.com";
+  process.env.REACT_APP_AUTH_ADDR || "https://auth.gearbox.foundation";
 export const getAuthUrl = (url: string) => `${AUTH_ADDR}${url}`;
 
 // gearbox contract addresses
