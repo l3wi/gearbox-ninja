@@ -155,6 +155,8 @@ export const connectSigner =
         signer.provider,
       );
 
+      dispatch(actions.web3.updateProvider(signer.provider));
+
       const wethGateWayAddress = await addressProvider.getWETHGateway();
 
       const wethGateway = IWETHGateway__factory.connect(
