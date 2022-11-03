@@ -367,7 +367,7 @@ export const checkNFT = (): ThunkWeb3Action => async (dispatch, getState) => {
 
         dispatch({
           type: "NFT_CLAIMED_SUCCESS",
-          payload: claimed ? true : false,
+          payload: claimed.toNumber() > 0 ? true : false,
         });
 
         dispatch({
