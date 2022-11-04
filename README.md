@@ -1,4 +1,4 @@
-# melonJS ES6 Webpack Boilerplate
+# Gearbox Ninja Game UI
 
 ![melonJS Logo](https://github.com/melonjs/melonJS/raw/master/media/Banner/Banner%20-%20Billboard%20-%20Original%20Logo%20-%20horizontal.png)
 
