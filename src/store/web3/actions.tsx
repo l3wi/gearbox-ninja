@@ -343,7 +343,9 @@ interface MerkleDistributorInfo {
 async function getMerkle(signer: ethers.Signer, address: string) {
   const nftDistributor = IDegenDistributor__factory.connect(address, signer);
   const root = await nftDistributor.merkleRoot();
-  const URL = `https://dm.gearbox.fi/mainnet_${root}.json`;
+  const URL = `https://dm.gearbox.fi/${
+    IS_TEST_NETWORK ? "goerli" : "mainnet"
+  }_${root}.json`;
 
   try {
     const result = await axios.get(URL);
